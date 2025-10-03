@@ -1,0 +1,2 @@
+todo:
+- Work on making sure that dynamic messages have a buffer and wait until the appropriate time to print

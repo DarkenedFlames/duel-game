@@ -1,0 +1,2 @@
+C:\Users\g2min\Desktop\C#\Duel\MyApp\bin\Release\net9.0\win-x64\publish\MyApp.pdb
+C:\Users\g2min\Desktop\C#\Duel\MyApp\bin\Release\net9.0\win-x64\publish\MyApp.exe
