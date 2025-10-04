@@ -12,15 +12,21 @@ namespace MyApp
             player => new Brandish(player),
             player => new Crescent(player),
             // Consumables
+                // Common
             player => new RubyRedRemedy(player),
             player => new BabyBlueBrew(player),
             player => new OozingOrangeOil(player),
+            player => new GlowingGreenGrog(player),
             player => new YieldingYellowYarb(player),
             player => new PalePurplePotion(player),
             player => new PupilPorridge(player),
             player => new CartilageChowder(player),
             player => new MagpieMorsel(player),
             player => new VultureVittles(player),
+                // Uncommon
+            player => new AuburnAmalgam(player),
+            player => new TealTincture(player),
+            player => new EarthyElixir(player),
             // Add more items here...
         };
 
