@@ -8,13 +8,17 @@ namespace MyApp
         // Each factory now takes a Player and returns an Item
         public static List<Func<Player, Item>> AllItems = new()
         {
+            // Weapons
             player => new Brandish(player),
             player => new Crescent(player),
+            // Consumables
             player => new RubyRedRemedy(player),
             player => new BabyBlueBrew(player),
             player => new OozingOrangeOil(player),
             player => new YieldingYellowYarb(player),
             player => new PalePurplePotion(player),
+            player => new PupilPorridge(player),
+            player => new CartilageChowder(player),
             // Add more items here...
         };
 
