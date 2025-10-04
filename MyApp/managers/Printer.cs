@@ -71,6 +71,8 @@ namespace MyApp
             Console.WriteLine($"Shield: {player.Shield.Value}");
             Console.WriteLine($"Critical: {player.Critical.Value}");
             Console.WriteLine($"Dodge: {player.Dodge.Value}");
+            Console.WriteLine($"Peer: {player.Peer.Value}");
+            Console.WriteLine($"Luck: {player.Luck.Value}");
             Console.WriteLine($"Healing Modifier: {player.Health.RestorationMultiplier:P}");
             Console.WriteLine($"Stimming Modifier: {player.Stamina.RestorationMultiplier:P}");
             AnyKey();
