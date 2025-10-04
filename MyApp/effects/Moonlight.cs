@@ -12,31 +12,32 @@ namespace MyApp
             MaximumStacks = 1;
             RemainingStacks = 1;
             TargetType = TargetType.Self;
-            IsNegative = true;
-        }
-
-        public override void Tick()
-        {
-
-            if (RemainingDuration > 0)
-            {
-                RemainingDuration--;
-                Console.WriteLine($"{Owner.Name} is illuminated by moonlight. ({RemainingDuration} turns remaining)");
-            }
-            else
-            {
-                Owner.LoseEffect(this);
-                Console.WriteLine($"{Owner.Name} is no longer illuminated by moonlight.");
-            }
+            IsNegative = false; // it’s a marker/buff
+            IsHidden = true;    // hide from UI if you want
         }
 
         public override void Receive()
         {
-            // Implementation for when the effect is applied to a target
+            // Only a marker — no additional logic needed
         }
+
+        public override void OnStack()
+        {
+            // If reapplied mid-turn, refresh duration
+            RemainingDuration = MaximumDuration;
+        }
+
+        public override void Tick()
+        {
+            RemainingDuration--;
+            if (RemainingDuration <= 0)
+                Owner.LoseEffect(this);
+        }
+
         public override void Lose()
         {
-            // Implementation for when the effect is removed from a target
+            // Optionally log
+            // Console.WriteLine($"{Owner.Name}'s Moonlight has faded, next hit can crit again.");
         }
     }
 }

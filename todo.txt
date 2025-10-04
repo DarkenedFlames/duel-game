@@ -1,2 +1,3 @@
 todo:
 - Work on making sure that dynamic messages have a buffer and wait until the appropriate time to print
+- Make sure each item doesn't apply affects or other logic if take damage returns false

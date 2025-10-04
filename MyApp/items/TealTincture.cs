@@ -18,7 +18,7 @@ namespace MyApp
         {
             target.Stamina.RestorationMultiplier *= StaminaAndStimmingModifier;
             target.MaximumStamina.Multiplier *= StaminaAndStimmingModifier;
-            Console.WriteLine($"{target.Name}'s maximum stamina and stimming modifiers have been permanently increased by {StaminaAndStimmingModifier:P}!");
+            Console.WriteLine($"{target.Name}'s maximum stamina and stimming modifiers have been permanently increased by {StaminaAndStimmingModifier - 1:P}!");
         }
     }
 }

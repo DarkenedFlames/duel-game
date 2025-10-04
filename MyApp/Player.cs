@@ -213,11 +213,23 @@ namespace MyApp
             }
         }
         // Apply effect to player
-        public void ReceiveEffect(Effect effect)
+        public void ReceiveEffect(Effect newEffect)
         {
-            ActiveEffects.Add(effect);
-            effect.Receive();
+            // Try to merge with existing effect of same type
+            var existing = ActiveEffects.FirstOrDefault(e => e.GetType() == newEffect.GetType());
+
+            if (existing != null)
+            {
+                // Ask the effect how to handle stacking/refreshing
+                existing.OnStack();
+            }
+            else
+            {
+                ActiveEffects.Add(newEffect);
+                newEffect.Receive();
+            }
         }
+
         // Remove effect from player
         public void LoseEffect(Effect effect)
         {

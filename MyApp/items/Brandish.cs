@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 
 namespace MyApp
 {
@@ -21,26 +20,12 @@ namespace MyApp
 
         public override void Use(Player target)
         {
-            // Always apply normal damage
+            // Always deal damage
             target.TakeDamage(Damage, DamageType, CanCrit, CanDodge);
 
-            // Roll chance for Inferno (15%)
+            // 15% chance to apply Inferno
             if (rng.NextDouble() < 0.15)
-            {
-                var existing = target.ActiveEffects.FirstOrDefault(e => e is Inferno);
-
-                if (existing != null)
-                {
-                    // Refresh duration
-                    existing.RemainingDuration = existing.MaximumDuration;
-                    Console.WriteLine($"{target.Name}'s Inferno is refreshed!");
-                }
-                else
-                {
-                    // Apply new Inferno
-                    target.ReceiveEffect(new Inferno(target));
-                }
-            }
+                target.ReceiveEffect(new Inferno(target));
         }
     }
 }

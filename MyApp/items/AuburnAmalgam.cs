@@ -18,7 +18,7 @@ namespace MyApp
         {
             target.Health.RestorationMultiplier *= HealthAndHealingModifier;
             target.MaximumHealth.Multiplier *= HealthAndHealingModifier;
-            Console.WriteLine($"{target.Name}'s maximum health and healing modifiers have been permanently increased by {HealthAndHealingModifier:P}!");
+            Console.WriteLine($"{target.Name}'s maximum health and healing modifiers have been permanently increased by {HealthAndHealingModifier - 1:P}!");
         }
     }
 }

@@ -18,7 +18,7 @@ namespace MyApp
         {
             target.Armor.Multiplier *= ArmorAndShieldModifier;
             target.Shield.Multiplier *= ArmorAndShieldModifier;
-            Console.WriteLine($"{target.Name}'s shield and armor have been permanently increased by {ArmorAndShieldModifier:P}!");
+            Console.WriteLine($"{target.Name}'s shield and armor have been permanently increased by {ArmorAndShieldModifier - 1:P}!");
         }
     }
 }

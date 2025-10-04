@@ -1,9 +1,12 @@
 using System;
+using System.Linq;
 
 namespace MyApp
 {
     public class Crescent : Item
     {
+        private const float CritBonus = 0.5f; // 50% bonus
+
         public Crescent(Player owner) : base(owner)
         {
             Name = "Crescent";
@@ -14,27 +17,21 @@ namespace MyApp
             StaminaCost = 15;
             CanCrit = true;
             CanDodge = true;
-
         }
 
         public override void Use(Player target)
         {
-            var hasMoonlight = Owner.ActiveEffects.Any(e => e is Moonlight);
+            // Check if owner already has Moonlight
+            bool hasMoonlight = Owner.ActiveEffects.Any(e => e is Moonlight);
 
+            float bonus = hasMoonlight ? 0f : CritBonus;
+
+            // Deal damage with optional bonus crit
+            target.TakeDamage(Damage, DamageType, CanCrit, CanDodge, critBonus: bonus);
+
+            // If first hit this turn, apply Moonlight marker
             if (!hasMoonlight)
-            {
-                // First Crescent strike this turn
                 Owner.ReceiveEffect(new Moonlight(Owner));
-
-                Console.WriteLine($"{Owner.Name}'s {Name} glows with moonlight!");
-                target.TakeDamage(Damage, DamageType, CanCrit, CanDodge, critBonus: 0.5f);
-            }
-            else
-            {
-                // Already used the boosted strike this turn
-                target.TakeDamage(Damage, DamageType, CanCrit, CanDodge);
-            }
         }
-
     }
 }

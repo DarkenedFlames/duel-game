@@ -13,6 +13,7 @@ namespace MyApp
         public int RemainingStacks { get; set; }
         public bool IsNegative { get; set; }
         public bool IsExpired => RemainingDuration <= 0;
+        public bool IsHidden { get; set; } = false;
 
         protected Effect(Player owner)
         {
@@ -22,5 +23,6 @@ namespace MyApp
         public abstract void Tick();
         public abstract void Receive();
         public abstract void Lose();
+        public abstract void OnStack();
     }
 }
