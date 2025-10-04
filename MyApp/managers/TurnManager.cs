@@ -1,120 +1,152 @@
-namespace MyApp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public class TurnManager
+namespace MyApp
 {
-    private int turnIndex = 0;
-    public static List<Player> players { get; private set; } = new();
-
-    public TurnManager(List<Player> playersList)
+    public class TurnManager
     {
-        players = playersList ?? new List<Player>();
-    }
+        private int turnIndex = 0;
+        public static List<Player> players { get; private set; } = new();
 
-    // Convenience accessor (turnIndex is clamped before use)
-    public Player CurrentPlayer
-    {
-        get
+        public TurnManager(List<Player> playersList)
         {
-            if (players.Count == 0) throw new InvalidOperationException("No players available.");
-            ClampTurnIndex();
-            return players[turnIndex];
-        }
-    }
-
-    public void StartTurns()
-    {
-        if (players.Count == 0)
-        {
-            Console.WriteLine("No players added to TurnManager.");
-            return;
+            players = playersList ?? new List<Player>();
         }
 
-        // Main loop — stop when only one (or zero) players remain
-        while (players.Count > 1)
+        public Player CurrentPlayer
         {
-            ClampTurnIndex();
-            int startIndex = turnIndex;
-            var current = players[startIndex];
-
-            //
-            // 1) Start-of-turn effects (they may kill the current player)
-            //
-            for (int i = current.ActiveEffects.Count - 1; i >= 0; i--)
+            get
             {
-                current.ActiveEffects[i].Tick();
+                if (players.Count == 0) throw new InvalidOperationException("No players available.");
+                ClampTurnIndex();
+                return players[turnIndex];
+            }
+        }
 
-                // remove any dead players immediately
+        public void StartTurns()
+        {
+            if (players.Count == 0)
+            {
+                Console.WriteLine("No players added to TurnManager.");
+                return;
+            }
+
+            while (players.Count > 1)
+            {
+                ClampTurnIndex();
+                var current = CurrentPlayer;
+
+                Console.Clear();
+
+                // START OF TURN SEQUENCE
+                if (ProcessStartOfTurnEffects(current)) continue; // skip to next player if current died
+
+                GivePlayerItems(current);
+                ReplenishStamina(current);
+                HandlePeer(current);
+                HandleLuck(current);
+
+                // PLAYER ACTION LOOP
+                ProcessPlayerActions(current);
+
+                // ADVANCE TURN
+                AdvanceTurn(current);
+            }
+
+            AnnounceEndGame();
+        }
+
+        // ----- Helper Methods -----
+
+        private bool ProcessStartOfTurnEffects(Player player)
+        {
+            for (int i = player.ActiveEffects.Count - 1; i >= 0; i--)
+            {
+                player.ActiveEffects[i].Tick();
                 RemoveDeadPlayers();
-
-                // if current died during effects, break out
-                if (!players.Contains(current))
-                    break;
+                if (!players.Contains(player)) return true; // player died during effects
             }
+            return false;
+        }
 
-            // If game ended during effects, break
-            if (players.Count <= 1) break;
-
-            // If current was removed during effects, next player is the one that now sits
-            // at startIndex (see explanation below)
-            if (!players.Contains(current))
-            {
-                // clamp turnIndex and continue to next iteration (do not increment)
-                if (startIndex >= players.Count) turnIndex = 0;
-                else turnIndex = startIndex;
-                continue;
-            }
-
-            //
-            // 2) Give the player an item and replenish their stamina (skip if they died)
-            //
+        private void GivePlayerItems(Player player)
+        {
             Console.Clear();
-            ItemFactory.GiveRandomItem(current);
-            current.Stamina.Change(current.MaximumStamina.Value - current.Stamina.Value);
-            Console.WriteLine($"\n{current.Name}'s stamina has been replenished!");
+            ItemFactory.GiveRandomItem(player);
             Console.WriteLine("Press any key to continue...");
             Console.ReadKey(true);
+        }
 
+        private void ReplenishStamina(Player player)
+        {
+            Console.Clear();
+            player.Stamina.Change(player.MaximumStamina.Value - player.Stamina.Value);
+            Console.WriteLine($"\n{player.Name}'s stamina has been replenished!");
+            Console.WriteLine("Press any key to continue...");
+            Console.ReadKey(true);
+        }
 
+        private void HandlePeer(Player player)
+        {
+            Console.Clear();
+            if (player.Peer.Value <= 0) return;
 
-            //
-            // 3) Player's menu loop (keeps running until the player ends turn).
-            //    We check for death BEFORE each menu invocation so a 0-HP player cannot act.
-            //
+            double chance = player.Peer.Value / (player.Peer.Value + 100); // hyperbolic scaling
+            if (Random.Shared.NextDouble() < chance)
+            {
+                Console.WriteLine("\nPeer activated! Enemy inventories revealed:");
+                foreach (var enemy in players.Where(p => p != player))
+                {
+                    Console.WriteLine($"- {enemy.Name}: {string.Join(", ", enemy.Inventory.Select(i => i.Name))}");
+                }
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey(true);
+            }
+        }
+
+        private void HandleLuck(Player player)
+        {
+            Console.Clear();
+            if (player.Luck.Value <= 0) return;
+
+            double chance = player.Luck.Value / (player.Luck.Value + 100); // hyperbolic scaling
+            if (Random.Shared.NextDouble() < chance)
+            {
+                Console.WriteLine("\nLuck activated! You received a bonus item:");
+                ItemFactory.GiveRandomItem(player);
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey(true);
+            }
+        }
+
+        private void ProcessPlayerActions(Player player)
+        {
             bool endTurn = false;
             while (!endTurn)
             {
-                if (current.Health.Value <= 0)
+                if (player.Health.Value <= 0)
                 {
-                    Console.WriteLine($"{current.Name} has fallen and cannot act.");
+                    Console.WriteLine($"{player.Name} has fallen and cannot act.");
                     RemoveDeadPlayers();
                     break;
                 }
 
-                endTurn = Printer.PrintMainMenu(current);
-
-                // After each action, remove dead players (other players may have died)
+                endTurn = Printer.PrintMainMenu(player);
                 RemoveDeadPlayers();
 
                 if (players.Count <= 1) break;
-                if (!players.Contains(current)) break; // current could have died during their own actions
+                if (!players.Contains(player)) break;
             }
+        }
 
-            if (players.Count <= 1) break;
-
-            //
-            // 4) Compute next turnIndex safely:
-            //    - if current still exists: next = (indexOf(current) + 1) % players.Count
-            //    - if current was removed: the player that was immediately after current
-            //      in the list now sits at `startIndex`, so next = startIndex % players.Count
-            //
+        private void AdvanceTurn(Player current)
+        {
             int pos = players.IndexOf(current);
             if (pos == -1)
             {
-                // current removed — next player now occupies the old startIndex
-                turnIndex = (players.Count > 0) ? (startIndex % players.Count) : 0;
+                // current was removed, next player is at old index
+                turnIndex = players.Count > 0 ? turnIndex % players.Count : 0;
             }
             else
             {
@@ -122,47 +154,33 @@ public class TurnManager
             }
         }
 
-        // End condition
-        if (players.Count == 1)
+        private void AnnounceEndGame()
         {
             Console.Clear();
-            Console.WriteLine($"{players[0].Name} is the last player standing! They win!");
+            if (players.Count == 1)
+                Console.WriteLine($"{players[0].Name} is the last player standing! They win!");
+            else
+                Console.WriteLine("No players remain. Game over.");
         }
-        else
+
+        private void RemoveDeadPlayers()
         {
-            Console.Clear();
-            Console.WriteLine("No players remain. Game over.");
+            var dead = players.Where(p => p.Health.Value <= 0).ToList();
+            if (dead.Count == 0) return;
+
+            foreach (var d in dead)
+            {
+                Console.WriteLine($"{d.Name} has fallen!");
+                players.Remove(d);
+            }
+
+            ClampTurnIndex();
         }
-    }
 
-    // Remove all players whose health is <= 0 and print announcement.
-    // Keep modifications localized here so turnIndex adjustments are consistent.
-    private void RemoveDeadPlayers()
-    {
-        var dead = players.Where(p => p.Health.Value <= 0).ToList();
-        if (dead.Count == 0) return;
-
-        foreach (var d in dead)
+        private void ClampTurnIndex()
         {
-            Console.WriteLine($"{d.Name} has fallen!");
-            players.Remove(d);
+            if (players.Count == 0) { turnIndex = 0; return; }
+            if (turnIndex >= players.Count || turnIndex < 0) turnIndex = 0;
         }
-
-        // Ensure turnIndex is a valid index into players after removals
-        ClampTurnIndex();
-    }
-
-    private void ClampTurnIndex()
-    {
-        if (players.Count == 0)
-        {
-            turnIndex = 0;
-            return;
-        }
-
-        if (turnIndex >= players.Count)
-            turnIndex = 0;
-        else if (turnIndex < 0)
-            turnIndex = 0; // safety in case negatives ever sneak in
     }
 }

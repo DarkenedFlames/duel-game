@@ -8,7 +8,7 @@ public class Luck : Stat
     public override float Multiplier { get; set; }
     public Luck()
     {
-        Base = 50;
+        Base = 0;
         Multiplier = 1.0f;
     }
 }

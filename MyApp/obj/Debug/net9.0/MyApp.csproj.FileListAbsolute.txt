@@ -12,3 +12,4 @@ C:\Users\g2min\Desktop\C#\Duel\MyApp\obj\Debug\net9.0\refint\MyApp.dll
 C:\Users\g2min\Desktop\C#\Duel\MyApp\obj\Debug\net9.0\MyApp.pdb
 C:\Users\g2min\Desktop\C#\Duel\MyApp\obj\Debug\net9.0\MyApp.genruntimeconfig.cache
 C:\Users\g2min\Desktop\C#\Duel\MyApp\obj\Debug\net9.0\ref\MyApp.dll
+C:\Users\g2min\Desktop\C#\Duel\MyApp\obj\Debug\net9.0\MyApp.sourcelink.json

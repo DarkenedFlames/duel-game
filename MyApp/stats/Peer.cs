@@ -8,7 +8,7 @@ public class Peer : Stat
     public override float Multiplier { get; set; }
     public Peer()
     {
-        Base = 50;
+        Base = 0;
         Multiplier = 1.0f;
     }
 }
