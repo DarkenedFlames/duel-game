@@ -19,6 +19,8 @@ namespace MyApp
             player => new PalePurplePotion(player),
             player => new PupilPorridge(player),
             player => new CartilageChowder(player),
+            player => new MagpieMorsel(player),
+            player => new VultureVittles(player),
             // Add more items here...
         };
 
