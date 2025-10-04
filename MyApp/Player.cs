@@ -25,6 +25,8 @@ namespace MyApp
             Shield = new Shield();
             Critical = new Critical();
             Dodge = new Dodge();
+            Peer = new Peer();
+            Luck = new Luck();
 
 
             Inventory = new List<Item>();
@@ -55,6 +57,9 @@ namespace MyApp
         public Shield Shield;
         public Critical Critical;
         public Dodge Dodge;
+        public Peer Peer;
+        public Luck Luck;
+
         public List<Item> Inventory;
         public Dictionary<EquipmentSlot, Item?> Equipment;
         public List<Effect> ActiveEffects;

@@ -10,7 +10,11 @@ public class Program
         turnManager.StartTurns();
     }
 }
-// Build Exe
+
+
+// ======== Development Notes ========
+
+// Build Executable
 // dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
 
 // Count Lines of Code
@@ -31,8 +35,10 @@ public class Program
 // repeat "Each feature/fix" steps to catch remaining changes
 // git tag -a v0.1.0 -m "Alpha milestone: first full duel loop"
 // git push origin v0.1.0
+// go to GitHub and create a new release with notes
 
 // Major changes include new complex systems or breaking changes
 // Minor changes include new features or significant improvements
 // Patch changes include bug fixes or small tweaks
+
 
