@@ -16,7 +16,7 @@ namespace MyApp
 
         public override void Use(Player target)
         {
-            target.Luck.Base += LuckAmount;
+            target.Stats["Luck"].Base += LuckAmount;
             Console.WriteLine($"{target.Name} gained {LuckAmount} luck!");
         }
     }

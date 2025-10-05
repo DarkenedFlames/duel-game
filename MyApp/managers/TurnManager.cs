@@ -81,7 +81,7 @@ namespace MyApp
         private void ReplenishStamina(Player player)
         {
             Console.Clear();
-            player.Stamina.Change(player.MaximumStamina.Value - player.Stamina.Value);
+            player.Resources["Stamina"].Change(player.Stats["MaximumStamina"].Value - player.Resources["Stamina"].Value);
             Console.WriteLine($"\n{player.Name}'s stamina has been replenished!");
             Console.WriteLine("Press any key to continue...");
             Console.ReadKey(true);
@@ -90,9 +90,9 @@ namespace MyApp
         private void HandlePeer(Player player)
         {
             Console.Clear();
-            if (player.Peer.Value <= 0) return;
+            if (player.Stats["Peer"].Value <= 0) return;
 
-            double chance = player.Peer.Value / (player.Peer.Value + 100); // hyperbolic scaling
+            double chance = player.Stats["Peer"].Value / (player.Stats["Peer"].Value + 100); // hyperbolic scaling
             if (Random.Shared.NextDouble() < chance)
             {
                 Console.WriteLine("\nPeer activated! Enemy inventories revealed:");
@@ -108,9 +108,9 @@ namespace MyApp
         private void HandleLuck(Player player)
         {
             Console.Clear();
-            if (player.Luck.Value <= 0) return;
+            if (player.Stats["Luck"].Value <= 0) return;
 
-            double chance = player.Luck.Value / (player.Luck.Value + 100); // hyperbolic scaling
+            double chance = player.Stats["Luck"].Value / (player.Stats["Luck"].Value + 100); // hyperbolic scaling
             if (Random.Shared.NextDouble() < chance)
             {
                 Console.WriteLine("\nLuck activated! You received a bonus item:");
@@ -125,7 +125,7 @@ namespace MyApp
             bool endTurn = false;
             while (!endTurn)
             {
-                if (player.Health.Value <= 0)
+                if (player.Resources["Health"].Value <= 0)
                 {
                     Console.WriteLine($"{player.Name} has fallen and cannot act.");
                     RemoveDeadPlayers();
@@ -165,7 +165,7 @@ namespace MyApp
 
         private void RemoveDeadPlayers()
         {
-            var dead = players.Where(p => p.Health.Value <= 0).ToList();
+            var dead = players.Where(p => p.Resources["Health"].Value <= 0).ToList();
             if (dead.Count == 0) return;
 
             foreach (var d in dead)

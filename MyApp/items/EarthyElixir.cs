@@ -16,8 +16,8 @@ namespace MyApp
 
         public override void Use(Player target)
         {
-            target.Armor.Multiplier *= ArmorAndShieldModifier;
-            target.Shield.Multiplier *= ArmorAndShieldModifier;
+            target.Stats["Armor"].Multiplier *= ArmorAndShieldModifier;
+            target.Stats["Shield"].Multiplier *= ArmorAndShieldModifier;
             Console.WriteLine($"{target.Name}'s shield and armor have been permanently increased by {ArmorAndShieldModifier - 1:P}!");
         }
     }

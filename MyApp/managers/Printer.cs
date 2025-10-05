@@ -65,16 +65,16 @@ namespace MyApp
         }
         private static void StatMenu(Player player)
         {
-            Console.WriteLine($"Health: {player.Health.Value} / {player.MaximumHealth.Value}");
-            Console.WriteLine($"Stamina: {player.Stamina.Value} / {player.MaximumStamina.Value}");
-            Console.WriteLine($"Armor: {player.Armor.Value}");
-            Console.WriteLine($"Shield: {player.Shield.Value}");
-            Console.WriteLine($"Critical: {player.Critical.Value}");
-            Console.WriteLine($"Dodge: {player.Dodge.Value}");
-            Console.WriteLine($"Peer: {player.Peer.Value}");
-            Console.WriteLine($"Luck: {player.Luck.Value}");
-            Console.WriteLine($"Healing Modifier: {player.Health.RestorationMultiplier:P}");
-            Console.WriteLine($"Stimming Modifier: {player.Stamina.RestorationMultiplier:P}");
+            Console.WriteLine($"Health: {player.Resources["Health"].Value} / {player.Stats["MaximumHealth"].Value}");
+            Console.WriteLine($"Stamina: {player.Resources["Stamina"].Value} / {player.Stats["MaximumStamina"].Value}");
+            Console.WriteLine($"Armor: {player.Stats["Armor"].Value}");
+            Console.WriteLine($"Shield: {player.Stats["Shield"].Value}");
+            Console.WriteLine($"Critical: {player.Stats["Critical"].Value}");
+            Console.WriteLine($"Dodge: {player.Stats["Dodge"].Value}");
+            Console.WriteLine($"Peer: {player.Stats["Peer"].Value}");
+            Console.WriteLine($"Luck: {player.Stats["Luck"].Value}");
+            Console.WriteLine($"Healing Modifier: {player.Resources["Health"].RestorationMultiplier:P}");
+            Console.WriteLine($"Stimming Modifier: {player.Resources["Stamina"].RestorationMultiplier:P}");
             AnyKey();
         }
         private static void InventoryMenu(Player player)

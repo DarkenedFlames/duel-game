@@ -16,7 +16,7 @@ namespace MyApp
 
         public override void Use(Player target)
         {
-            target.MaximumStamina.Base += MaximumStaminaAmount;
+            target.Stats["MaximumStamina"].Base += MaximumStaminaAmount;
             Console.WriteLine($"{target.Name} gained {MaximumStaminaAmount} maximum stamina!");
         }
     }

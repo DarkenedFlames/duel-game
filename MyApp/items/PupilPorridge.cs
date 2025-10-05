@@ -16,7 +16,7 @@ namespace MyApp
 
         public override void Use(Player target)
         {
-            target.Critical.Base += CriticalAmount;
+            target.Stats["Critical"].Base += CriticalAmount;
             Console.WriteLine($"{target.Name} gained {CriticalAmount} critical!");
         }
     }

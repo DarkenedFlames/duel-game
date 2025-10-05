@@ -16,7 +16,7 @@ namespace MyApp
 
         public override void Use(Player target)
         {
-            target.Dodge.Base += DodgeAmount;
+            target.Stats["Dodge"].Base += DodgeAmount;
             Console.WriteLine($"{target.Name} gained {DodgeAmount} dodge!");
         }
     }

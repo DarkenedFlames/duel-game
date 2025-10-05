@@ -2,7 +2,7 @@ namespace MyApp;
 
 using System;
 
-public abstract class Resource
+public class Resource
 {
     public int Value { get; set; }
     public Stat MaximumStat { get; set; }

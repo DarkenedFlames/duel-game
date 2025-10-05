@@ -16,7 +16,7 @@ namespace MyApp
 
         public override void Use(Player target)
         {
-            target.Peer.Base += PeerAmount;
+            target.Stats["Peer"].Base += PeerAmount;
             Console.WriteLine($"{target.Name} gained {PeerAmount} peer!");
         }
     }

@@ -16,7 +16,7 @@ namespace MyApp
 
         public override void Use(Player target)
         {
-            target.Shield.Base += ShieldAmount;
+            target.Stats["Shield"].Base += ShieldAmount;
             Console.WriteLine($"{target.Name} gained {ShieldAmount} shield!");
         }
     }

@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MyApp
 {
     public class Player
     {
-        // Place Holder: public event Action<Player, int>? OnTakeDamage;
-        // Place Holder: public event Action<Player, int>? OnHeal;
         public event Action<Player, Item>? OnEquip;
         public event Action<Player, Item>? OnUnequip;
         public event Action<Player, Item>? OnReceiveItem;
@@ -17,30 +16,36 @@ namespace MyApp
         {
             Name = newName;
 
-            MaximumHealth = new MaximumHealth();
-            MaximumStamina = new MaximumStamina();
-            Health = new Health(MaximumHealth);
-            Stamina = new Stamina(MaximumStamina);
-            Armor = new Armor();
-            Shield = new Shield();
-            Critical = new Critical();
-            Dodge = new Dodge();
-            Peer = new Peer();
-            Luck = new Luck();
+            Stats = new Dictionary<string, Stat>()
+            {
+                { "MaximumHealth", new Stat() },
+                { "MaximumStamina", new Stat() },
+                { "Armor", new Stat() },
+                { "Shield", new Stat() },
+                { "Critical", new Stat() },
+                { "Dodge", new Stat() },
+                { "Peer", new Stat() },
+                { "Luck", new Stat() }
+            };
 
+            Resources = new Dictionary<string, Resource>()
+            {
+                { "Health", new Resource(Stats["MaximumHealth"]) },
+                { "Stamina", new Resource(Stats["MaximumStamina"]) }
+            };
 
             Inventory = new List<Item>();
             ActiveEffects = new List<Effect>();
-            Equipment = new Dictionary<EquipmentSlot, Item?>()
+            Equipment = new Dictionary<ItemType, Item?>()
             {
-                { EquipmentSlot.Weapon, null },
-                { EquipmentSlot.Helmet, null },
-                { EquipmentSlot.Chestplate, null },
-                { EquipmentSlot.Leggings, null },
-                { EquipmentSlot.Accessory, null }
+                { ItemType.Weapon, null },
+                { ItemType.Helmet, null },
+                { ItemType.Chestplate, null },
+                { ItemType.Leggings, null },
+                { ItemType.Accessory, null }
             };
 
-            // Register/Subscribe Printers For The Instance
+            // Event handlers
             this.OnEquip += (player, item) => Printer.PrintItemEquipped(player, item);
             this.OnUnequip += (player, item) => Printer.PrintItemUnequipped(player, item);
             this.OnReceiveItem += (player, item) => Printer.PrintItemReceived(player, item);
@@ -49,35 +54,25 @@ namespace MyApp
         }
 
         public string Name;
-        public MaximumHealth MaximumHealth;
-        public MaximumStamina MaximumStamina;
-        public Health Health;
-        public Stamina Stamina;
-        public Armor Armor;
-        public Shield Shield;
-        public Critical Critical;
-        public Dodge Dodge;
-        public Peer Peer;
-        public Luck Luck;
-
+        public Dictionary<string, Stat> Stats;
+        public Dictionary<string, Resource> Resources;
         public List<Item> Inventory;
-        public Dictionary<EquipmentSlot, Item?> Equipment;
+        public Dictionary<ItemType, Item?> Equipment;
         public List<Effect> ActiveEffects;
 
-        // Player take damage, apply armor/shield, crits, dodges
         public bool TakeDamage(int amount, DamageType damageType, bool canCrit, bool canDodge, float critBonus = 0)
         {
-            float dodgeChance = Dodge.Value / (Dodge.Value + 100f);
+            float dodgeChance = Stats["Dodge"].Value / (Stats["Dodge"].Value + 100f);
             if (new Random().NextDouble() < dodgeChance && canDodge)
             {
                 Console.WriteLine($"{Name} dodged the attack!");
                 return false;
             }
 
-            float criticalChance = Critical.Value / (Critical.Value + 100f) + critBonus;
+            float criticalChance = Stats["Critical"].Value / (Stats["Critical"].Value + 100f) + critBonus;
             if (new Random().NextDouble() < criticalChance && canCrit)
             {
-                amount = (int)(amount * 2.0f); // Critical hit deals 100% more damage
+                amount = (int)(amount * 2.0f);
                 Console.WriteLine("Critical Hit!");
             }
 
@@ -85,63 +80,55 @@ namespace MyApp
             switch (damageType)
             {
                 case DamageType.Physical:
-                    multiplier = 100f / (Armor.Value + 100f);
+                    multiplier = 100f / (Stats["Armor"].Value + 100f);
                     amount = (int)Math.Max(0, amount * multiplier);
                     break;
                 case DamageType.Magical:
-                    multiplier = 100f / (Shield.Value + 100f);
+                    multiplier = 100f / (Stats["Shield"].Value + 100f);
                     amount = (int)Math.Max(0, amount * multiplier);
                     break;
                 case DamageType.True:
-                    // True damage ignores armor
                     break;
             }
 
-            Health.Change(-amount);
+            Resources["Health"].Change(-amount);
             Console.WriteLine($"{Name} took {amount} damage!");
             return true;
         }
-        // Player heal, not implemented
-        public void Heal(int amount)
-        {
-            //Health.Change(amount);
-            //Console.WriteLine($"{Name} healed {amount} health!");
-            //Might be used later, needs event triggers to justify existence
-        }
-        // Add Item to inventory, call Item.Receive()
+
+        public void Heal(int amount) { /* Placeholder for future use */ }
+
         public void AddItem(Item item)
         {
             Inventory.Add(item);
             OnReceiveItem?.Invoke(this, item);
         }
-        // Remove Item from inventory, call Item.Lose()
+
         public void RemoveItem(Item item)
         {
             OnLoseItem?.Invoke(this, item);
             Console.WriteLine($"{Name} lost item: {item.Name}");
             Inventory.Remove(item);
         }
-        // Use item, check and spend stamina, call Item.Use()
+
         public bool UseItem(Item item, Player target)
         {
-
-            // Check stamina
-            if (Stamina.Value < item.StaminaCost)
+            if (Resources["Stamina"].Value < item.StaminaCost)
             {
                 Console.WriteLine($"{Name} does not have enough stamina to use {item.Name}.");
                 return false;
             }
-            else
-            {
-                Stamina.Change(-item.StaminaCost);
-                item.Use(target);
-                OnUseItem?.Invoke(this, item, target);
-                if (item.Type == ItemType.Consumable){Inventory.Remove(item);}
-                return true;
-            }
+
+            Resources["Stamina"].Change(-item.StaminaCost);
+            item.Use(target);
+            OnUseItem?.Invoke(this, item, target);
+
+            if (item.Type == ItemType.Consumable)
+                Inventory.Remove(item);
+
+            return true;
         }
 
-        // Equip an item or perform logic based on ItemType, TODO: add effect application and stat changes
         public bool Equip(Item item)
         {
             if (!Inventory.Contains(item))
@@ -150,79 +137,54 @@ namespace MyApp
                 return false;
             }
 
-            EquipmentSlot slot;
-            switch (item.Type)
+            if (!Equipment.ContainsKey(item.Type))
             {
-                case ItemType.Weapon:
-                    slot = EquipmentSlot.Weapon;
-                    break;
-                case ItemType.Helmet:
-                    slot = EquipmentSlot.Helmet;
-                    break;
-                case ItemType.Chestplate:
-                    slot = EquipmentSlot.Chestplate;
-                    break;
-                case ItemType.Leggings:
-                    slot = EquipmentSlot.Leggings;
-                    break;
-                case ItemType.Accessory:
-                    slot = EquipmentSlot.Accessory;
-                    break;
-                case ItemType.Consumable:
-                    Console.WriteLine($"{item.Name} is a consumable and cannot be equipped.");
-                    return false;
-                default:
-                    Console.WriteLine($"{item.Name} cannot be equipped (unknown type).");
-                    return false;
-            }
-
-            Inventory.Remove(item);
-            if (Equipment[slot] != null)
-            {
-                Inventory.Add(Equipment[slot]!);
-                Console.WriteLine($"{Name} unequipped {Equipment[slot]?.Name} from {slot} slot.");
-            }
-            Equipment[slot] = item;
-            OnEquip?.Invoke(this, item);
-            return true;
-        }
-        // Unequip logic based on ItemType; TODO: Add effect application and stat changes
-        public bool Unequip(EquipmentSlot slot)
-        {
-            var item = Equipment[slot];
-            if (item == null)
-            {
-                Console.WriteLine($"No item equipped in {slot} slot.");
+                Console.WriteLine($"{item.Name} cannot be equipped (type {item.Type} is not equippable).");
                 return false;
             }
 
-            switch (item.Type)
+            if (Equipment[item.Type] != null)
             {
-                case ItemType.Weapon:
-                case ItemType.Helmet:
-                case ItemType.Chestplate:
-                case ItemType.Leggings:
-                case ItemType.Accessory:
-                    AddItem(item);
-                    Equipment[slot] = null;
-                    OnUnequip?.Invoke(this, item);
-                    return true;
-                default:
-                    Console.WriteLine($"{item.Name} cannot be unequipped (unknown type).");
-                    return false;
+                var previous = Equipment[item.Type]!;
+                Unequip(item.Type);
+                Console.WriteLine($"{Name} unequipped {previous.Name}.");
             }
+
+            // Equip the new item
+            Equipment[item.Type] = item;
+            Inventory.Remove(item);
+            OnEquip?.Invoke(this, item);
+            Console.WriteLine($"{Name} equipped {item.Name} ({item.Type}).");
+            return true;
         }
-        // Apply effect to player
+
+        public bool Unequip(ItemType type)
+        {
+            if (!Equipment.ContainsKey(type))
+            {
+                Console.WriteLine($"No equipment slot for {type}.");
+                return false;
+            }
+
+            var item = Equipment[type];
+            if (item == null)
+            {
+                Console.WriteLine($"No {type} equipped.");
+                return false;
+            }
+
+            Equipment[type] = null;
+            AddItem(item);
+            OnUnequip?.Invoke(this, item);
+            Console.WriteLine($"{Name} unequipped {item.Name}.");
+            return true;
+        }
+
         public void ReceiveEffect(Effect newEffect)
         {
-            // Try to merge with existing effect of same type
             var existing = ActiveEffects.FirstOrDefault(e => e.GetType() == newEffect.GetType());
-
             if (existing != null)
-            {
-                // Ask the effect how to handle stacking/refreshing
                 existing.OnStack();
-            }
             else
             {
                 ActiveEffects.Add(newEffect);
@@ -230,7 +192,6 @@ namespace MyApp
             }
         }
 
-        // Remove effect from player
         public void LoseEffect(Effect effect)
         {
             if (ActiveEffects.Contains(effect))
