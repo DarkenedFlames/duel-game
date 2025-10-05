@@ -107,20 +107,19 @@ namespace MyApp
         }
         private static void EquipmentMenu(Player player)
         {
-            // Map numeric choices to slots
-            var slotChoices = new List<(int number, EquipmentSlot slot, string label)>
+            var slotChoices = new List<(int number, ItemType type, string label)>
             {
-                (1, EquipmentSlot.Weapon, "Weapon"),
-                (2, EquipmentSlot.Helmet, "Helmet"),
-                (3, EquipmentSlot.Chestplate, "Chestplate"),
-                (4, EquipmentSlot.Leggings, "Leggings"),
-                (5, EquipmentSlot.Accessory, "Accessory")
+                (1, ItemType.Weapon, "Weapon"),
+                (2, ItemType.Helmet, "Helmet"),
+                (3, ItemType.Chestplate, "Chestplate"),
+                (4, ItemType.Leggings, "Leggings"),
+                (5, ItemType.Accessory, "Accessory")
             };
 
             // Print slots with numbers
-            foreach (var (number, slot, label) in slotChoices)
+            foreach (var (number, type, label) in slotChoices)
             {
-                if (player.Equipment.TryGetValue(slot, out var item) && item != null)
+                if (player.Equipment.TryGetValue(type, out var item) && item != null)
                     Console.WriteLine($"{number}. {label}: {item.Name}");
                 else
                     Console.WriteLine($"{number}. {label}: (empty)");
@@ -141,10 +140,10 @@ namespace MyApp
                 return;
             }
 
-            // Get selected slot
-            var selectedSlot = slotChoices[choice - 1].slot;
+            // Get selected item type
+            var selectedType = slotChoices[choice - 1].type;
 
-            if (player.Equipment.TryGetValue(selectedSlot, out var selectedItem) && selectedItem != null)
+            if (player.Equipment.TryGetValue(selectedType, out var selectedItem) && selectedItem != null)
             {
                 PrintItemMenu(player, selectedItem);
             }

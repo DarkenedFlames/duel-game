@@ -18,14 +18,14 @@ namespace MyApp
 
             Stats = new Dictionary<string, Stat>()
             {
-                { "MaximumHealth", new Stat() },
-                { "MaximumStamina", new Stat() },
-                { "Armor", new Stat() },
-                { "Shield", new Stat() },
-                { "Critical", new Stat() },
-                { "Dodge", new Stat() },
-                { "Peer", new Stat() },
-                { "Luck", new Stat() }
+                { "MaximumHealth", new Stat(baseValue: 100, multiplier: 1.0f) },
+                { "MaximumStamina", new Stat(baseValue: 100, multiplier: 1.0f) },
+                { "Armor", new Stat(baseValue: 50, multiplier: 1.0f) },
+                { "Shield", new Stat(baseValue: 50, multiplier: 1.0f) },
+                { "Critical", new Stat(baseValue: 0, multiplier: 1.0f) },
+                { "Dodge", new Stat(baseValue: 0, multiplier: 1.0f) },
+                { "Peer", new Stat(baseValue: 0, multiplier: 1.0f) },
+                { "Luck", new Stat(baseValue: 0, multiplier: 1.0f) }
             };
 
             Resources = new Dictionary<string, Resource>()
