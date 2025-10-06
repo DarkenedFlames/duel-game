@@ -1,39 +1,50 @@
 using System;
+using System.Collections.Generic;
 
-namespace MyApp
+namespace MyCBA
 {
-    public class InventoryComponent
+    public class InventoryComponent : Component
     {
-        private Player player;
+        public event Action<Entity>? OnPickupItem;
+        public event Action<Entity>? OnDropItem;
 
-        public InventoryComponent(Player player)
+        private readonly List<Entity> _items = new();
+        public IEnumerable<Entity> Items => _items;
+
+        public void PickupItem(Entity item)
         {
-            this.player = player;
+            if (!_items.Contains(item))
+            {
+                _items.Add(item);
+                OnPickupItem?.Invoke(item);
+                Console.WriteLine($"{Owner?.Name} picked up {item.GetComponent<ItemComponent>()?.Name}.");
+            }
         }
 
-        public void AddItem(Item item)
+        public void DropItem(Entity item)
         {
-
+            if (_items.Remove(item))
+            {
+                OnDropItem?.Invoke(item);
+                Console.WriteLine($"{Owner?.Name} dropped {item.GetComponent<ItemComponent>()?.Name}.");
+            }
         }
 
-        public void RemoveItem(Item item)
+        public bool HasItem(Entity item) => _items.Contains(item);
+
+        public void Subscribe(EquipmentComponent equipment)
         {
+            equipment.OnEquip += (owner, item) =>
+            {
+                if (owner == Owner)
+                    DropItem(item);
+            };
 
-        }
-
-        public void EquipItem(Item item)
-        {
-
-        }
-
-        public void UnequipItem(Item item)
-        {
-
-        }
-
-        public void UseItem(Item item, Player target)
-        {
-
+            equipment.OnUnequip += (owner, item) =>
+            {
+                if (owner == Owner)
+                    PickupItem(item);
+            };
         }
     }
 }

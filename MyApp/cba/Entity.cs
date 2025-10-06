@@ -1,12 +1,13 @@
 using System;
 
-namespace MyApp
+namespace MyCBA
 {
     public class Entity
     {
         private readonly Dictionary<Type, Component> _components = new();
+        public string Name { get; set; } = "Unnamed Entity";
 
-        public T GetComponent<T>() where T : Component
+        public T? GetComponent<T>() where T : Component
         {
             _components.TryGetValue(typeof(T), out var comp);
             return comp as T;

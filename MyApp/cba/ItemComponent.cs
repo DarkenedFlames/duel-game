@@ -1,20 +1,36 @@
 using System;
 
-namespace MyApp
+namespace MyCBA
 {
-    public class ItemComponent
+    public class ItemComponent : Component
     {
-        private Player player;
+        public string Name { get; }
+        public ItemType Type { get; }
+        public ItemRarity Rarity { get; }
 
-
-        public ItemComponent(Player player)
+        public ItemComponent(string name, ItemType type, ItemRarity rarity)
         {
-            this.player = player;
+            Name = name;
+            Type = type;
+            Rarity = rarity;
         }
+    }
 
-        public void Use(Player target)
-        {
-            
-        }
+    public enum ItemRarity
+    {
+        Common,
+        Uncommon,
+        Rare,
+        Mythical
+    }
+
+    public enum ItemType
+    {
+        Weapon,
+        Helmet,
+        Chestplate,
+        Leggings,
+        Accessory,
+        Consumable
     }
 }

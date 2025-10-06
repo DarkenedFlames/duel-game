@@ -1,9 +1,9 @@
 using System;
 
-namespace MyApp
+namespace MyCBA
 {
     public abstract class Component
     {
-        public Entity Owner { get; internal set; }
+        public Entity? Owner { get; internal set; }
     }
 }

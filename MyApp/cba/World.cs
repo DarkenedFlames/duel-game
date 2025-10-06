@@ -1,6 +1,6 @@
 using System;
 
-namespace MyApp
+namespace MyCBA
 {
     public class World
     {
