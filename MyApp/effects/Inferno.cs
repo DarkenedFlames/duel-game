@@ -11,47 +11,28 @@ namespace MyApp
             RemainingDuration = 3;
             MaximumStacks = 3;
             RemainingStacks = 1;
-            TargetType = TargetType.Enemy;
+            StackingType = StackingType.AddStack;
             IsNegative = true;
-            IsHidden = false;
         }
 
-        public override void Receive()
+        protected override void OnAdded()
         {
             Console.WriteLine($"{Owner.Name} is engulfed in flames!");
         }
 
-        public override void OnStack()
+        protected override void OnStacked()
         {
-            if (RemainingStacks < MaximumStacks)
-            {
-                RemainingStacks++;
-                RemainingDuration = MaximumDuration;
-                Console.WriteLine($"{Owner.Name}'s Inferno stacks to {RemainingStacks}!");
-            }
-            else
-            {
-                RemainingDuration = MaximumDuration;
-                Console.WriteLine($"{Owner.Name}'s Inferno is refreshed at max stacks!");
-            }
+            Console.WriteLine($"{Owner.Name}'s Inferno stacks to {RemainingStacks}!");
         }
 
-        public override void Tick()
+        protected override void OnTick()
         {
-            int damage = Math.Max(1, (int)(Owner.Stats.Get("MaximumHealth") * 0.01f));
-            // Multiply by stacks
-            damage *= RemainingStacks;
-
+            int damage = Math.Max(1, (int)(Owner.Stats.Get("MaximumHealth") * 0.01f)) * RemainingStacks;
             Owner.TakeDamage(damage, DamageType.Magical, canCrit: false, canDodge: false);
-
-            RemainingDuration--;
-            if (RemainingDuration <= 0)
-                Owner.LoseEffect(this);
-
-            Console.WriteLine($"{Owner.Name} takes inferno damage. ({RemainingDuration} turns left)");
+            Console.WriteLine($"{Owner.Name} burns ({RemainingDuration - 1} turns left).");
         }
 
-        public override void Lose()
+        protected override void OnRemoved()
         {
             Console.WriteLine($"{Owner.Name} is no longer aflame.");
         }

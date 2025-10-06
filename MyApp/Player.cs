@@ -13,7 +13,6 @@ namespace MyApp
             Name = newName;
 
             Resources = new Resources(Stats);
-            ActiveEffects = new List<Effect>();
 
             // Event handlers
             this.OnUseItem += (player, item, target) => Printer.PrintItemUsed(player, item, target);
@@ -33,7 +32,7 @@ namespace MyApp
         public Resources Resources;
         public Inventory Inventory = new();
         public Equipment Equipment = new();
-        public List<Effect> ActiveEffects;
+        public ActiveEffects ActiveEffects = new();
 
         public bool TakeDamage(int amount, DamageType damageType, bool canCrit, bool canDodge, float critBonus = 0)
         {
@@ -70,9 +69,6 @@ namespace MyApp
             Console.WriteLine($"{Name} took {amount} damage!");
             return true;
         }
-
-        public void Heal(int amount) { /* Placeholder for future use */ }
-
         public bool UseItem(Item item, Player target)
         {
             if (Resources.Get("Stamina") < item.StaminaCost)
@@ -89,27 +85,6 @@ namespace MyApp
                 Inventory.RemoveItem(item);
 
             return true;
-        }
-
-        public void ReceiveEffect(Effect newEffect)
-        {
-            var existing = ActiveEffects.FirstOrDefault(e => e.GetType() == newEffect.GetType());
-            if (existing != null)
-                existing.OnStack();
-            else
-            {
-                ActiveEffects.Add(newEffect);
-                newEffect.Receive();
-            }
-        }
-
-        public void LoseEffect(Effect effect)
-        {
-            if (ActiveEffects.Contains(effect))
-            {
-                effect.Lose();
-                ActiveEffects.Remove(effect);
-            }
         }
     }
 }

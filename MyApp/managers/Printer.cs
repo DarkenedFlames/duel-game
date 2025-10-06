@@ -51,13 +51,13 @@ namespace MyApp
         }
         private static void StatusMenu(Player player)
         {
-            if (player.ActiveEffects.Count == 0)
+            if (player.ActiveEffects.Effects.Count == 0)
             {
                 Console.WriteLine("(No active effects)");
                 AnyKey();
                 return;
             }
-            foreach (var effect in player.ActiveEffects)
+            foreach (var effect in player.ActiveEffects.Effects)
             {
                 Console.WriteLine($"- {effect.Name} (Duration: {effect.RemainingDuration} turns)");
             }

@@ -5,24 +5,33 @@ namespace MyApp
     public abstract class Effect
     {
         public string Name { get; init; } = "";
-        public Player Owner { get; }         // always exists
-        public TargetType TargetType { get; init; }
+        public Player Owner { get; }
+        public StackingType StackingType { get; init; } = StackingType.AddStack;
         public int RemainingDuration { get; set; }
         public int MaximumDuration { get; set; }
         public int MaximumStacks { get; set; }
         public int RemainingStacks { get; set; }
         public bool IsNegative { get; set; }
-        public bool IsExpired => RemainingDuration <= 0;
-        public bool IsHidden { get; set; } = false;
+        public bool IsHidden { get; set; }
 
         protected Effect(Player owner)
         {
-            Owner = owner ?? throw new ArgumentNullException(nameof(owner));
+            Owner = owner;
         }
 
-        public abstract void Tick();
-        public abstract void Receive();
-        public abstract void Lose();
-        public abstract void OnStack();
+        // Effects subscribe to container events dynamically
+        public virtual void Subscribe(ActiveEffects container)
+        {
+            container.OnEffectAdded += e => { if (e == this) OnAdded(); };
+            container.OnEffectStacked += e => { if (e == this) OnStacked(); };
+            container.OnEffectRemoved += e => { if (e == this) OnRemoved(); };
+            container.OnEffectTicked += e => { if (e == this) OnTick(); };
+        }
+
+        // These are the “reactions” an effect can define
+        protected virtual void OnAdded() { }
+        protected virtual void OnStacked() { }
+        protected virtual void OnRemoved() { }
+        protected virtual void OnTick() { }
     }
 }

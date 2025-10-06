@@ -11,33 +11,18 @@ namespace MyApp
             RemainingDuration = 1;
             MaximumStacks = 1;
             RemainingStacks = 1;
-            TargetType = TargetType.Self;
-            IsNegative = false; // it’s a marker/buff
-            IsHidden = true;    // hide from UI if you want
+            StackingType = StackingType.RefreshOnly;
+            IsHidden = true;
         }
 
-        public override void Receive()
+        protected override void OnAdded()
         {
-            // Only a marker — no additional logic needed
+            Console.WriteLine($"{Owner.Name} is bathed in moonlight.");
         }
 
-        public override void OnStack()
+        protected override void OnRemoved()
         {
-            // If reapplied mid-turn, refresh duration
-            RemainingDuration = MaximumDuration;
-        }
-
-        public override void Tick()
-        {
-            RemainingDuration--;
-            if (RemainingDuration <= 0)
-                Owner.LoseEffect(this);
-        }
-
-        public override void Lose()
-        {
-            // Optionally log
-            // Console.WriteLine($"{Owner.Name}'s Moonlight has faded, next hit can crit again.");
+            Console.WriteLine($"{Owner.Name}'s Moonlight fades.");
         }
     }
 }
