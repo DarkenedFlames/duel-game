@@ -247,7 +247,8 @@ namespace MyApp
                     }
 
                     Player target = players[targetIndex - 1];
-                    player.UseItem(selectedItem, target);
+                    selectedItem.TryUse(target);
+
                     break;
 
 
@@ -272,7 +273,7 @@ namespace MyApp
         }
         public static void PrintItemUsed(Player player, Item item, Player target)
         {
-                Console.WriteLine($"\n{player.Name} used {item.Name} on {target.Name}!");
+            Console.WriteLine($"\n{player.Name} used {item.Name} on {target.Name}!");
         }
         public static void PrintItemReceived(Player player, Item item)
         {
@@ -281,6 +282,27 @@ namespace MyApp
         public static void PrintItemLost(Player player, Item item)
         {
             Console.WriteLine($"\n{player.Name} lost {item.Name}!");
+        }
+
+        public static void PrintInsufficientStamina(Player player, Item item)
+        {
+            Console.WriteLine($"\n{player.Name} lacks stamina to use {item.Name}.");
+        }
+        public static void PrintEffectAdded(Player player, Effect effect)
+        {
+            Console.WriteLine($"\n{player.Name} gained effect: {effect.Name} (Duration: {effect.RemainingDuration} turns)");
+        }
+        public static void PrintEffectStacked(Player player, Effect effect)
+        {
+            Console.WriteLine($"\n{player.Name}'s effect {effect.Name} stacked to {effect.RemainingStacks} stacks!");
+        }
+        public static void PrintEffectRemoved(Player player, Effect effect)
+        {
+            Console.WriteLine($"\n{player.Name}'s effect {effect.Name} has expired.");
+        }
+        public static void PrintEffectTicked(Player player, Effect effect)
+        {
+            Console.WriteLine($"\n{player.Name}'s effect {effect.Name} ticks. (Duration left: {effect.RemainingDuration} turns)");
         }
 
     }

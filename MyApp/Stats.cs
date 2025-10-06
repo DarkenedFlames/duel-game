@@ -5,7 +5,7 @@ namespace MyApp
 {
     public class Stats
     {
-        public event Action<string, int>? OnStatChanged; // name, new effective value
+        public event Action<string, int>? OnStatChanged;
 
         public Dictionary<string, (int Base, float Modifier)> Values { get; private set; }
 
@@ -24,39 +24,34 @@ namespace MyApp
             };
         }
 
+        public bool HasStat(string name) => Values.ContainsKey(name);
+        public void ValidateStat(string name)
+        {
+            if (!HasStat(name))
+                throw new ArgumentException($"Stat '{name}' does not exist.");
+        }
+
         public int Get(string name)
         {
-            if (!Values.ContainsKey(name))
-                throw new ArgumentException($"Stat '{name}' does not exist.");
-
+            ValidateStat(name);
             var stat = Values[name];
             return (int)(stat.Base * stat.Modifier);
         }
 
         public void IncreaseBase(string name, int delta)
         {
-            if (!Values.ContainsKey(name))
-                throw new ArgumentException($"Stat '{name}' does not exist.");
-
+            ValidateStat(name);
             var stat = Values[name];
             Values[name] = (stat.Base + delta, stat.Modifier);
-            RaiseChangeEvent(name);
+            OnStatChanged?.Invoke(name, Get(name));
         }
 
         public void IncreaseModifier(string name, float factor)
         {
-            if (!Values.ContainsKey(name))
-                throw new ArgumentException($"Stat '{name}' does not exist.");
-
+            ValidateStat(name);
             var stat = Values[name];
             Values[name] = (stat.Base, stat.Modifier * factor);
-            RaiseChangeEvent(name);
-        }
-
-        private void RaiseChangeEvent(string name)
-        {
-            int newValue = Get(name);
-            OnStatChanged?.Invoke(name, newValue);
+            OnStatChanged?.Invoke(name, Get(name));
         }
 
         public override string ToString()

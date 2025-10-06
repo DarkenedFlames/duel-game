@@ -17,7 +17,7 @@ namespace MyApp
             // Event handlers
             this.OnUseItem += (player, item, target) => Printer.PrintItemUsed(player, item, target);
 
-            Inventory.OnEquipRequest += Equipment.Equip;
+            Inventory.OnEquipRequest += item => Equipment.Equip(item);
 
             Equipment.OnItemEquipped += item => Printer.PrintItemEquipped(this, item);
             Equipment.OnItemUnequipped += item => Printer.PrintItemUnequipped(this, item);

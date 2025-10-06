@@ -19,6 +19,8 @@ namespace MyApp
 
         public IReadOnlyDictionary<ItemType, Item?> Slots => _slots;
 
+        // Fires OnItemEquipped event if item was equipped
+        // Fired by Inventory.OnEquipRequest
         public void Equip(Item item)
         {
             if (!_slots.ContainsKey(item.Type))
@@ -38,6 +40,7 @@ namespace MyApp
             OnItemEquipped?.Invoke(item);
         }
 
+        // Fires OnItemUnequipped event if an item was unequipped
         public void Unequip(ItemType type)
         {
             if (!_slots.ContainsKey(type) || _slots[type] is not Item item)
@@ -51,16 +54,3 @@ namespace MyApp
         }
     }
 }
-
-
-// Inventory.OnEquipItem += Equipment.HandleEquip;
-// Inventory.OnUnequipItem += Equipment.HandleUnequip;
-
-// Equipment.OnEquipped += item => Printer.PrintItemEquipped(this, item);
-// Equipment.OnUnequipped += item => Printer.PrintItemUnequipped(this, item);
-
-// Equipment.OnUnequipped += item => Inventory.AddItem(item);
-// Equipment.OnEquipped += item => Inventory.RemoveItem(item);
-
-// Inventory.OnAddItem += item => Printer.PrintItemReceived(this, item);
-// Inventory.OnRemoveItem += item => Printer.PrintItemLost(this, item);

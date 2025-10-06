@@ -22,12 +22,15 @@ namespace MyApp
         public bool HasEffect<T>() where T : Effect => _effects.Any(e => e is T);
         public T? GetEffect<T>() where T : Effect => _effects.OfType<T>().FirstOrDefault();
 
+        // Fires onEffectAddRequest
+        // Fired by external callers
         public void RequestAddEffect(Effect effect)
         {
             OnEffectAddRequest?.Invoke(effect);
             AddEffect(effect);
         }
 
+        // Fires onEffectAdded or onEffectStacked as appropriate
         private void AddEffect(Effect newEffect)
         {
             var existing = _effects.FirstOrDefault(e => e.GetType() == newEffect.GetType());
@@ -59,6 +62,7 @@ namespace MyApp
             }
         }
 
+        // Fires onEffectRemoved if effect was present
         public void RemoveEffect(Effect effect)
         {
             if (_effects.Remove(effect))
@@ -67,6 +71,7 @@ namespace MyApp
             }
         }
 
+        // Fires onEffectTicked for each effect, and removes expired effects
         public void TickAll()
         {
             foreach (var effect in _effects.ToList())
