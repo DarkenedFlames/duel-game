@@ -16,7 +16,7 @@ namespace MyApp
 
         public override void Use(Player target)
         {
-            target.Resources["Stamina"].Change(StaminaAmount);
+            target.Resources.Change("Stamina", StaminaAmount);
             Console.WriteLine($"{target.Name} restored {StaminaAmount} stamina!");
         }
     }

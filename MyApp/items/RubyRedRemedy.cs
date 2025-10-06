@@ -16,7 +16,7 @@ namespace MyApp
 
         public override void Use(Player target)
         {
-            target.Resources["Health"].Change(HealAmount);
+            target.Resources.Change("Health", HealAmount);
             Console.WriteLine($"{target.Name} healed {HealAmount} health!");
         }
     }

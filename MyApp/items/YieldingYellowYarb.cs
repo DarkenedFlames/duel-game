@@ -16,7 +16,7 @@ namespace MyApp
 
         public override void Use(Player target)
         {
-            target.Stats["Armor"].Base += ArmorAmount;
+            target.Stats.IncreaseBase("Armor", ArmorAmount);
             Console.WriteLine($"{target.Name} gained {ArmorAmount} armor!");
         }
     }

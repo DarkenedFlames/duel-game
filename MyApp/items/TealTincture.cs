@@ -16,8 +16,8 @@ namespace MyApp
 
         public override void Use(Player target)
         {
-            target.Resources["Stamina"].RestorationMultiplier *= StaminaAndStimmingModifier;
-            target.Stats["MaximumStamina"].Multiplier *= StaminaAndStimmingModifier;
+            target.Resources.IncreaseMultiplier("Stamina", StaminaAndStimmingModifier);
+            target.Stats.IncreaseModifier("MaximumStamina", StaminaAndStimmingModifier);
             Console.WriteLine($"{target.Name}'s maximum stamina and stimming modifiers have been permanently increased by {StaminaAndStimmingModifier - 1:P}!");
         }
     }

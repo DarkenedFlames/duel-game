@@ -16,23 +16,9 @@ namespace MyApp
         {
             Name = newName;
 
-            Stats = new Dictionary<string, Stat>()
-            {
-                { "MaximumHealth", new Stat(baseValue: 100, multiplier: 1.0f) },
-                { "MaximumStamina", new Stat(baseValue: 100, multiplier: 1.0f) },
-                { "Armor", new Stat(baseValue: 50, multiplier: 1.0f) },
-                { "Shield", new Stat(baseValue: 50, multiplier: 1.0f) },
-                { "Critical", new Stat(baseValue: 0, multiplier: 1.0f) },
-                { "Dodge", new Stat(baseValue: 0, multiplier: 1.0f) },
-                { "Peer", new Stat(baseValue: 0, multiplier: 1.0f) },
-                { "Luck", new Stat(baseValue: 0, multiplier: 1.0f) }
-            };
+            Stats = new Stats();
 
-            Resources = new Dictionary<string, Resource>()
-            {
-                { "Health", new Resource(Stats["MaximumHealth"]) },
-                { "Stamina", new Resource(Stats["MaximumStamina"]) }
-            };
+            Resources = new Resources(Stats);
 
             Inventory = new List<Item>();
             ActiveEffects = new List<Effect>();
@@ -54,22 +40,22 @@ namespace MyApp
         }
 
         public string Name;
-        public Dictionary<string, Stat> Stats;
-        public Dictionary<string, Resource> Resources;
+        public Stats Stats;
+        public Resources Resources;
         public List<Item> Inventory;
         public Dictionary<ItemType, Item?> Equipment;
         public List<Effect> ActiveEffects;
 
         public bool TakeDamage(int amount, DamageType damageType, bool canCrit, bool canDodge, float critBonus = 0)
         {
-            float dodgeChance = Stats["Dodge"].Value / (Stats["Dodge"].Value + 100f);
+            float dodgeChance = Stats.Get("Dodge") / (Stats.Get("Dodge") + 100f);
             if (new Random().NextDouble() < dodgeChance && canDodge)
             {
                 Console.WriteLine($"{Name} dodged the attack!");
                 return false;
             }
 
-            float criticalChance = Stats["Critical"].Value / (Stats["Critical"].Value + 100f) + critBonus;
+            float criticalChance = Stats.Get("Critical") / (Stats.Get("Critical") + 100f) + critBonus;
             if (new Random().NextDouble() < criticalChance && canCrit)
             {
                 amount = (int)(amount * 2.0f);
@@ -80,18 +66,18 @@ namespace MyApp
             switch (damageType)
             {
                 case DamageType.Physical:
-                    multiplier = 100f / (Stats["Armor"].Value + 100f);
+                    multiplier = 100f / (Stats.Get("Armor") + 100f);
                     amount = (int)Math.Max(0, amount * multiplier);
                     break;
                 case DamageType.Magical:
-                    multiplier = 100f / (Stats["Shield"].Value + 100f);
+                    multiplier = 100f / (Stats.Get("Shield") + 100f);
                     amount = (int)Math.Max(0, amount * multiplier);
                     break;
                 case DamageType.True:
                     break;
             }
 
-            Resources["Health"].Change(-amount);
+            Resources.Change("Health", -amount);
             Console.WriteLine($"{Name} took {amount} damage!");
             return true;
         }
@@ -113,13 +99,13 @@ namespace MyApp
 
         public bool UseItem(Item item, Player target)
         {
-            if (Resources["Stamina"].Value < item.StaminaCost)
+            if (Resources.Get("Stamina") < item.StaminaCost)
             {
                 Console.WriteLine($"{Name} does not have enough stamina to use {item.Name}.");
                 return false;
             }
 
-            Resources["Stamina"].Change(-item.StaminaCost);
+            Resources.Change("Stamina", -item.StaminaCost);
             item.Use(target);
             OnUseItem?.Invoke(this, item, target);
 

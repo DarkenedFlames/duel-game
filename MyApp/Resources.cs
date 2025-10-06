@@ -42,7 +42,7 @@ namespace MyApp
             Values[name] = (newValue, resource.RestoreMult, resource.SpendMult);
         }
 
-        public void SetMultiplier(string name, float? restoreMult = null, float? spendMult = null)
+        public void IncreaseMultiplier(string name, float? restoreMult = null, float? spendMult = null)
         {
             if (!Values.ContainsKey(name))
                 throw new ArgumentException($"Resource '{name}' does not exist.");
@@ -50,9 +50,19 @@ namespace MyApp
             var resource = Values[name];
             Values[name] = (
                 resource.Value,
-                restoreMult ?? resource.RestoreMult,
-                spendMult ?? resource.SpendMult
+                resource.RestoreMult * (restoreMult ?? 1),
+                resource.SpendMult * (spendMult ?? 1)
             );
+        }
+
+        public void Refill(string name)
+        {
+            if (!Values.ContainsKey(name))
+                throw new ArgumentException($"Resource '{name}' does not exist.");
+
+            var resource = Values[name];
+            int max = _stats.Get($"Maximum{name}");
+            Values[name] = (max, resource.RestoreMult, resource.SpendMult);
         }
 
         public override string ToString()

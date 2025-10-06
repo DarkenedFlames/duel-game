@@ -16,7 +16,7 @@ namespace MyApp
 
         public override void Use(Player target)
         {
-            target.Stats["MaximumHealth"].Base += MaximumHealthAmount;
+            target.Stats.IncreaseBase("MaximumHealth", MaximumHealthAmount);
             Console.WriteLine($"{target.Name} gained {MaximumHealthAmount} maximum health!");
         }
     }

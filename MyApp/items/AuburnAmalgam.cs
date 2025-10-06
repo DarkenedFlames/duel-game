@@ -16,8 +16,8 @@ namespace MyApp
 
         public override void Use(Player target)
         {
-            target.Resources["Health"].RestorationMultiplier *= HealthAndHealingModifier;
-            target.Stats["MaximumHealth"].Multiplier *= HealthAndHealingModifier;
+            target.Resources.IncreaseMultiplier("Health", HealthAndHealingModifier);
+            target.Stats.IncreaseModifier("MaximumHealth", HealthAndHealingModifier);
             Console.WriteLine($"{target.Name}'s maximum health and healing modifiers have been permanently increased by {HealthAndHealingModifier - 1:P}!");
         }
     }
