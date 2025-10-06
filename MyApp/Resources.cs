@@ -5,8 +5,7 @@ namespace MyApp
 {
     public class Resources
     {
-        private Stats _stats;
-
+        private readonly Stats _stats;
         public Dictionary<string, (int Value, float RestoreMult, float SpendMult)> Values { get; private set; }
 
         public Resources(Stats stats)
@@ -17,13 +16,31 @@ namespace MyApp
                 { "Health", (_stats.Get("MaximumHealth"), 1.0f, 1.0f) },
                 { "Stamina", (_stats.Get("MaximumStamina"), 1.0f, 1.0f) }
             };
+
+            // Subscribe to stat changes
+            _stats.OnStatChanged += HandleStatChange;
+        }
+
+        private void HandleStatChange(string statName, int newValue)
+        {
+            // Only clamp for stats that affect resources
+            if (statName == "MaximumHealth")
+                Clamp("Health", newValue);
+            else if (statName == "MaximumStamina")
+                Clamp("Stamina", newValue);
+        }
+
+        private void Clamp(string resourceName, int newMax)
+        {
+            var resource = Values[resourceName];
+            int clamped = Math.Clamp(resource.Value, 0, newMax);
+            Values[resourceName] = (clamped, resource.RestoreMult, resource.SpendMult);
         }
 
         public int Get(string name)
         {
             if (!Values.ContainsKey(name))
                 throw new ArgumentException($"Resource '{name}' does not exist.");
-
             return Values[name].Value;
         }
 

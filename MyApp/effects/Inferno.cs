@@ -38,7 +38,7 @@ namespace MyApp
 
         public override void Tick()
         {
-            int damage = Math.Max(1, (int)(Owner.Stats["MaximumHealth"].Value * 0.01f));
+            int damage = Math.Max(1, (int)(Owner.Stats.Get("MaximumHealth") * 0.01f));
             // Multiply by stacks
             damage *= RemainingStacks;
 

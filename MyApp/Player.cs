@@ -6,44 +6,33 @@ namespace MyApp
 {
     public class Player
     {
-        public event Action<Player, Item>? OnEquip;
-        public event Action<Player, Item>? OnUnequip;
-        public event Action<Player, Item>? OnReceiveItem;
-        public event Action<Player, Item>? OnLoseItem;
         public event Action<Player, Item, Player>? OnUseItem;
 
         public Player(string newName)
         {
             Name = newName;
 
-            Stats = new Stats();
-
             Resources = new Resources(Stats);
-
-            Inventory = new List<Item>();
             ActiveEffects = new List<Effect>();
-            Equipment = new Dictionary<ItemType, Item?>()
-            {
-                { ItemType.Weapon, null },
-                { ItemType.Helmet, null },
-                { ItemType.Chestplate, null },
-                { ItemType.Leggings, null },
-                { ItemType.Accessory, null }
-            };
 
             // Event handlers
-            this.OnEquip += (player, item) => Printer.PrintItemEquipped(player, item);
-            this.OnUnequip += (player, item) => Printer.PrintItemUnequipped(player, item);
-            this.OnReceiveItem += (player, item) => Printer.PrintItemReceived(player, item);
-            this.OnLoseItem += (player, item) => Printer.PrintItemLost(player, item);
             this.OnUseItem += (player, item, target) => Printer.PrintItemUsed(player, item, target);
+
+            Inventory.OnEquipRequest += Equipment.Equip;
+
+            Equipment.OnItemEquipped += item => Printer.PrintItemEquipped(this, item);
+            Equipment.OnItemUnequipped += item => Printer.PrintItemUnequipped(this, item);
+            Equipment.OnItemUnequipped += item => Inventory.AddItem(item);
+            Equipment.OnItemEquipped += item => Inventory.RemoveItem(item);
+            Inventory.OnItemAdded += item => Printer.PrintItemReceived(this, item);
+            Inventory.OnItemRemoved += item => Printer.PrintItemLost(this, item);
         }
 
         public string Name;
-        public Stats Stats;
+        public Stats Stats = new();
         public Resources Resources;
-        public List<Item> Inventory;
-        public Dictionary<ItemType, Item?> Equipment;
+        public Inventory Inventory = new();
+        public Equipment Equipment = new();
         public List<Effect> ActiveEffects;
 
         public bool TakeDamage(int amount, DamageType damageType, bool canCrit, bool canDodge, float critBonus = 0)
@@ -84,19 +73,6 @@ namespace MyApp
 
         public void Heal(int amount) { /* Placeholder for future use */ }
 
-        public void AddItem(Item item)
-        {
-            Inventory.Add(item);
-            OnReceiveItem?.Invoke(this, item);
-        }
-
-        public void RemoveItem(Item item)
-        {
-            OnLoseItem?.Invoke(this, item);
-            Console.WriteLine($"{Name} lost item: {item.Name}");
-            Inventory.Remove(item);
-        }
-
         public bool UseItem(Item item, Player target)
         {
             if (Resources.Get("Stamina") < item.StaminaCost)
@@ -110,59 +86,8 @@ namespace MyApp
             OnUseItem?.Invoke(this, item, target);
 
             if (item.Type == ItemType.Consumable)
-                Inventory.Remove(item);
+                Inventory.RemoveItem(item);
 
-            return true;
-        }
-
-        public bool Equip(Item item)
-        {
-            if (!Inventory.Contains(item))
-            {
-                Console.WriteLine($"{Name} does not have item: {item.Name}");
-                return false;
-            }
-
-            if (!Equipment.ContainsKey(item.Type))
-            {
-                Console.WriteLine($"{item.Name} cannot be equipped (type {item.Type} is not equippable).");
-                return false;
-            }
-
-            if (Equipment[item.Type] != null)
-            {
-                var previous = Equipment[item.Type]!;
-                Unequip(item.Type);
-                Console.WriteLine($"{Name} unequipped {previous.Name}.");
-            }
-
-            // Equip the new item
-            Equipment[item.Type] = item;
-            Inventory.Remove(item);
-            OnEquip?.Invoke(this, item);
-            Console.WriteLine($"{Name} equipped {item.Name} ({item.Type}).");
-            return true;
-        }
-
-        public bool Unequip(ItemType type)
-        {
-            if (!Equipment.ContainsKey(type))
-            {
-                Console.WriteLine($"No equipment slot for {type}.");
-                return false;
-            }
-
-            var item = Equipment[type];
-            if (item == null)
-            {
-                Console.WriteLine($"No {type} equipped.");
-                return false;
-            }
-
-            Equipment[type] = null;
-            AddItem(item);
-            OnUnequip?.Invoke(this, item);
-            Console.WriteLine($"{Name} unequipped {item.Name}.");
             return true;
         }
 

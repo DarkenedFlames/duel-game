@@ -98,7 +98,7 @@ namespace MyApp
                 Console.WriteLine("\nPeer activated! Enemy inventories revealed:");
                 foreach (var enemy in players.Where(p => p != player))
                 {
-                    Console.WriteLine($"- {enemy.Name}: {string.Join(", ", enemy.Inventory.Select(i => i.Name))}");
+                    Console.WriteLine($"- {enemy.Name}: {string.Join(", ", enemy.Inventory.Items.Select(i => i.Name))}");
                 }
                 Console.WriteLine("Press any key to continue...");
                 Console.ReadKey(true);

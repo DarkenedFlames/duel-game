@@ -65,22 +65,22 @@ namespace MyApp
         }
         private static void StatMenu(Player player)
         {
-            Console.WriteLine($"Health: {player.Resources["Health"].Value} / {player.Stats["MaximumHealth"].Value}");
-            Console.WriteLine($"Stamina: {player.Resources["Stamina"].Value} / {player.Stats["MaximumStamina"].Value}");
-            Console.WriteLine($"Armor: {player.Stats["Armor"].Value}");
-            Console.WriteLine($"Shield: {player.Stats["Shield"].Value}");
-            Console.WriteLine($"Critical: {player.Stats["Critical"].Value}");
-            Console.WriteLine($"Dodge: {player.Stats["Dodge"].Value}");
-            Console.WriteLine($"Peer: {player.Stats["Peer"].Value}");
-            Console.WriteLine($"Luck: {player.Stats["Luck"].Value}");
-            Console.WriteLine($"Healing Modifier: {player.Resources["Health"].RestorationMultiplier:P}");
-            Console.WriteLine($"Stimming Modifier: {player.Resources["Stamina"].RestorationMultiplier:P}");
+            Console.WriteLine($"Health: {player.Resources.Get("Health")} / {player.Stats.Get("MaximumHealth")}");
+            Console.WriteLine($"Stamina: {player.Resources.Get("Stamina")} / {player.Stats.Get("MaximumStamina")}");
+            Console.WriteLine($"Armor: {player.Stats.Get("Armor")}");
+            Console.WriteLine($"Shield: {player.Stats.Get("Shield")}");
+            Console.WriteLine($"Critical: {player.Stats.Get("Critical")}");
+            Console.WriteLine($"Dodge: {player.Stats.Get("Dodge")}");
+            Console.WriteLine($"Peer: {player.Stats.Get("Peer")}");
+            Console.WriteLine($"Luck: {player.Stats.Get("Luck")}");
+            Console.WriteLine($"Healing Modifier: {player.Resources.Values["Health"].RestoreMult:P}");
+            Console.WriteLine($"Stimming Modifier: {player.Resources.Values["Stamina"].RestoreMult:P}");
             AnyKey();
         }
         private static void InventoryMenu(Player player)
         {
             int idx = 1;
-            foreach (var item in player.Inventory)
+            foreach (var item in player.Inventory.Items)
             {
                 Console.WriteLine($"{idx}. {item.Name}");
                 idx++;
@@ -95,9 +95,9 @@ namespace MyApp
             string? choice = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(choice)) return;
 
-            if (int.TryParse(choice, out int index) && index > 0 && index < player.Inventory.Count + 1)
+            if (int.TryParse(choice, out int index) && index > 0 && index < player.Inventory.Items.Count + 1)
             {
-                PrintItemMenu(player, player.Inventory[index - 1]);
+                PrintItemMenu(player, player.Inventory.Items[index - 1]);
             }
             else
             {
@@ -119,7 +119,7 @@ namespace MyApp
             // Print slots with numbers
             foreach (var (number, type, label) in slotChoices)
             {
-                if (player.Equipment.TryGetValue(type, out var item) && item != null)
+                if (player.Equipment.Slots.TryGetValue(type, out var item) && item != null)
                     Console.WriteLine($"{number}. {label}: {item.Name}");
                 else
                     Console.WriteLine($"{number}. {label}: (empty)");
@@ -143,7 +143,7 @@ namespace MyApp
             // Get selected item type
             var selectedType = slotChoices[choice - 1].type;
 
-            if (player.Equipment.TryGetValue(selectedType, out var selectedItem) && selectedItem != null)
+            if (player.Equipment.Slots.TryGetValue(selectedType, out var selectedItem) && selectedItem != null)
             {
                 PrintItemMenu(player, selectedItem);
             }
@@ -168,7 +168,7 @@ namespace MyApp
                 else if (selectedItem.Type == ItemType.Consumable)
                     actions.Add("Use Item");
             }
-            else if (player.Equipment.ContainsValue(selectedItem))
+            else if (player.Equipment.Slots.Any(kvp => kvp.Value == selectedItem))
             {
                 actions.Add("Unequip Item");
                 if (selectedItem.Type == ItemType.Weapon)
@@ -197,12 +197,12 @@ namespace MyApp
             switch (selectedAction)
             {
                 case "remove item":
-                    player.RemoveItem(selectedItem);
+                    player.Inventory.RemoveItem(selectedItem);
                     break;
 
                 case "equip item":
                     if (actions.Contains("Equip Item"))
-                        player.Equip(selectedItem);
+                        player.Inventory.TryEquip(selectedItem);
                     else
                         Console.WriteLine("Cannot equip this item.");
                     break;
@@ -210,11 +210,11 @@ namespace MyApp
                 case "unequip item":
                     if (actions.Contains("Unequip Item"))
                     {
-                        foreach (var kvp in player.Equipment)
+                        foreach (var kvp in player.Equipment.Slots)
                         {
                             if (kvp.Value == selectedItem)
                             {
-                                player.Unequip(kvp.Key);
+                                player.Equipment.Unequip(kvp.Key);
                                 break;
                             }
                         }
