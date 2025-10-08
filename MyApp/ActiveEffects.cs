@@ -10,9 +10,6 @@ namespace MyApp
 
         public IReadOnlyList<Effect> Effects => _effects.AsReadOnly();
 
-        // Intent
-        public event Action<Effect>? OnEffectAddRequest;
-
         // Resolution
         public event Action<Effect>? OnEffectAdded;
         public event Action<Effect>? OnEffectStacked;
@@ -22,16 +19,8 @@ namespace MyApp
         public bool HasEffect<T>() where T : Effect => _effects.Any(e => e is T);
         public T? GetEffect<T>() where T : Effect => _effects.OfType<T>().FirstOrDefault();
 
-        // Fires onEffectAddRequest
-        // Fired by external callers
-        public void RequestAddEffect(Effect effect)
-        {
-            OnEffectAddRequest?.Invoke(effect);
-            AddEffect(effect);
-        }
-
         // Fires onEffectAdded or onEffectStacked as appropriate
-        private void AddEffect(Effect newEffect)
+        public void AddEffect(Effect newEffect)
         {
             var existing = _effects.FirstOrDefault(e => e.GetType() == newEffect.GetType());
             if (existing != null)

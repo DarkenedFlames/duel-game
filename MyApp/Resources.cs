@@ -5,12 +5,15 @@ namespace MyApp
 {
     public class Resources
     {
+        public event Action<string, int>? OnResourceChanged;
+        public event Action<string, float>? OnResourceModifierChanged;
+        public event Action<string>? OnResourceDepleted;
         private readonly Stats _stats;
         public Dictionary<string, (int Value, float RestoreMult, float SpendMult)> Values { get; private set; }
 
-        public Resources(Stats stats)
+        public Resources(Player owner)
         {
-            _stats = stats;
+            _stats = owner.Stats;
             Values = new Dictionary<string, (int, float, float)>
             {
                 { "Health", (_stats.Get("MaximumHealth"), 1.0f, 1.0f) },

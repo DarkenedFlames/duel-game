@@ -304,6 +304,22 @@ namespace MyApp
         {
             Console.WriteLine($"\n{player.Name}'s effect {effect.Name} ticks. (Duration left: {effect.RemainingDuration} turns)");
         }
+        public static void PrintStatChanged(Player player, string statName, int newValue)
+        {
+            Console.WriteLine($"\n{player.Name}'s {statName} changed to {newValue}.");
+        }
+        public static void PrintStatModifierChanged(Player player, string statName, float factor)
+        {
+            Console.WriteLine($"\n{player.Name}'s {statName} modifier changed to {factor:P}.");
+        }
+        public static void PrintResourceChanged(Player player, string resourceName, int newValue)
+        {
+            Console.WriteLine($"\n{player.Name}'s {resourceName} is now {newValue}.");
+        }
+        public static void PrintResourceDepleted(Player player, string resourceName)
+        {
+            Console.WriteLine($"\n{player.Name}'s {resourceName} has been depleted!");
+        }
 
     }
 }

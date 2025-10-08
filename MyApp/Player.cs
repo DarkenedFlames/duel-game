@@ -6,25 +6,27 @@ namespace MyApp
 {
     public class Player
     {
-        public event Action<Player, Item, Player>? OnUseItem;
-
         public Player(string newName)
         {
             Name = newName;
 
-            Resources = new Resources(Stats);
+            Resources = new Resources(this);
 
             // Event handlers
-            this.OnUseItem += (player, item, target) => Printer.PrintItemUsed(player, item, target);
 
-            Inventory.OnEquipRequest += item => Equipment.Equip(item);
 
             Equipment.OnItemEquipped += item => Printer.PrintItemEquipped(this, item);
             Equipment.OnItemUnequipped += item => Printer.PrintItemUnequipped(this, item);
             Equipment.OnItemUnequipped += item => Inventory.AddItem(item);
             Equipment.OnItemEquipped += item => Inventory.RemoveItem(item);
+            Inventory.OnEquipRequest += item => Equipment.Equip(item);
             Inventory.OnItemAdded += item => Printer.PrintItemReceived(this, item);
             Inventory.OnItemRemoved += item => Printer.PrintItemLost(this, item);
+
+            Stats.OnStatChanged += (statName, newValue) => Printer.PrintStatChanged(this, statName, newValue);
+            Stats.OnStatModifierChanged += (statName, factor) => Printer.PrintStatModifierChanged(this, statName, factor);
+            Resources.OnResourceChanged += (name, newValue) => Printer.PrintResourceChanged(this, name, newValue);
+            Resources.OnResourceDepleted += name => Printer.PrintResourceDepleted(this, name);
         }
 
         public string Name;
@@ -69,22 +71,6 @@ namespace MyApp
             Console.WriteLine($"{Name} took {amount} damage!");
             return true;
         }
-        public bool UseItem(Item item, Player target)
-        {
-            if (Resources.Get("Stamina") < item.StaminaCost)
-            {
-                Console.WriteLine($"{Name} does not have enough stamina to use {item.Name}.");
-                return false;
-            }
 
-            Resources.Change("Stamina", -item.StaminaCost);
-            item.Use(target);
-            OnUseItem?.Invoke(this, item, target);
-
-            if (item.Type == ItemType.Consumable)
-                Inventory.RemoveItem(item);
-
-            return true;
-        }
     }
 }
