@@ -6,6 +6,8 @@ namespace MyApp
     public class Stats
     {
         public event Action<string, int>? OnStatChanged;
+        public event Action<string, float>? OnStatModifierChanged;
+        
 
         public Dictionary<string, (int Base, float Modifier)> Values { get; private set; }
 
