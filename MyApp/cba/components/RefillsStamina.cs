@@ -1,0 +1,30 @@
+using System;
+
+namespace CBA
+{
+    public class RefillsStamina(Entity owner) : Component(owner)
+    {
+        protected override void Subscribe()
+        {
+            var resources = Owner.GetComponent<ResourcesComponent>();
+            if (resources != null)
+            {
+                var turns = Owner.GetComponent<TakesTurns>();
+                if (turns != null)
+                {
+                    turns.OnTurnStart += owner => RefillStamina(owner);
+                }
+            }
+        }
+
+        private void RefillStamina(Entity owner)
+        {
+            var resources = Owner.GetComponent<ResourcesComponent>();
+            resources?.Refill("Stamina");
+        }
+        
+
+
+    }
+
+}

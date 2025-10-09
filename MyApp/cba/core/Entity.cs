@@ -4,20 +4,16 @@ namespace CBA
 {
     public abstract class Entity
     {
-        public World World { get; }
         private readonly List<Component> _components = new();
 
-        public Entity(World world)
+        public Entity()
         {
-            World = world;
-            world.AddEntity(this);
+            World.Instance.AddEntity(this);
         }
 
-        public T AddComponent<T>(T component) where T : Component
+        public void AddComponent<T>(T component) where T : Component
         {
             _components.Add(component);
-            component.Initialize(this);
-            return component;
         }
 
         public T? GetComponent<T>() where T : Component =>

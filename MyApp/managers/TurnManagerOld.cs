@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace MyApp
 {
-    public class TurnManager
+    public class TurnManagerOld
     {
         private int turnIndex = 0;
         public static List<Player> players { get; private set; } = new();

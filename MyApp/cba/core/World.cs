@@ -4,10 +4,26 @@ namespace CBA
 {
     public class World
     {
+        // Static reference to the "singleton" world
+        public static World Instance { get; private set; } = null!;
+
+        public TurnManager TurnManager { get; private set; }
         private readonly List<Entity> _entities = new();
 
         public event Action<Entity>? OnEntityAdded;
         public event Action<Entity>? OnEntityRemoved;
+
+        public World()
+        {
+            if (Instance != null)
+                throw new InvalidOperationException("Only one World instance allowed!");
+            
+            Instance = this;  // set the static reference
+            TurnManager = new TurnManager();
+
+            OnEntityAdded += entity => Printer.PrintEntityAdded(entity);
+            OnEntityRemoved += entity => Printer.PrintEntityRemoved(entity);
+        }
 
         public void AddEntity(Entity entity)
         {
