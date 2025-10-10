@@ -3,21 +3,16 @@ using System.Linq;
 
 namespace CBA
 {
-    public class Wearable : Component
+    public class Wearable(Entity owner, EquipType equipType) : Component(owner)
     {
         public bool IsEquipped { get; set; } = false;
         public ItemType Type { get; init; }
-        public EquipType EquipType { get; init; }
+        public EquipType EquipType { get; init; } = equipType;
 
         public event Action<Entity>? OnEquipSuccess;
         public event Action<Entity>? OnEquipFail;
         public event Action<Entity>? OnUnequipSuccess;
         public event Action<Entity>? OnUnequipFail;
-
-        public Wearable(Entity owner, EquipType equipType) : base(owner)
-        {
-            EquipType = equipType;
-        }
 
         protected override void Subscribe()
         {

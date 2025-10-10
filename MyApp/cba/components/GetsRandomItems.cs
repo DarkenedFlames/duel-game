@@ -2,10 +2,8 @@ using System;
 
 namespace CBA
 {
-    public class GetsRandomItems : Component
+    public class GetsRandomItems(Entity owner) : Component(owner)
     {
-        public GetsRandomItems(Entity owner) : base(owner) { }
-
         protected override void Subscribe()
         {
             // Subscribe to the player's turn start event

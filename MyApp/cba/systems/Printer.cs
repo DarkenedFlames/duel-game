@@ -212,7 +212,6 @@ namespace CBA
             }
         }
 
-
         public static void PrintItemMenu(Entity player, Entity selectedItem)
         {
             var playerData = player.GetComponent<PlayerData>();
@@ -418,10 +417,28 @@ namespace CBA
         public static void PrintItemUsed(Entity item, Entity target)
         {
             var itemData = item.GetComponent<ItemData>();
-            var playerName = itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name;
             var itemName = itemData?.Name;
+            var player = itemData?.PlayerEntity;
+            bool usedOnSelf = player == target;
+            var playerName = player?.GetComponent<PlayerData>()?.Name;
             var targetName = target.GetComponent<PlayerData>()?.Name;
-            Console.WriteLine($"\n{playerName} used {itemName} on {targetName}!");
+
+            if (!usedOnSelf)
+            {
+                Console.WriteLine($"\n{playerName} used {itemName} on themselves!");
+            }
+            else
+            {
+                Console.WriteLine($"\n{playerName} used {itemName} on {targetName}!");
+            }
+            
+        }
+        public static void PrintItemConsumed(Entity item)
+        {
+            var itemData = item.GetComponent<ItemData>();
+            var itemName = itemData?.Name;
+            var playerName = itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name;
+            Console.WriteLine($"\n{playerName} consumed their {itemName}!");
         }
 
         public static void PrintInsufficientStamina(Entity item)
@@ -448,13 +465,36 @@ namespace CBA
             Console.WriteLine($"\n{playerName}'s {resourceName} has been depleted!");
         }
 
-
-
-        /*
-        public static void PrintEffectStacked(Entity player, Effect effect)
+        public static void PrintDamageDealt(Entity itemOrEffect, Entity target, int finalDamage)
         {
-            Console.WriteLine($"\n{player.Name}'s effect {effect.Name} stacked to {effect.RemainingStacks} stacks!");
+            var itemData = itemOrEffect.GetComponent<ItemData>();
+            var effectData = itemOrEffect.GetComponent<EffectData>();
+
+            bool isItem = itemData != null;
+            var user = isItem ? itemData?.PlayerEntity : effectData?.PlayerEntity;
+            bool selfDamage = user == target;
+
+            string? userName = user?.GetComponent<PlayerData>()?.Name;
+            string? targetName = target.GetComponent<PlayerData>()?.Name;
+            string? sourceName = isItem ? itemData?.Name : effectData?.Name;
+
+            if (isItem)
+            {
+                if (selfDamage)
+                    Console.WriteLine($"\n{userName} damaged themselves with {sourceName} for {finalDamage} damage!");
+                else
+                    Console.WriteLine($"\n{userName} dealt {finalDamage} damage to {targetName} with {sourceName}!");
+            }
+            else
+            {
+                Console.WriteLine($"\n{userName} took {finalDamage} damage from {sourceName}!");
+            }
         }
-        */
+            /*
+            public static void PrintEffectStacked(Entity player, Effect effect)
+            {
+                Console.WriteLine($"\n{player.Name}'s effect {effect.Name} stacked to {effect.RemainingStacks} stacks!");
+            }
+            */
     }
 }

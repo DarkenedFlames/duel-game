@@ -2,19 +2,14 @@ using System;
 
 namespace CBA
 {
-    public class TakesTurns : Component
+    public class TakesTurns(Entity owner) : Component(owner)
     {
         private static int _nextTurnOrder = 0;
-        public int TurnOrder { get; }
+        public int TurnOrder { get; } = _nextTurnOrder++;
         public bool IsActive { get; private set; } = true;
 
         public event Action<Entity>? OnTurnStart;
         public event Action<Entity>? OnTurnEnd;
-
-        public TakesTurns(Entity owner) : base(owner)
-        {
-            TurnOrder = _nextTurnOrder++;
-        }
 
         protected override void Subscribe()
         {

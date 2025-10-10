@@ -22,7 +22,7 @@ namespace CBA
             while (turnEntities.Count > 1)
             {
                 // Remove deleted or dead entities
-                turnEntities = World.Instance.GetEntitiesWith<TakesTurns>().ToList();
+                turnEntities = [.. World.Instance.GetEntitiesWith<TakesTurns>()];
                 if (turnEntities.Count == 0) break;
 
                 // Sort by their unique TurnOrder (monotonic ID)

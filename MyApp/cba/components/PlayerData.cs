@@ -2,14 +2,9 @@ using System;
 
 namespace CBA
 {
-    public class PlayerData : Component
+    public class PlayerData(Entity owner, string name) : Component(owner)
     {
-        public string Name { get; set; }
-
-        public PlayerData(Entity owner, string name) : base(owner)
-        {
-            Name = name;
-        }
+        public string Name { get; set; } = name;
 
         protected override void Subscribe()
         {

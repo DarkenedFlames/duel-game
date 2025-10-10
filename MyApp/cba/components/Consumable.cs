@@ -2,14 +2,14 @@ using System;
 
 namespace CBA
 {
-    public class Consumable : Component
+    public class Consumable(Entity owner) : Component(owner)
     {
         public event Action<Entity>? OnConsumed;
 
-        public Consumable(Entity owner) : base(owner) { }
-
         protected override void Subscribe()
         {
+            OnConsumed += Printer.PrintItemConsumed;
+
             var usable = Owner.GetComponent<Usable>();
             if (usable != null)
             {

@@ -2,17 +2,32 @@ using System;
 
 namespace CBA
 {
-    public class EffectDuration : Component
+    public class EffectDuration(Entity owner, int maxDuration) : Component(owner)
     {
-        public int Remaining { get; set; }
-        public int Maximum { get; set; }
+        public int Remaining { get; set; } = maxDuration;
+        public int Maximum { get; set; } = maxDuration;
 
-        public EffectDuration(Entity owner, int maxDuration) : base(owner)
+        protected override void Subscribe()
         {
-            Maximum = maxDuration;
-            Remaining = maxDuration;
+            var target = Owner.GetComponent<EffectData>()?.PlayerEntity;
+            var takesTurns = target?.GetComponent<TakesTurns>();
+            if (takesTurns != null)
+            {
+                takesTurns.OnTurnStart += (player) => TickDuration();
+            }
         }
 
-        protected override void Subscribe() { }
+        public void TickDuration()
+        {
+            if (Remaining <= 0)
+            {
+                World.Instance.RemoveEntity(Owner);
+            }
+            else
+            {
+                Remaining--;
+            }
+        }
+
     }
 }

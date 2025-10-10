@@ -2,16 +2,12 @@ using System;
 
 namespace CBA
 {
-    public class Usable : Component
+    public class Usable(Entity owner, int staminaCost) : Component(owner)
     {
-        public int StaminaCost { get; init; } = 0;
+        public int StaminaCost { get; init; } = staminaCost;
 
         public event Action<Entity, Entity>? OnUseSuccess;
         public event Action<Entity, Entity>? OnUseFailed;
-        public Usable(Entity owner, int staminaCost) : base(owner)
-        {
-            StaminaCost = staminaCost;
-        }
 
         protected override void Subscribe()
         {

@@ -9,7 +9,9 @@ namespace CBA
         None = 0,
         OnUse = 1 << 0,
         OnEquip = 1 << 1,
-        OnUnequip = 1 << 2
+        OnUnequip = 1 << 2,
+        OnApply = 1 << 3,   // Effect applied (entity added)
+        OnRemove = 1 << 4   // Effect removed (entity removed)
     }
 
     public class ModifiesStats : Component
@@ -30,6 +32,7 @@ namespace CBA
 
         protected override void Subscribe()
         {
+            // Item logic
             if (Triggers.HasFlag(ModifiesStatsTrigger.OnUse))
             {
                 var usable = Owner.GetComponent<Usable>();
@@ -43,11 +46,42 @@ namespace CBA
                 if (wearable != null)
                 {
                     if (Triggers.HasFlag(ModifiesStatsTrigger.OnEquip))
-                        wearable.OnEquipSuccess += user => Apply(user);
+                        wearable.OnEquipSuccess += item =>
+                        {
+                            var user = item.GetComponent<ItemData>()?.PlayerEntity;
+                            if (user != null) Apply(user);
+                        };
 
                     if (Triggers.HasFlag(ModifiesStatsTrigger.OnUnequip))
-                        wearable.OnUnequipSuccess += user => Remove(user);
+                        wearable.OnUnequipSuccess += item =>
+                        {
+                            var user = item.GetComponent<ItemData>()?.PlayerEntity;
+                            if (user != null) Remove(user);
+                        };
+
+                                
                 }
+            }
+
+            // Effect logic
+            if (Triggers.HasFlag(ModifiesStatsTrigger.OnApply))
+            {
+                World.Instance.OnEntityAdded += entity =>
+                {
+                    var effectData = entity.GetComponent<EffectData>();
+                    if (effectData != null && entity == Owner)
+                        Apply(effectData.PlayerEntity);
+                };
+            }
+
+            if (Triggers.HasFlag(ModifiesStatsTrigger.OnRemove))
+            {
+                World.Instance.OnEntityRemoved += entity =>
+                {
+                    var effectData = entity.GetComponent<EffectData>();
+                    if (effectData != null && entity == Owner)
+                        Remove(effectData.PlayerEntity);
+                };
             }
         }
 
@@ -97,7 +131,7 @@ namespace CBA
                     resources.Change(kvp.Key, -kvp.Value);
 
                 foreach (var kvp in ResourceModifiers)
-                    resources.ChangeMultiplier(kvp.Key, 1f / kvp.Value); // inverse factor to undo
+                    resources.ChangeMultiplier(kvp.Key, 1f / kvp.Value); // undo factor
             }
 
             OnStatsModified?.Invoke(Owner, target);

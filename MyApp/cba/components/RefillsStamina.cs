@@ -12,7 +12,7 @@ namespace CBA
                 var turns = Owner.GetComponent<TakesTurns>();
                 if (turns != null)
                 {
-                    turns.OnTurnStart += owner => RefillStamina(owner);
+                    turns.OnTurnStart += RefillStamina;
                 }
             }
         }

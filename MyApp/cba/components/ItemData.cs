@@ -2,26 +2,14 @@ using System;
 
 namespace CBA
 {
-    public class ItemData : Component
+    public class ItemData(Entity owner, string name, ItemRarity rarity, ItemType type, Entity playerEntity) : Component(owner)
     {
-        public string Name { get; init; }
-        public ItemRarity Rarity { get; init; }
-        public ItemType Type { get; init; }
-        public Entity PlayerEntity { get; init; }  // owning player
+        public string Name { get; init; } = name;
+        public ItemRarity Rarity { get; init; } = rarity;
+        public ItemType Type { get; init; } = type;
+        public Entity PlayerEntity { get; init; } = playerEntity;
 
-        public ItemData(Entity owner, string name, ItemRarity rarity, ItemType type, Entity playerEntity) 
-            : base(owner)
-        {
-            Name = name;
-            Rarity = rarity;
-            Type = type;
-            PlayerEntity = playerEntity;
-        }
-
-        protected override void Subscribe()
-        {
-            // World entity added event printing
-        }
+        protected override void Subscribe() { }
     }
 
 }

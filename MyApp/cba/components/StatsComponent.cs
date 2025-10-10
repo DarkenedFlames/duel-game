@@ -29,15 +29,15 @@ namespace CBA
         public int Get(string name)
         {
             ValidateStat(name);
-            var s = _values[name];
-            return (int)(s.Base * s.Modifier);
+            var (Base, Modifier) = _values[name];
+            return (int)(Base * Modifier);
         }
 
         public void IncreaseBase(string name, int delta)
         {
             ValidateStat(name);
-            var s = _values[name];
-            _values[name] = (s.Base + delta, s.Modifier);
+            var (Base, Modifier) = _values[name];
+            _values[name] = (Base + delta, Modifier);
             OnStatChanged?.Invoke(name);
         }
 
@@ -46,8 +46,8 @@ namespace CBA
         public void IncreaseModifier(string name, float factor)
         {
             ValidateStat(name);
-            var s = _values[name];
-            _values[name] = (s.Base, s.Modifier * factor);
+            var (Base, Modifier) = _values[name];
+            _values[name] = (Base, Modifier * factor);
             OnStatChanged?.Invoke(name);
         }
 

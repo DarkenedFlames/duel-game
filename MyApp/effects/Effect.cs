@@ -2,10 +2,10 @@ using System;
 
 namespace MyApp
 {
-    public abstract class Effect
+    public abstract class Effect(Player owner)
     {
         public string Name { get; init; } = "";
-        public Player Owner { get; }
+        public Player Owner { get; } = owner;
         public StackingType StackingType { get; init; } = StackingType.AddStack;
         public int RemainingDuration { get; set; }
         public int MaximumDuration { get; set; }
@@ -13,11 +13,6 @@ namespace MyApp
         public int RemainingStacks { get; set; }
         public bool IsNegative { get; set; }
         public bool IsHidden { get; set; }
-
-        protected Effect(Player owner)
-        {
-            Owner = owner;
-        }
 
         // Effects subscribe to container events dynamically
         public virtual void Subscribe(ActiveEffects container)

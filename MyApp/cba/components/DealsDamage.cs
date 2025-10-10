@@ -2,28 +2,22 @@ using System;
 
 namespace CBA
 {
-    public class DealsDamage : Component
+    public class DealsDamage(Entity owner, int damage,
+                            DamageType damageType = DamageType.Physical,
+                            bool canCrit = false,
+                            bool canDodge = false) : Component(owner)
     {
-        public int Damage { get; }
-        public DamageType DamageType { get; init; } = DamageType.Physical;
-        public bool CanCrit { get; init; } = false;
-        public bool CanDodge { get; init; } = false;
+        public int Damage { get; } = damage;
+        public DamageType DamageType { get; init; } = damageType;
+        public bool CanCrit { get; init; } = canCrit;
+        public bool CanDodge { get; init; } = canDodge;
 
         public event Action<Entity, Entity, int>? OnDamageDealt;
 
-        public DealsDamage(Entity owner, int damage,
-                           DamageType damageType = DamageType.Physical,
-                           bool canCrit = false,
-                           bool canDodge = false) : base(owner)
-        {
-            Damage = damage;
-            DamageType = damageType;
-            CanCrit = canCrit;
-            CanDodge = canDodge;
-        }
-
         protected override void Subscribe()
         {
+            OnDamageDealt += (user, target, finalDamage) => Printer.PrintDamageDealt(user, target, finalDamage);
+
             var usable = Owner.GetComponent<Usable>();
             if (usable != null)
             {
@@ -47,7 +41,7 @@ namespace CBA
 
                         // Crit logic
                         float critChance = user.GetComponent<StatsComponent>()?.Get("Critical") ?? 0;
-                        critChance = critChance / (critChance + 100f);
+                        critChance /= critChance + 100f;
                         if (CanCrit && Random.Shared.NextDouble() < critChance)
                         {
                             finalDamage = (int)(finalDamage * 2.0f);
@@ -69,7 +63,7 @@ namespace CBA
 
                         var targetResources = target.GetComponent<ResourcesComponent>();
                         targetResources?.Change("Health", finalDamage);
-                        OnDamageDealt?.Invoke(user, target, finalDamage);
+                        OnDamageDealt?.Invoke(Owner, target, finalDamage);
                     }
                 };
             }
