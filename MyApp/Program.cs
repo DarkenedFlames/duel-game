@@ -1,6 +1,4 @@
 ﻿using CBA;
-using System;
-using System.Collections.Generic;
 
 public class Program
 {
@@ -13,9 +11,8 @@ public class Program
         {
             var player = new PlayerEntity();
             player.AddComponent(new PlayerData(player, name));
-            var stats = new StatsComponent(player); // see if stats need to be passed into resources
-            player.AddComponent(stats);
-            player.AddComponent(new ResourcesComponent(player, stats));
+            player.AddComponent(new StatsComponent(player));
+            player.AddComponent(new ResourcesComponent(player));
             player.AddComponent(new TakesTurns(player)); 
             player.AddComponent(new GetsRandomItems(player));
             player.AddComponent(new PeersComponent(player));

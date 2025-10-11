@@ -1,5 +1,3 @@
-using System;
-
 namespace CBA
 {
     public class GetsRandomItems(Entity owner) : Component(owner)

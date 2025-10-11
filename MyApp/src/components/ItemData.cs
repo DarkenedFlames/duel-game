@@ -1,5 +1,3 @@
-using System;
-
 namespace CBA
 {
     public class ItemData(Entity owner, string name, ItemRarity rarity, ItemType type, Entity playerEntity) : Component(owner)

@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 namespace CBA
 {
     // Concrete entity class for items
@@ -258,9 +254,7 @@ namespace CBA
                     new Usable(itemEntity, 25);
                     new DealsDamage(itemEntity, damage: 10, DamageType.Physical, canCrit: true, canDodge: true);
                     var modifiesEffects = new ModifiesEffects(itemEntity);
-                    modifiesEffects.TriggeredEffects[EffectTrigger.OnUse] = [
-                        new EffectInfo(){ EffectName = "Inferno", TargetType = EffectTargetType.Target}
-                    ];
+                    modifiesEffects.TriggeredEffects[EffectTrigger.OnUse] = ["Inferno"];
                 }
             },
             // Add more templates as needed

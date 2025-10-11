@@ -1,5 +1,3 @@
-using System;
-
 namespace CBA
 {
     public class Usable(Entity owner, int staminaCost) : Component(owner)

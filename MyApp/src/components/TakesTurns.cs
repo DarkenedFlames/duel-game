@@ -1,5 +1,3 @@
-using System;
-
 namespace CBA
 {
     public class TakesTurns(Entity owner) : Component(owner)

@@ -1,5 +1,3 @@
-using System;
-
 namespace CBA
 {
     public class Consumable(Entity owner) : Component(owner)
@@ -8,16 +6,12 @@ namespace CBA
 
         public override void Subscribe()
         {
-            var usable = Owner.GetComponent<Usable>();
-            if (usable != null)
+            Owner.GetComponent<Usable>()?.OnUseSuccess += (user, target) =>
             {
-                usable.OnUseSuccess += (user, target) =>
-                {
-                    Printer.PrintItemConsumed(Owner);
-                    World.Instance.RemoveEntity(Owner);  // remove item from world
-                    OnConsumed?.Invoke(Owner);
-                };
-            }
+                Printer.PrintItemConsumed(Owner);
+                World.Instance.RemoveEntity(Owner);
+                OnConsumed?.Invoke(Owner);
+            };
         }
     }
 }

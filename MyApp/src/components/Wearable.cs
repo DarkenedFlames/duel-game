@@ -1,6 +1,3 @@
-using System;
-using System.Linq;
-
 namespace CBA
 {
     public class Wearable(Entity owner, EquipType equipType) : Component(owner)

@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace CBA
 {
     public class StatsComponent(Entity owner) : Component(owner)

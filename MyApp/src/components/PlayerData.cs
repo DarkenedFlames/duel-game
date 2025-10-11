@@ -1,5 +1,3 @@
-using System;
-
 namespace CBA
 {
     public class PlayerData(Entity owner, string name) : Component(owner)

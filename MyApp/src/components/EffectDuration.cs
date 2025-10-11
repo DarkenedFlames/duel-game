@@ -1,5 +1,3 @@
-using System;
-
 namespace CBA
 {
     public class EffectDuration(Entity owner, int maxDuration) : Component(owner)

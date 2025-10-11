@@ -1,5 +1,3 @@
-using System;
-
 namespace CBA
 {
     public enum EquipType

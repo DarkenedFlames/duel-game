@@ -1,7 +1,3 @@
-
-
-using System;
-
 namespace CBA
 {
     public enum DamageType

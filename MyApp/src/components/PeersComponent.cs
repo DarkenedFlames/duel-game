@@ -1,18 +1,10 @@
-using System;
-using System.Linq;
-using System.Collections.Generic;
-
 namespace CBA
 {
     public class PeersComponent(Entity owner) : Component(owner)
     {
         public override void Subscribe()
         {
-            var takesTurns = Owner.GetComponent<TakesTurns>();
-            if (takesTurns != null)
-            {
-                takesTurns.OnTurnStart += RevealInventory;
-            }
+            Owner.GetComponent<TakesTurns>()?.OnTurnStart += RevealInventory;
         }
 
         private void RevealInventory(Entity playerEntity)

@@ -1,5 +1,3 @@
-using System;
-
 namespace CBA
 {
     public enum StackingType { AddStack, RefreshOnly, Ignore }
