@@ -40,7 +40,7 @@ namespace CBA
             var usable = Owner.GetComponent<Usable>();
             var wearable = Owner.GetComponent<Wearable>();
 
-            // --- On Use ---
+            // --- On Use call ApplyByTrigger on the target (which might be the user) ---
             if (usable != null)
             {
                 usable.OnUseSuccess += (item, target) =>
@@ -49,18 +49,21 @@ namespace CBA
                 };
             }
 
-            // --- On Equip ---
+            // --- On Equip call ApplyByTrigger on the user ---
             if (wearable != null)
             {
                 wearable.OnEquipSuccess += item =>
                 {
-                    ApplyByTrigger(EffectTrigger.OnEquip, item, item);
+                    var wearer = item.GetComponent<ItemData>()?.PlayerEntity;
+                    if (wearer != null)
+                        ApplyByTrigger(EffectTrigger.OnEquip, item, wearer);
                 };
 
-                // --- On Unequip ---
                 wearable.OnUnequipSuccess += item =>
                 {
-                    ApplyByTrigger(EffectTrigger.OnUnequip, item, item);
+                    var wearer = item.GetComponent<ItemData>()?.PlayerEntity;
+                    if (wearer != null)
+                        ApplyByTrigger(EffectTrigger.OnUnequip, item, wearer);
                 };
             }
         }

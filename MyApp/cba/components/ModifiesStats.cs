@@ -14,21 +14,16 @@ namespace CBA
         OnRemove = 1 << 4   // Effect removed (entity removed)
     }
 
-    public class ModifiesStats : Component
+    public class ModifiesStats(Entity owner, ModifiesStatsTrigger triggers) : Component(owner)
     {
-        public Dictionary<string, float> StatModifiers { get; } = new();
-        public Dictionary<string, int> StatAdditions { get; } = new();
-        public Dictionary<string, float> ResourceModifiers { get; } = new();
-        public Dictionary<string, int> ResourceAdditions { get; } = new();
+        public Dictionary<string, float> StatModifiers { get; } = [];
+        public Dictionary<string, int> StatAdditions { get; } = [];
+        public Dictionary<string, float> ResourceModifiers { get; } = [];
+        public Dictionary<string, int> ResourceAdditions { get; } = [];
 
-        public ModifiesStatsTrigger Triggers { get; }
+        public ModifiesStatsTrigger Triggers { get; } = triggers;
 
         public event Action<Entity, Entity>? OnStatsModified;
-
-        public ModifiesStats(Entity owner, ModifiesStatsTrigger triggers) : base(owner)
-        {
-            Triggers = triggers;
-        }
 
         protected override void Subscribe()
         {

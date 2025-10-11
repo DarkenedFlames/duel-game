@@ -1,88 +1,22 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MyApp;
 
 namespace CBA
 {
-    public class Printer
+    public static class Printer
     {
-        private static void AnyKey()
-        {
-            Console.WriteLine("\nPress any key to return to the main menu...");
-            Console.ReadKey(true);
-        }
-        private static void ClearAndHeader(string header)
+        // === General Helpers ===
+        public static void ClearAndHeader(string header)
         {
             Console.Clear();
             Console.WriteLine(new string('-', header.Length));
             Console.WriteLine(header);
             Console.WriteLine(new string('-', header.Length));
         }
-        public static bool PrintMainMenu(Entity player)
-        {
-            var playerData = player.GetComponent<PlayerData>();
-            var playerName = playerData?.Name;
-            ClearAndHeader($"Main Menu: {playerName}'s Turn");
-            Console.WriteLine("[1] Stats [2] Inventory [3] Equipment [4] Status [5] End Turn");
-            Console.Write("Choose an option: ");
-            string? choice = Console.ReadLine();
-            switch (choice)
-            {
-                case "1":
-                    ClearAndHeader($"{playerName}'s Stats");
-                    Console.WriteLine();
-                    StatMenu(player);
-                    break;
-                case "2":
-                    ClearAndHeader($"{playerName}'s Inventory");
-                    Console.WriteLine("\nChoose an Item (Enter to exit):");
-                    InventoryMenu(player);
-                    break;
-                case "3":
-                    ClearAndHeader($"{playerName}'s Equipment");
-                    Console.WriteLine("\nChoose Equipment:");
-                    EquipmentMenu(player);
-                    break;
-                case "4":
-                    ClearAndHeader($"{playerName}'s Status");
-                    StatusMenu(player);
-                    break;
-                case "5": return true; // signal end turn
-                default: Console.WriteLine("Invalid choice. Please try again."); break;
-            }
-            return false; // stay in menu
-        }
-        private static void StatusMenu(Entity player)
-        {
-            var allEffects = World.Instance.GetEntitiesWith<EffectData>().ToList();
-            List<Entity> playerEffects = [];
 
-            foreach (Entity effect in allEffects)
-            {
-                var effectData = effect.GetComponent<EffectData>();
-
-                if (effectData?.PlayerEntity == player)
-                {
-                    playerEffects.Add(effect);
-                }
-            }
-
-            if (playerEffects.Count == 0)
-            {
-                Console.WriteLine("(No active effects)");
-                AnyKey();
-                return;
-            }
-            foreach (var effect in playerEffects)
-            {
-                var effectName = effect.GetComponent<EffectData>()?.Name;
-                var remaining = effect.GetComponent<EffectDuration>()?.Remaining;
-                Console.WriteLine($"- {effectName} (Duration: {remaining} turns)");
-            }
-            AnyKey();
-        }
-        private static void StatMenu(Entity player)
+        // === Player Stats ===
+        public static void PrintStats(Entity player)
         {
             var resources = player.GetComponent<ResourcesComponent>();
             var stats = player.GetComponent<StatsComponent>();
@@ -102,250 +36,130 @@ namespace CBA
             }
             else
             {
-                throw new Exception($"{player.GetComponent<PlayerData>()?.Name} has no StatsComponent or no ResourcesComponent.");
+                Console.WriteLine($"{player.GetComponent<PlayerData>()?.Name} missing Stats or Resources component.");
             }
-            AnyKey();
         }
-        private static void InventoryMenu(Entity player)
+
+        // === Status Effects ===
+        public static void PrintEffects(Entity player)
         {
-            var allItems = World.Instance.GetEntitiesWith<ItemData>().ToList();
-            List<Entity> playerItems = [];
+            var effects = World.Instance.GetEntitiesWith<EffectData>()
+                .Where(e => e.GetComponent<EffectData>()?.PlayerEntity == player);
 
-            foreach (Entity item in allItems)
+            if (!effects.Any())
             {
-                var itemData = item.GetComponent<ItemData>();
-
-                if (itemData?.PlayerEntity == player)
-                {
-                    playerItems.Add(item);
-                }
+                Console.WriteLine("(No active effects)");
+                return;
             }
-            int idx = 1;
-            foreach (var item in playerItems)
+
+            foreach (var effect in effects)
             {
-                Console.WriteLine($"{idx}. {item.GetComponent<ItemData>()?.Name}");
+                var data = effect.GetComponent<EffectData>();
+                var duration = effect.GetComponent<EffectDuration>()?.Remaining;
+                Console.WriteLine($"- {data?.Name ?? "Unknown"} (Duration: {duration} turns)");
+            }
+        }
+
+        // === Item Lists ===
+        public static void PrintItemList(IEnumerable<Entity> items)
+        {
+            int idx = 1;
+            foreach (var item in items)
+            {
+                var itemName = item.GetComponent<ItemData>()?.Name ?? "Unknown";
+                Console.WriteLine($"{idx}. {itemName}");
                 idx++;
             }
 
             if (idx == 1)
-            {
-                Console.WriteLine("(Inventory is empty)");
-                AnyKey();
-            }
-
-            string? choice = Console.ReadLine();
-            if (string.IsNullOrWhiteSpace(choice)) return;
-
-            if (int.TryParse(choice, out int index) && index > 0 && index < playerItems.Count + 1)
-            {
-                PrintItemMenu(player, playerItems[index - 1]);
-            }
-            else
-            {
-                Console.WriteLine("Invalid choice.");
-                AnyKey();
-            }
+                Console.WriteLine("(No items found)");
         }
-        private static void EquipmentMenu(Entity player)
-        {
-            var world = World.Instance;
 
-            // All equipped items that belong to this player
-            var equippedItems = world.GetEntitiesWith<Wearable>()
+        // === Equipment Slots ===
+        public static void PrintEquipment(Entity player)
+        {
+            var equippedItems = World.Instance.GetEntitiesWith<Wearable>()
                 .Where(e =>
                 {
                     var wearable = e.GetComponent<Wearable>();
                     var itemData = e.GetComponent<ItemData>();
                     return wearable != null &&
-                        itemData != null &&
-                        wearable.IsEquipped &&
-                        itemData.PlayerEntity == player;
+                           itemData != null &&
+                           wearable.IsEquipped &&
+                           itemData.PlayerEntity == player;
                 })
                 .ToList();
 
-            var slotChoices = new List<(int number, EquipType type, string label)>
+            var slots = new List<(EquipType type, string label)>
             {
-                (1, EquipType.Weapon, "Weapon"),
-                (2, EquipType.Helmet, "Helmet"),
-                (3, EquipType.Chestplate, "Chestplate"),
-                (4, EquipType.Leggings, "Leggings"),
-                (5, EquipType.Accessory, "Accessory")
+                (EquipType.Weapon, "Weapon"),
+                (EquipType.Helmet, "Helmet"),
+                (EquipType.Chestplate, "Chestplate"),
+                (EquipType.Leggings, "Leggings"),
+                (EquipType.Accessory, "Accessory")
             };
 
-            // Display all “slots” with what’s currently equipped
-            foreach (var (number, type, label) in slotChoices)
+            foreach (var (type, label) in slots)
             {
-                var equippedEntity = equippedItems.FirstOrDefault(e =>
-                    e.GetComponent<Wearable>()?.EquipType == type);
-
-                var itemName = equippedEntity?.GetComponent<ItemData>()?.Name ?? "(empty)";
-                Console.WriteLine($"{number}. {label}: {itemName}");
-            }
-
-            Console.WriteLine("Press Enter to return to the main menu...");
-            string? input = Console.ReadLine();
-
-            if (string.IsNullOrWhiteSpace(input))
-                return;
-
-            if (!int.TryParse(input, out int choice) || choice < 1 || choice > slotChoices.Count)
-            {
-                Console.WriteLine("Invalid choice.");
-                AnyKey();
-                return;
-            }
-
-            var selectedType = slotChoices[choice - 1].type;
-
-            // Find the equipped item of that type
-            var selectedItem = equippedItems.FirstOrDefault(e =>
-                e.GetComponent<Wearable>()?.EquipType == selectedType);
-
-            if (selectedItem != null)
-            {
-                PrintItemMenu(player, selectedItem);
-            }
-            else
-            {
-                Console.WriteLine("No item equipped in that slot.");
-                AnyKey();
+                var itemName = equippedItems.FirstOrDefault(e => e.GetComponent<Wearable>()?.EquipType == type)
+                    ?.GetComponent<ItemData>()?.Name ?? "(empty)";
+                Console.WriteLine($"{label}: {itemName}");
             }
         }
 
-        public static void PrintItemMenu(Entity player, Entity selectedItem)
+        // === Item Menu Actions ===
+        public static string? PrintItemMenu(Entity itemEntity)
         {
-            var playerData = player.GetComponent<PlayerData>();
-            var itemData = selectedItem.GetComponent<ItemData>();
-            var wearable = selectedItem.GetComponent<Wearable>();
+            var itemData = itemEntity.GetComponent<ItemData>();
+            var player = itemData?.PlayerEntity;
+            var playerData = player?.GetComponent<PlayerData>();
+            var wearable = itemEntity.GetComponent<Wearable>();
             var allPlayers = World.Instance.GetEntitiesWith<PlayerData>().ToList();
 
-            if (playerData == null || itemData == null)
+            if (itemData == null || playerData == null)
             {
                 Console.WriteLine("Invalid entity or missing components.");
-                return;
+                return null;
             }
 
-            // === Header ===
             ClearAndHeader($"Item Menu: {playerData.Name} using {itemData.Name}");
 
-            // === Determine available actions ===
-            List<string> actions = new() { "Remove Item" };
+            // Determine available actions
+            var actions = new List<string> { "Remove" };
 
-            // If the player owns the item
             if (itemData.PlayerEntity == player)
             {
-                // Has Wearable component
                 if (wearable != null)
                 {
-                    if (!wearable.IsEquipped)
-                        actions.Add("Equip Item");
-                    else
-                        actions.Add("Unequip Item");
+                    actions.Add(wearable.IsEquipped ? "Unequip" : "Equip");
 
-                    // Weapons can only be used if equipped
                     if (itemData.Type == ItemType.Weapon && wearable.IsEquipped)
-                        actions.Add("Use Item");
+                        actions.Add("Use");
                 }
                 else if (itemData.Type == ItemType.Consumable)
                 {
-                    // Consumables can always be used
-                    actions.Add("Use Item");
+                    actions.Add("Use");
                 }
             }
 
-            // === Display available actions ===
-            Console.WriteLine("Available Actions:");
+            // Display actions
             for (int i = 0; i < actions.Count; i++)
                 Console.WriteLine($"{i + 1}. {actions[i]}");
 
-            Console.WriteLine("Enter a number to select an action, or press Enter to return.");
+            Console.WriteLine("Enter a number to select an action, or press Enter to cancel.");
+
             string? input = Console.ReadLine();
-            if (string.IsNullOrWhiteSpace(input)) return;
+            if (string.IsNullOrWhiteSpace(input))
+                return null;
 
             if (!int.TryParse(input, out int choice) || choice < 1 || choice > actions.Count)
             {
                 Console.WriteLine("Invalid choice.");
-                AnyKey();
-                return;
+                return null;
             }
 
-            string selectedAction = actions[choice - 1].ToLower();
-
-            // === Perform action ===
-            switch (selectedAction)
-            {
-                case "remove item":
-                    // Probably just delete or mark removed in world
-                    World.Instance.RemoveEntity(selectedItem);
-                    Console.WriteLine($"{itemData.Name} removed from world.");
-                    break;
-
-                case "equip item":
-                    if (wearable != null && !wearable.IsEquipped)
-                    {
-                        wearable.TryEquip();
-                        Console.WriteLine($"{playerData.Name} equipped {itemData.Name}.");
-                    }
-                    else
-                        Console.WriteLine("Cannot equip this item.");
-                    break;
-
-                case "unequip item":
-                    if (wearable != null && wearable.IsEquipped)
-                    {
-                        wearable.TryUnequip();
-                        Console.WriteLine($"{playerData.Name} unequipped {itemData.Name}.");
-                    }
-                    else
-                        Console.WriteLine("Cannot unequip this item.");
-                    break;
-
-                case "use item":
-                    if (itemData.Type == ItemType.Consumable ||
-                        (itemData.Type == ItemType.Weapon && wearable?.IsEquipped == true))
-                    {
-                        // === Choose target ===
-                        ClearAndHeader($"Choose target for {itemData.Name}:");
-                        for (int i = 0; i < allPlayers.Count; i++)
-                        {
-                            var pData = allPlayers[i].GetComponent<PlayerData>();
-                            Console.WriteLine($"{i + 1}. {pData?.Name ?? "Unknown"}");
-                        }
-
-                        string? targetInput = Console.ReadLine();
-                        if (string.IsNullOrWhiteSpace(targetInput)) return;
-
-                        if (!int.TryParse(targetInput, out int targetIndex) ||
-                            targetIndex < 1 || targetIndex > allPlayers.Count)
-                        {
-                            Console.WriteLine("Invalid choice.");
-                            AnyKey();
-                            return;
-                        }
-
-                        var target = allPlayers[targetIndex - 1];
-                        var targetData = target.GetComponent<PlayerData>();
-
-                        Console.WriteLine($"{playerData.Name} used {itemData.Name} on {targetData?.Name ?? "Unknown"}!");
-
-                        selectedItem.GetComponent<Usable>()?.TryUse(target);
-                    }
-                    else
-                    {
-                        Console.WriteLine("Cannot use this item right now.");
-                    }
-                    break;
-
-                default:
-                    Console.WriteLine("Invalid action.");
-                    break;
-            }
-
-            AnyKey();
+            return actions[choice - 1]; // return the selected action string
         }
-
-
-
 
         //================== Event Printers =================//
 

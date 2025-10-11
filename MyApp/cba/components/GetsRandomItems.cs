@@ -16,10 +16,22 @@ namespace CBA
 
         private void GiveRandomItem(Entity player)
         {
-            // Player is the owner of this component
-            var newItem = ItemFactory.CreateRandomItem(player);
-            // Notify printer (optional)
-            Printer.PrintEntityAdded(newItem); // Fix this, probably needs to be an event
+            if (player == null) return;
+
+            // --- Step 1: Create the first item ---
+            var firstItem = ItemFactory.CreateRandomItem(player);
+            Printer.PrintEntityAdded(firstItem);
+
+            // --- Step 2: Check for bonus item based on Luck ---
+            var stats = player.GetComponent<StatsComponent>();
+            float luck = stats?.Get("Luck") ?? 0f;
+            float chance = luck / (luck + 100f);
+
+            if (Random.Shared.NextDouble() < chance)
+            {
+                var secondItem = ItemFactory.CreateRandomItem(player);
+                Printer.PrintEntityAdded(secondItem);
+            }
         }
     }
 }

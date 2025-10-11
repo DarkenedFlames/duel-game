@@ -1,15 +1,45 @@
-﻿using MyApp;
+﻿using CBA;
 
 public class Program
 {
     static void Main()
     {
-        Player playerOne = new("Bob");
-        Player playerTwo = new("Alice");
-        TurnManager turnManager = new([playerOne, playerTwo]);
-        turnManager.StartTurns();
+        // --- Create the world singleton ---
+        World world = World.Instance;
+
+        // --- Create player entities ---
+        var playerOne = new PlayerEntity();
+        var playerTwo = new PlayerEntity();
+
+        // --- Add PlayerData ---
+        playerOne.AddComponent(new PlayerData(playerOne, "Bob"));
+        playerTwo.AddComponent(new PlayerData(playerTwo, "Alice"));
+
+        // --- Add Stats and Resources ---
+        var playerOneStats = new StatsComponent(playerOne);
+        playerOne.AddComponent(playerOneStats);
+        playerOne.AddComponent(new ResourcesComponent(playerOne, playerOneStats));
+
+        var playerTwoStats = new StatsComponent(playerTwo);
+        playerTwo.AddComponent(playerTwoStats);
+        playerTwo.AddComponent(new ResourcesComponent(playerTwo, playerTwoStats));
+
+        // --- Add TakesTurns ---
+        playerOne.AddComponent(new TakesTurns(playerOne));
+        playerTwo.AddComponent(new TakesTurns(playerTwo));
+
+        // --- Start game loop ---
+        world.TurnManager.StartGameLoop();
     }
 }
+
+// --- Concrete PlayerEntity class ---
+namespace CBA
+{
+    public class PlayerEntity() : Entity() { }
+}
+
+
 
 
 // ======== Development Notes ========

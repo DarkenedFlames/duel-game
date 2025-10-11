@@ -2,71 +2,132 @@ using System;
 
 namespace CBA
 {
-    public class DealsDamage(Entity owner, int damage,
-                            DamageType damageType = DamageType.Physical,
-                            bool canCrit = false,
-                            bool canDodge = false) : Component(owner)
+    public class DealsDamage : Component
     {
-        public int Damage { get; } = damage;
-        public DamageType DamageType { get; init; } = damageType;
-        public bool CanCrit { get; init; } = canCrit;
-        public bool CanDodge { get; init; } = canDodge;
+        private readonly Func<int>? _getDamage; // dynamic damage function
+        private readonly int _staticDamage;      // static damage fallback
+
+        public int Damage => _getDamage?.Invoke() ?? _staticDamage;
+
+        public DamageType DamageType { get; init; } = DamageType.Physical;
+        public bool CanCrit { get; init; } = false;
+        public bool CanDodge { get; init; } = false;
 
         public event Action<Entity, Entity, int>? OnDamageDealt;
 
+        // Static damage constructor
+        public DealsDamage(Entity owner, int damage,
+                           DamageType damageType = DamageType.Physical,
+                           bool canCrit = false,
+                           bool canDodge = false) : base(owner)
+        {
+            _staticDamage = damage;
+            DamageType = damageType;
+            CanCrit = canCrit;
+            CanDodge = canDodge;
+        }
+
+        // Dynamic damage constructor
+        public DealsDamage(Entity owner, Func<int> getDamage,
+                           DamageType damageType = DamageType.Physical,
+                           bool canCrit = false,
+                           bool canDodge = false) : base(owner)
+        {
+            _getDamage = getDamage ?? throw new ArgumentNullException(nameof(getDamage));
+            DamageType = damageType;
+            CanCrit = canCrit;
+            CanDodge = canDodge;
+        }
+
         protected override void Subscribe()
         {
-            OnDamageDealt += (user, target, finalDamage) => Printer.PrintDamageDealt(user, target, finalDamage);
+            OnDamageDealt += Printer.PrintDamageDealt;
 
+            // --- Item logic ---
             var usable = Owner.GetComponent<Usable>();
             if (usable != null)
             {
-                usable.OnUseSuccess += (user, target) =>
+                usable.OnUseSuccess += (item, target) =>
                 {
-                    int finalDamage = Damage;
-
-                    var playerData = target.GetComponent<PlayerData>();
-                    string targetName = playerData?.Name ?? "Unknown";
-
-                    var targetStats = target.GetComponent<StatsComponent>();
-                    if (targetStats != null)
-                    {
-                        // Dodge logic
-                        float dodgeChance = targetStats.Get("Dodge") / (targetStats.Get("Dodge") + 100f);
-                        if (CanDodge && Random.Shared.NextDouble() < dodgeChance)
-                        {
-                            Console.WriteLine($"{targetName} dodged the attack!");
-                            finalDamage = 0;
-                        }
-
-                        // Crit logic
-                        float critChance = user.GetComponent<StatsComponent>()?.Get("Critical") ?? 0;
-                        critChance /= critChance + 100f;
-                        if (CanCrit && Random.Shared.NextDouble() < critChance)
-                        {
-                            finalDamage = (int)(finalDamage * 2.0f);
-                            Console.WriteLine("Critical Hit!");
-                        }
-
-                        // Damage type reduction
-                        switch (DamageType)
-                        {
-                            case DamageType.Physical:
-                                finalDamage = (int)(finalDamage * (100f / (targetStats.Get("Armor") + 100f)));
-                                break;
-                            case DamageType.Magical:
-                                finalDamage = (int)(finalDamage * (100f / (targetStats.Get("Shield") + 100f)));
-                                break;
-                            case DamageType.True:
-                                break;
-                        }
-
-                        var targetResources = target.GetComponent<ResourcesComponent>();
-                        targetResources?.Change("Health", finalDamage);
-                        OnDamageDealt?.Invoke(Owner, target, finalDamage);
-                    }
+                    ApplyDamage(item, target);
                 };
             }
+
+            // --- Effect logic ---
+            var effectData = Owner.GetComponent<EffectData>();
+            if (effectData != null)
+            {
+                var player = effectData.PlayerEntity;
+                if (player != null)
+                {
+                    var takesTurns = player.GetComponent<TakesTurns>();
+                    if (takesTurns != null)
+                    {
+                        takesTurns.OnTurnStart += _ =>
+                        {
+                            ApplyDamage(Owner, player); // self-targeting effect
+                        };
+                    }
+                }
+            }
+        }
+
+        private void ApplyDamage(Entity source, Entity target)
+        {
+            if (target == null) return;
+
+            int finalDamage = Damage;
+            var targetStats = target.GetComponent<StatsComponent>();
+            var targetResources = target.GetComponent<ResourcesComponent>();
+            var userStats = source.GetComponent<StatsComponent>();
+
+            // --- Dodge ---
+            if (CanDodge && targetStats != null)
+            {
+                float dodgeChance = targetStats.Get("Dodge") / (targetStats.Get("Dodge") + 100f);
+                if (Random.Shared.NextDouble() < dodgeChance)
+                {
+                    Console.WriteLine($"{target.GetComponent<PlayerData>()?.Name ?? "Unknown"} dodged the attack!");
+                    finalDamage = 0;
+                }
+            }
+
+            // --- Crit ---
+            if (CanCrit && userStats != null && finalDamage > 0)
+            {
+                float critChance = userStats.Get("Critical") / (userStats.Get("Critical") + 100f);
+                if (Random.Shared.NextDouble() < critChance)
+                {
+                    finalDamage = (int)(finalDamage * 2.0f);
+                    Console.WriteLine("Critical Hit!");
+                }
+            }
+
+            // --- Damage Reduction ---
+            if (targetStats != null && finalDamage > 0)
+            {
+                float reduction = 1f;
+                switch (DamageType)
+                {
+                    case DamageType.Physical:
+                        reduction = 100f / (targetStats.Get("Armor") + 100f);
+                        break;
+                    case DamageType.Magical:
+                        reduction = 100f / (targetStats.Get("Shield") + 100f);
+                        break;
+                }
+
+                finalDamage = (int)(finalDamage * reduction);
+            }
+
+            // --- Apply ---
+            if (finalDamage > 0)
+            {
+                targetResources?.Change("Health", -finalDamage);
+                Console.WriteLine($"{source.GetComponent<PlayerData>()?.Name ?? "Someone"} dealt {finalDamage} {DamageType} damage to {target.GetComponent<PlayerData>()?.Name ?? "someone"}.");
+            }
+
+            OnDamageDealt?.Invoke(source, target, finalDamage);
         }
     }
 }

@@ -1,15 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
-// Needs heavy refactor... ties in with stacking and effect application
+using System.Reflection.Metadata.Ecma335;
 
 namespace CBA
 {
-    public class EffectEntity : Entity
-    {
-        // Concrete effect entity
-    }
+    public class EffectEntity : Entity { }
 
     public static class EffectFactory
     {
@@ -20,7 +16,6 @@ namespace CBA
             public bool IsHidden { get; init; } = false;
             public StackingType StackingType { get; init; } = StackingType.AddStack;
             public int MaxStacks { get; init; } = 1;
-            public int Duration { get; init; } = 1;
             public Action<Entity, Entity>? Factory { get; init; }
         }
 
@@ -28,43 +23,50 @@ namespace CBA
         {
             new EffectTemplate
             {
-                Name = "Burn",
-                IsNegative = true,
-                Duration = 3,
+                Name = "Inferno",
                 StackingType = StackingType.AddStack,
                 MaxStacks = 5,
-                Factory = (effectEntity, playerEntity) =>
+                Factory = (effectEntity, player) =>
                 {
-                    new EffectData(effectEntity, playerEntity, "Burn", isNegative: true);
+                    new EffectData(effectEntity, player, "Inferno", isNegative: true,
+                        stackingType: StackingType.AddStack, maxStacks: 5);
+
                     new EffectDuration(effectEntity, 3);
-                    new EffectStacking(effectEntity, StackingType.AddStack, 5);
-                    // Add any Burn-specific logic components here later (e.g., DOT)
+
+                    var playerStats = player.GetComponent<StatsComponent>();
+
+                    new DealsDamage(
+                        effectEntity,
+                        getDamage: () => {return (int)((playerStats?.Get("Health") ?? 0) * 0.01f);},
+                        damageType: DamageType.Magical,
+                        canCrit: false,
+                        canDodge: false
+                    );
                 }
             },
             new EffectTemplate
             {
                 Name = "Poison",
                 IsNegative = true,
-                Duration = 5,
                 StackingType = StackingType.RefreshOnly,
-                Factory = (effectEntity, playerEntity) =>
+                Factory = (effectEntity, player) =>
                 {
-                    new EffectData(effectEntity, playerEntity, "Poison", isNegative: true);
+                    new EffectData(effectEntity, player, "Poison", isNegative: true,
+                        stackingType: StackingType.RefreshOnly);
+
                     new EffectDuration(effectEntity, 5);
-                    new EffectStacking(effectEntity, StackingType.RefreshOnly);
                 }
             },
             new EffectTemplate
             {
                 Name = "Shield",
                 IsNegative = false,
-                Duration = 2,
                 StackingType = StackingType.Ignore,
-                Factory = (effectEntity, playerEntity) =>
+                Factory = (effectEntity, player) =>
                 {
-                    new EffectData(effectEntity, playerEntity, "Shield", isNegative: false);
-                    new EffectDuration(effectEntity, 2);
-                    new EffectStacking(effectEntity, StackingType.Ignore);
+                    new EffectData(effectEntity, player, "Shield", isNegative: false,
+                        stackingType: StackingType.Ignore);
+                    // no duration = permanent shield
                 }
             }
         };
@@ -80,27 +82,43 @@ namespace CBA
             return template;
         }
 
-        public static Entity CreateEffect(string name, Entity playerEntity)
-        {
-            var template = GetTemplate(name);
-            var effectEntity = new EffectEntity();
-
-            // Apply template factory logic
-            template.Factory?.Invoke(effectEntity, playerEntity);
-
-            // Add to world
-            World.Instance.AddEntity(effectEntity);
-
-            return effectEntity;
-        }
-
         public static void ApplyEffect(string name, Entity playerEntity)
         {
-            var effectEntity = CreateEffect(name, playerEntity);
+            var template = GetTemplate(name);
 
-            // Handle stacking logic automatically via component
-            var stacking = effectEntity.GetComponent<EffectStacking>();
-            stacking?.HandleStacking(playerEntity);
+            // Find existing instance on player
+            var existingEffect = World.Instance.GetEntitiesWith<EffectData>()
+                .Select(e => e.GetComponent<EffectData>()!)
+                .FirstOrDefault(ed => ed.PlayerEntity == playerEntity &&
+                                      ed.Name == template.Name);
+
+            // Handle stacking/refresh before creating a new one
+            if (existingEffect != null)
+            {
+                switch (existingEffect.StackingType)
+                {
+                    case StackingType.RefreshOnly:
+                        var dur = existingEffect.Owner.GetComponent<EffectDuration>();
+                        if (dur != null) dur.Remaining = dur.Maximum;
+                        return; // don’t create new
+
+                    case StackingType.AddStack:
+                        if (existingEffect.CurrentStacks < existingEffect.MaximumStacks)
+                        {
+                            existingEffect.CurrentStacks++;
+                            var d = existingEffect.Owner.GetComponent<EffectDuration>();
+                            if (d != null) d.Remaining = d.Maximum;
+                        }
+                        return;
+
+                    case StackingType.Ignore:
+                        return;
+                }
+            }
+
+            // No existing effect → create a new one
+            var effectEntity = new EffectEntity();
+            template.Factory?.Invoke(effectEntity, playerEntity);
         }
     }
 }
