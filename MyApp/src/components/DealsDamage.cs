@@ -5,17 +5,17 @@ namespace CBA
     public class DealsDamage : Component
     {
         private readonly Func<int>? _getDamage; // dynamic damage function
-        private readonly int _staticDamage;      // static damage fallback
+        private readonly int _staticDamage;     // static damage fallback
 
         public int Damage => _getDamage?.Invoke() ?? _staticDamage;
 
         public DamageType DamageType { get; init; } = DamageType.Physical;
-        public bool CanCrit { get; init; } = false;
-        public bool CanDodge { get; init; } = false;
+        public bool CanCrit { get; init; }
+        public bool CanDodge { get; init; }
 
         public event Action<Entity, Entity, int>? OnDamageDealt;
 
-        // Static damage constructor
+        // --- Static damage constructor ---
         public DealsDamage(Entity owner, int damage,
                            DamageType damageType = DamageType.Physical,
                            bool canCrit = false,
@@ -27,7 +27,7 @@ namespace CBA
             CanDodge = canDodge;
         }
 
-        // Dynamic damage constructor
+        // --- Dynamic damage constructor ---
         public DealsDamage(Entity owner, Func<int> getDamage,
                            DamageType damageType = DamageType.Physical,
                            bool canCrit = false,
@@ -44,39 +44,20 @@ namespace CBA
             OnDamageDealt += Printer.PrintDamageDealt;
 
             // --- Item logic ---
-            var usable = Owner.GetComponent<Usable>();
-            if (usable != null)
-            {
-                usable.OnUseSuccess += (item, target) =>
-                {
-                    ApplyDamage(item, target);
-                };
-            }
+            Owner.GetComponent<Usable>()?.OnUseSuccess += ApplyDamage;
 
             // --- Effect logic ---
-            var effectData = Owner.GetComponent<EffectData>();
-            if (effectData != null)
-            {
-                var player = effectData.PlayerEntity;
-                if (player != null)
-                {
-                    var takesTurns = player.GetComponent<TakesTurns>();
-                    if (takesTurns != null)
-                    {
-                        takesTurns.OnTurnStart += _ =>
-                        {
-                            ApplyDamage(Owner, player); // self-targeting effect
-                        };
-                    }
-                }
-            }
+            var player = Owner.GetComponent<EffectData>()?.PlayerEntity;
+            player?.GetComponent<TakesTurns>()?.OnTurnStart += _ =>
+                ApplyDamage(Owner, player); // self-targeting effect
         }
 
-        private void ApplyDamage(Entity source, Entity target)
+        private void ApplyDamage(Entity source, Entity? target)
         {
             if (target == null) return;
 
             int finalDamage = Damage;
+
             var targetStats = target.GetComponent<StatsComponent>();
             var targetResources = target.GetComponent<ResourcesComponent>();
             var userStats = source.GetComponent<StatsComponent>();
@@ -84,8 +65,7 @@ namespace CBA
             // --- Dodge ---
             if (CanDodge && targetStats != null)
             {
-                float dodgeChance = targetStats.Get("Dodge") / (targetStats.Get("Dodge") + 100f);
-                if (Random.Shared.NextDouble() < dodgeChance)
+                if (Random.Shared.NextDouble() < targetStats.GetHyperbolic("Dodge"))
                 {
                     Printer.PrintDodged(Owner, target);
                     finalDamage = 0;
@@ -95,8 +75,8 @@ namespace CBA
             // --- Crit ---
             if (CanCrit && userStats != null && finalDamage > 0)
             {
-                float critChance = userStats.Get("Critical") / (userStats.Get("Critical") + 100f);
-                if (Random.Shared.NextDouble() < critChance)
+                
+                if (Random.Shared.NextDouble() < userStats.GetHyperbolic("Critical"))
                 {
                     finalDamage = (int)(finalDamage * 2.0f);
                     Printer.PrintCritical(Owner, target);
@@ -106,21 +86,17 @@ namespace CBA
             // --- Damage Reduction ---
             if (targetStats != null && finalDamage > 0)
             {
-                float reduction = 1f;
-                switch (DamageType)
+                float divisor = DamageType switch
                 {
-                    case DamageType.Physical:
-                        reduction = 100f / (targetStats.Get("Armor") + 100f);
-                        break;
-                    case DamageType.Magical:
-                        reduction = 100f / (targetStats.Get("Shield") + 100f);
-                        break;
-                }
+                    DamageType.Physical => targetStats.GetHyperbolic("Armor"),
+                    DamageType.Magical  => targetStats.GetHyperbolic("Shield"),
+                    _                   => 1f
+                };
 
-                finalDamage = (int)(finalDamage * reduction);
+                finalDamage = (int)(finalDamage / divisor);
             }
 
-            // --- Apply ---
+            // --- Apply Damage ---
             if (finalDamage > 0)
             {
                 targetResources?.Change("Health", -finalDamage);

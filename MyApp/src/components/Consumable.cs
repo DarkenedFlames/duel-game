@@ -8,13 +8,12 @@ namespace CBA
 
         public override void Subscribe()
         {
-            OnConsumed += Printer.PrintItemConsumed;
-
             var usable = Owner.GetComponent<Usable>();
             if (usable != null)
             {
                 usable.OnUseSuccess += (user, target) =>
                 {
+                    Printer.PrintItemConsumed(Owner);
                     World.Instance.RemoveEntity(Owner);  // remove item from world
                     OnConsumed?.Invoke(Owner);
                 };

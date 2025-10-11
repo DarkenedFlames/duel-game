@@ -32,6 +32,13 @@ namespace CBA
             var (Base, Modifier) = _values[name];
             return (int)(Base * Modifier);
         }
+        public float GetHyperbolic(string name)
+        {
+            ValidateStat(name);
+            float hyperbolic = Get(name);
+            hyperbolic /= (hyperbolic + 100);
+            return hyperbolic;
+        }
 
         public void IncreaseBase(string name, int delta)
         {
@@ -40,7 +47,6 @@ namespace CBA
             _values[name] = (Base + delta, Modifier);
             OnStatChanged?.Invoke(name);
         }
-
         public void DecreaseBase(string name, int delta) => IncreaseBase(name, -delta);
 
         public void IncreaseModifier(string name, float factor)
@@ -50,7 +56,6 @@ namespace CBA
             _values[name] = (Base, Modifier * factor);
             OnStatChanged?.Invoke(name);
         }
-
         public void DecreaseModifier(string name, float factor) => IncreaseModifier(name, 1f / factor);
 
         public override void Subscribe()

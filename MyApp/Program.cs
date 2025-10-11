@@ -13,7 +13,7 @@ public class Program
         {
             var player = new PlayerEntity();
             player.AddComponent(new PlayerData(player, name));
-            var stats = new StatsComponent(player);
+            var stats = new StatsComponent(player); // see if stats need to be passed into resources
             player.AddComponent(stats);
             player.AddComponent(new ResourcesComponent(player, stats));
             player.AddComponent(new TakesTurns(player)); 

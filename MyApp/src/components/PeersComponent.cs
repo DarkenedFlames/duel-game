@@ -20,10 +20,9 @@ namespace CBA
             if (playerEntity == null) return;
 
             var stats = playerEntity.GetComponent<StatsComponent>();
-            float peer = stats?.Get("Peer") ?? 0f;
-            if (peer <= 0) return;
+            var chance = stats?.GetHyperbolic("Peer");
+            if (chance <= 0) return;
 
-            float chance = peer / (peer + 100f);
             if (Random.Shared.NextDouble() >= chance) return;
 
             // --- Get all other players ---
