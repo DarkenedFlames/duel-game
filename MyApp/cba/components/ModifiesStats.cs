@@ -25,7 +25,7 @@ namespace CBA
 
         public event Action<Entity, Entity>? OnStatsModified;
 
-        protected override void Subscribe()
+        public override void Subscribe()
         {
             // Item logic
             if (Triggers.HasFlag(ModifiesStatsTrigger.OnUse))

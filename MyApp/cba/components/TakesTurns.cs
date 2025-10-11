@@ -11,7 +11,7 @@ namespace CBA
         public event Action<Entity>? OnTurnStart;
         public event Action<Entity>? OnTurnEnd;
 
-        protected override void Subscribe()
+        public override void Subscribe()
         {
             // Optionally subscribe to world or other systems
         }

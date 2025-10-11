@@ -6,7 +6,7 @@ namespace CBA
     {
         public event Action<Entity>? OnConsumed;
 
-        protected override void Subscribe()
+        public override void Subscribe()
         {
             OnConsumed += Printer.PrintItemConsumed;
 

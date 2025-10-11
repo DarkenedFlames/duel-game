@@ -6,7 +6,7 @@ namespace CBA
     {
         public string Name { get; set; } = name;
 
-        protected override void Subscribe()
+        public override void Subscribe()
         {
             // Nothing to subscribe to for now
         }

@@ -100,7 +100,7 @@ namespace CBA
             OnResourceChanged?.Invoke(name);
         }
 
-        protected override void Subscribe()
+        public override void Subscribe()
         {
             _stats.OnStatChanged += OnStatChange;
             OnResourceChanged += name => Printer.PrintResourceChanged(this, name);

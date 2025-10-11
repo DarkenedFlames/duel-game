@@ -53,7 +53,7 @@ namespace CBA
 
         public void DecreaseModifier(string name, float factor) => IncreaseModifier(name, 1f / factor);
 
-        protected override void Subscribe()
+        public override void Subscribe()
         {
             OnStatChanged += name => Printer.PrintStatChanged(this, name);
         }

@@ -319,16 +319,14 @@ namespace CBA
 
                 foreach (var r in raritiesByDistance)
                 {
-                    candidates = ItemTemplates
-                        .Where(t => t.Rarity == r)
-                        .ToList();
+                    candidates = [.. ItemTemplates.Where(t => t.Rarity == r)];
                     if (candidates.Count > 0) break;
                 }
             }
 
             // --- Step 5: Ultimate fallback: pick anything ---
             if (candidates.Count == 0)
-                candidates = ItemTemplates.ToList();
+                candidates = [.. ItemTemplates];
 
             // --- Step 6: Pick one randomly from remaining candidates ---
             var chosenTemplate = candidates[rng.Next(candidates.Count)];
@@ -336,6 +334,7 @@ namespace CBA
             // --- Step 7: Instantiate the entity and apply components ---
             var itemEntity = new ItemEntity();
             chosenTemplate.Factory(itemEntity, player);
+            itemEntity.SubscribeAll();
 
             // --- Step 8: Add to world ---
             // automatic

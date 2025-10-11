@@ -20,6 +20,6 @@ namespace CBA
         public int MaximumStacks { get; set; } = maxStacks;
         public StackingType StackingType { get; set; } = stackingType;
 
-        protected override void Subscribe() { }
+        public override void Subscribe() { }
     }
 }

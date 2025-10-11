@@ -9,7 +9,7 @@ namespace CBA
         public ItemType Type { get; init; } = type;
         public Entity PlayerEntity { get; init; } = playerEntity;
 
-        protected override void Subscribe() { }
+        public override void Subscribe() { }
     }
 
 }

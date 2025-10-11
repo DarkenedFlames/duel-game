@@ -14,7 +14,7 @@ namespace CBA
         public event Action<Entity>? OnUnequipSuccess;
         public event Action<Entity>? OnUnequipFail;
 
-        protected override void Subscribe()
+        public override void Subscribe()
         {
             // Optional subscriptions to world events
         }

@@ -4,7 +4,7 @@ namespace CBA
 {
     public class RefillsStamina(Entity owner) : Component(owner)
     {
-        protected override void Subscribe()
+        public override void Subscribe()
         {
             var resources = Owner.GetComponent<ResourcesComponent>();
             if (resources != null)

@@ -9,9 +9,8 @@ namespace CBA
         {
             Owner = owner;
             Owner.AddComponent(this);
-            Subscribe();
         }
-        protected abstract void Subscribe();
+        public abstract void Subscribe();
     }
 
 }

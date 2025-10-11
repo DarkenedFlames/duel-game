@@ -39,7 +39,7 @@ namespace CBA
             CanDodge = canDodge;
         }
 
-        protected override void Subscribe()
+        public override void Subscribe()
         {
             OnDamageDealt += Printer.PrintDamageDealt;
 

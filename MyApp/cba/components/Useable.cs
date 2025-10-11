@@ -9,7 +9,7 @@ namespace CBA
         public event Action<Entity, Entity>? OnUseSuccess;
         public event Action<Entity, Entity>? OnUseFailed;
 
-        protected override void Subscribe()
+        public override void Subscribe()
         {
             // Could subscribe to external triggers if needed
         }

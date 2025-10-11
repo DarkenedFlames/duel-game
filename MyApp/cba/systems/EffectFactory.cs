@@ -119,6 +119,7 @@ namespace CBA
             // No existing effect → create a new one
             var effectEntity = new EffectEntity();
             template.Factory?.Invoke(effectEntity, playerEntity);
+            effectEntity.SubscribeAll();
         }
     }
 }

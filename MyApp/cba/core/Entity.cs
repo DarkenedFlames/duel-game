@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace CBA
 {
@@ -26,6 +28,24 @@ namespace CBA
         {
             var c = _components.OfType<T>().FirstOrDefault();
             if (c != null) _components.Remove(c);
+        }
+
+        // === New Methods ===
+
+        /// <summary>
+        /// Returns all components of this entity.
+        /// </summary>
+        public IEnumerable<Component> GetAllComponents() => _components;
+
+        /// <summary>
+        /// Calls Subscribe() on all components.
+        /// </summary>
+        public void SubscribeAll()
+        {
+            foreach (var component in _components)
+            {
+                component.Subscribe();
+            }
         }
     }
 }

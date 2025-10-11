@@ -35,7 +35,7 @@ namespace CBA
 
         public event Action<Entity, Entity, EffectInfo>? OnEffectApplied;
 
-        protected override void Subscribe()
+        public override void Subscribe()
         {
             var usable = Owner.GetComponent<Usable>();
             var wearable = Owner.GetComponent<Wearable>();

@@ -5,7 +5,7 @@ public class Program
     static void Main()
     {
         // --- Create the world singleton ---
-        World world = World.Instance;
+        World world = new();
 
         // --- Create player entities ---
         var playerOne = new PlayerEntity();
@@ -27,6 +27,9 @@ public class Program
         // --- Add TakesTurns ---
         playerOne.AddComponent(new TakesTurns(playerOne));
         playerTwo.AddComponent(new TakesTurns(playerTwo));
+
+        playerOne.SubscribeAll();
+        playerTwo.SubscribeAll();
 
         // --- Start game loop ---
         world.TurnManager.StartGameLoop();

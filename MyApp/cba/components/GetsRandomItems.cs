@@ -4,7 +4,7 @@ namespace CBA
 {
     public class GetsRandomItems(Entity owner) : Component(owner)
     {
-        protected override void Subscribe()
+        public override void Subscribe()
         {
             // Subscribe to the player's turn start event
             var takesTurns = Owner.GetComponent<TakesTurns>();

@@ -7,7 +7,7 @@ namespace CBA
         public int Remaining { get; set; } = maxDuration;
         public int Maximum { get; set; } = maxDuration;
 
-        protected override void Subscribe()
+        public override void Subscribe()
         {
             var target = Owner.GetComponent<EffectData>()?.PlayerEntity;
             var takesTurns = target?.GetComponent<TakesTurns>();

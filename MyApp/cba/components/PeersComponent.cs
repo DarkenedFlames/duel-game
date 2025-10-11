@@ -6,7 +6,7 @@ namespace CBA
 {
     public class PeerInventoryReveal(Entity owner) : Component(owner)
     {
-        protected override void Subscribe()
+        public override void Subscribe()
         {
             var takesTurns = Owner.GetComponent<TakesTurns>();
             if (takesTurns != null)
