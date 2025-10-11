@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace CBA
 {
-    public class PeerInventoryReveal(Entity owner) : Component(owner)
+    public class PeersComponent(Entity owner) : Component(owner)
     {
         public override void Subscribe()
         {
