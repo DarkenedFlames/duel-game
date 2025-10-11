@@ -87,7 +87,7 @@ namespace CBA
                 float dodgeChance = targetStats.Get("Dodge") / (targetStats.Get("Dodge") + 100f);
                 if (Random.Shared.NextDouble() < dodgeChance)
                 {
-                    Console.WriteLine($"{target.GetComponent<PlayerData>()?.Name ?? "Unknown"} dodged the attack!");
+                    Printer.PrintDodged(Owner, target);
                     finalDamage = 0;
                 }
             }
@@ -99,7 +99,7 @@ namespace CBA
                 if (Random.Shared.NextDouble() < critChance)
                 {
                     finalDamage = (int)(finalDamage * 2.0f);
-                    Console.WriteLine("Critical Hit!");
+                    Printer.PrintCritical(Owner, target);
                 }
             }
 
@@ -124,7 +124,7 @@ namespace CBA
             if (finalDamage > 0)
             {
                 targetResources?.Change("Health", -finalDamage);
-                Console.WriteLine($"{source.GetComponent<PlayerData>()?.Name ?? "Someone"} dealt {finalDamage} {DamageType} damage to {target.GetComponent<PlayerData>()?.Name ?? "someone"}.");
+                Printer.PrintDamageDealt(Owner, target, finalDamage);
             }
 
             OnDamageDealt?.Invoke(source, target, finalDamage);

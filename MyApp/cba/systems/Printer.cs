@@ -162,17 +162,29 @@ namespace CBA
         }
 
         //================== Event Printers =================//
+        public static void PrintTurnStartHeader(Entity player)
+        {
+            Console.Clear();
+            Console.WriteLine($"-----\n{player.GetComponent<PlayerData>()?.Name}'s turn has began!-----");
+        }
+        public static void PrintTurnEndHeader(Entity player)
+        {
+            Console.WriteLine($"-----\n{player.GetComponent<PlayerData>()?.Name}'s turn has ended!-----");
+        }
+
 
         public static void PrintEntityAdded(Entity entity)
         {
             if (entity.GetComponent<PlayerData>() != null)
             {
                 Console.WriteLine($"\n{entity.GetComponent<PlayerData>()?.Name} has joined the game!");
+                TurnManager.WaitForKey();
             }
             if (entity.GetComponent<ItemData>() != null)
             {
                 var itemData = entity.GetComponent<ItemData>();
                 Console.WriteLine($"\n{itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name} has picked up {itemData?.Name}!");
+                TurnManager.WaitForKey();
             }
             if (entity.GetComponent<EffectData>() != null)
             {
@@ -181,10 +193,12 @@ namespace CBA
                 if (effectDuration != null)
                 {
                     Console.WriteLine($"\n{effectData?.PlayerEntity.GetComponent<PlayerData>()?.Name} has gained an effect: {effectData?.Name}! Remaining turns: {effectDuration.Remaining}");
+                    TurnManager.WaitForKey();
                 }
                 else
                 {
                     Console.WriteLine($"\n{effectData?.PlayerEntity.GetComponent<PlayerData>()?.Name} has gained an effect: {effectData?.Name}!");
+                    TurnManager.WaitForKey();
                 }
             }
         }
@@ -193,11 +207,13 @@ namespace CBA
             if (entity.GetComponent<PlayerData>() != null)
             {
                 Console.WriteLine($"\n{entity.GetComponent<PlayerData>()?.Name} has died!");
+                TurnManager.WaitForKey();
             }
             if (entity.GetComponent<ItemData>() != null)
             {
                 var itemData = entity.GetComponent<ItemData>();
                 Console.WriteLine($"\n{itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name} has lost {itemData?.Name}!");
+                TurnManager.WaitForKey();
             }
             if (entity.GetComponent<EffectData>() != null)
             {
@@ -206,10 +222,12 @@ namespace CBA
                 if (effectDuration != null)
                 {
                     Console.WriteLine($"\n{effectData?.PlayerEntity.GetComponent<PlayerData>()?.Name}'s effect: {effectData?.Name} has expired!");
+                    TurnManager.WaitForKey();
                 }
                 else
                 {
                     Console.WriteLine($"\n{effectData?.PlayerEntity.GetComponent<PlayerData>()?.Name} has lost an effect: {effectData?.Name}!");
+                    TurnManager.WaitForKey();
                 }
             }
         }
@@ -220,6 +238,7 @@ namespace CBA
             var playerName = itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name;
             var itemName = itemData?.Name;
             Console.WriteLine($"\n{playerName} equipped {itemName}!");
+            TurnManager.WaitForKey();
         }
         public static void PrintItemUnequipped(Entity item)
         {
@@ -227,6 +246,7 @@ namespace CBA
             var playerName = itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name;
             var itemName = itemData?.Name;
             Console.WriteLine($"\n{playerName} unequipped {itemName}!");
+            TurnManager.WaitForKey();
         }
         public static void PrintItemUsed(Entity item, Entity target)
         {
@@ -240,12 +260,14 @@ namespace CBA
             if (!usedOnSelf)
             {
                 Console.WriteLine($"\n{playerName} used {itemName} on themselves!");
+                TurnManager.WaitForKey();
             }
             else
             {
                 Console.WriteLine($"\n{playerName} used {itemName} on {targetName}!");
+                TurnManager.WaitForKey();
             }
-            
+
         }
         public static void PrintItemConsumed(Entity item)
         {
@@ -253,6 +275,7 @@ namespace CBA
             var itemName = itemData?.Name;
             var playerName = itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name;
             Console.WriteLine($"\n{playerName} consumed their {itemName}!");
+            TurnManager.WaitForKey();
         }
 
         public static void PrintInsufficientStamina(Entity item)
@@ -261,22 +284,26 @@ namespace CBA
             var playerName = itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name;
             var itemName = itemData?.Name;
             Console.WriteLine($"\n{playerName} lacks stamina to use {itemName}.");
+            TurnManager.WaitForKey();
         }
 
         public static void PrintStatChanged(StatsComponent stats, string statName)
         {
             var playerName = stats.Owner.GetComponent<PlayerData>();
             Console.WriteLine($"\n{playerName}'s {statName} changed to {stats.Get(statName)}.");
+            TurnManager.WaitForKey();
         }
         public static void PrintResourceChanged(ResourcesComponent resources, string resourceName)
         {
             var playerName = resources.Owner.GetComponent<PlayerData>();
             Console.WriteLine($"\n{playerName}'s {resourceName} is now {resources.Get(resourceName)}.");
+            TurnManager.WaitForKey();
         }
         public static void PrintResourceDepleted(ResourcesComponent resources, string resourceName)
         {
             var playerName = resources.Owner.GetComponent<PlayerData>();
             Console.WriteLine($"\n{playerName}'s {resourceName} has been depleted!");
+            TurnManager.WaitForKey();
         }
 
         public static void PrintDamageDealt(Entity itemOrEffect, Entity target, int finalDamage)
@@ -295,20 +322,86 @@ namespace CBA
             if (isItem)
             {
                 if (selfDamage)
+                {
                     Console.WriteLine($"\n{userName} damaged themselves with {sourceName} for {finalDamage} damage!");
+                    TurnManager.WaitForKey();
+                }
                 else
+                {
                     Console.WriteLine($"\n{userName} dealt {finalDamage} damage to {targetName} with {sourceName}!");
+                    TurnManager.WaitForKey();
+                }
             }
             else
             {
                 Console.WriteLine($"\n{userName} took {finalDamage} damage from {sourceName}!");
+                TurnManager.WaitForKey();
             }
         }
-            /*
-            public static void PrintEffectStacked(Entity player, Effect effect)
+
+        public static void PrintDodged(Entity itemOrEffect, Entity target)
+        {
+            var itemData = itemOrEffect.GetComponent<ItemData>();
+            var effectData = itemOrEffect.GetComponent<EffectData>();
+            var targetName = target.GetComponent<PlayerData>()?.Name;
+
+            if (itemData != null)
             {
-                Console.WriteLine($"\n{player.Name}'s effect {effect.Name} stacked to {effect.RemainingStacks} stacks!");
+                var itemName = itemData.Name;
+                var playerName = itemData.PlayerEntity.GetComponent<PlayerData>()?.Name;
+                Console.WriteLine($"\n{playerName}'s attack with {itemName} was dodged by {targetName}!");
+                TurnManager.WaitForKey();
+
             }
-            */
+            else if (effectData != null)
+            {
+                var effectName = effectData.Name;
+                Console.WriteLine($"\n{targetName} dodged damage from their {effectName} effect!");
+                TurnManager.WaitForKey();
+            }
+            else
+            {
+                throw new NullReferenceException($"{itemOrEffect} was null when it should have been an <Entity>.");
+            }
+        }
+
+        public static void PrintCritical(Entity itemOrEffect, Entity target)
+        {
+            var itemData = itemOrEffect.GetComponent<ItemData>();
+            var effectData = itemOrEffect.GetComponent<EffectData>();
+            var targetName = target.GetComponent<PlayerData>()?.Name;
+
+            if (itemData != null)
+            {
+                var itemName = itemData.Name;
+                var playerName = itemData.PlayerEntity.GetComponent<PlayerData>()?.Name;
+                Console.WriteLine($"\n{playerName}'s attack with {itemName} scored a critical hit on {targetName}!");
+                TurnManager.WaitForKey();
+
+            }
+            else if (effectData != null)
+            {
+                var effectName = effectData.Name;
+                Console.WriteLine($"\n{targetName} was critically damaged by their {effectName} effect!");
+                TurnManager.WaitForKey();
+            }
+            else
+            {
+                throw new NullReferenceException($"{itemOrEffect} was null when it should have been an <Entity>.");
+            }
+        }
+
+        public static void PrintPeered(List<String> targetItems, Entity target)
+        {
+            Console.WriteLine($"\nPeer activated! {target.GetComponent<PlayerData>()?.Name ?? "Enemy"}'s inventory:");
+            Console.WriteLine(string.Join(", ", targetItems));
+            TurnManager.WaitForKey();
+        }
+        /*
+        public static void PrintEffectStacked(Entity player, Effect effect)
+        {
+            Console.WriteLine($"\n{player.Name}'s effect {effect.Name} stacked to {effect.RemainingStacks} stacks!");
+        }
+        */
     }
 }

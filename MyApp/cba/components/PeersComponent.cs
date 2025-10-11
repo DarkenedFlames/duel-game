@@ -42,10 +42,7 @@ namespace CBA
 
             if (enemyItems.Count > 0)
             {
-                Console.WriteLine($"\nPeer activated! {enemy.GetComponent<PlayerData>()?.Name ?? "Enemy"}'s inventory:");
-                Console.WriteLine(string.Join(", ", enemyItems));
-                Console.WriteLine("Press any key to continue...");
-                Console.ReadKey(true);
+                Printer.PrintPeered(enemyItems, enemy);
             }
         }
     }

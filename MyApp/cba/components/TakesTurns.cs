@@ -19,14 +19,13 @@ namespace CBA
         public void StartTurn()
         {
             IsActive = true;
-            Console.Clear();
-            Console.WriteLine($"--- {Owner.GetComponent<PlayerData>()?.Name}'s Turn Start ---");
+            Printer.PrintTurnStartHeader(Owner);
             OnTurnStart?.Invoke(Owner);
         }
 
         public void EndTurn()
         {
-            Console.WriteLine($"--- {Owner.GetComponent<PlayerData>()?.Name}'s Turn End ---");
+            Printer.PrintTurnEndHeader(Owner);
             OnTurnEnd?.Invoke(Owner);
             IsActive = false;
         }

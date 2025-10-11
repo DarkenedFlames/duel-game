@@ -116,7 +116,7 @@ namespace CBA
             Console.WriteLine("\nGame Over.");
         }
 
-        private void WaitForKey()
+        public static void WaitForKey()
         {
             Console.WriteLine("\nPress any key to continue...");
             Console.ReadKey(true);
