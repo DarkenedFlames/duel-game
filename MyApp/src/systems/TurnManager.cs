@@ -7,8 +7,6 @@ namespace CBA
 {
     public class TurnManager
     {
-        private int _turnIndex = 0;
-
         public void StartGameLoop()
         {
             var turnEntities = World.Instance.GetEntitiesWith<TakesTurns>().ToList();
@@ -18,38 +16,41 @@ namespace CBA
                 return;
             }
 
-            while (turnEntities.Count > 1)
+            while (true) // main game loop
             {
-                turnEntities = World.Instance.GetEntitiesWith<TakesTurns>().ToList();
-                if (turnEntities.Count == 0) break;
-
-                var ordered = turnEntities
+                // Order turns for this round
+                var orderedTurns = turnEntities
                     .Select(e => e.GetComponent<TakesTurns>())
                     .OrderBy(t => t!.TurnOrder)
                     .ToList();
 
-                if (_turnIndex >= ordered.Count) _turnIndex = 0;
-
-                var currentTurn = ordered[_turnIndex];
-                if (currentTurn == null || !currentTurn.IsActive)
+                foreach (var currentTurn in orderedTurns)
                 {
-                    _turnIndex++;
-                    continue;
+                    if (currentTurn == null) continue;
+
+                    var player = currentTurn.Owner;
+                    var playerData = player.GetComponent<PlayerData>();
+
+                    currentTurn.StartTurn(); // fires OnTurnStart
+
+                    HandlePlayerMenu(player, playerData);
+
+                    currentTurn.EndTurn(); // fires OnTurnEnd
                 }
 
-                var player = currentTurn.Owner;
-                var playerData = player.GetComponent<PlayerData>();
+                // Check game over: if <=1 alive player remains
+                var alivePlayers = turnEntities
+                    .Where(e => e.GetComponent<PlayerData>() != null)
+                    .ToList();
 
-                currentTurn.StartTurn();
-
-                HandlePlayerMenu(player, playerData);
-
-                currentTurn.EndTurn();
-                _turnIndex++;
+                if (alivePlayers.Count <= 1)
+                    break;
             }
 
             Printer.PrintMessage("\nGame Over.");
         }
+
+
 
         private void HandlePlayerMenu(Entity player, PlayerData? playerData)
         {

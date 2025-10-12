@@ -4,19 +4,17 @@ namespace CBA
     {
         private static int _nextTurnOrder = 0;
         public int TurnOrder { get; } = _nextTurnOrder++;
-        public bool IsActive { get; private set; } = true;
 
         public event Action<Entity>? OnTurnStart;
         public event Action<Entity>? OnTurnEnd;
 
         public override void Subscribe()
         {
-            // Optionally subscribe to world or other systems
+            // Optional subscription logic if needed
         }
 
         public void StartTurn()
         {
-            IsActive = true;
             Printer.PrintTurnStartHeader(Owner);
             OnTurnStart?.Invoke(Owner);
         }
@@ -25,7 +23,6 @@ namespace CBA
         {
             Printer.PrintTurnEndHeader(Owner);
             OnTurnEnd?.Invoke(Owner);
-            IsActive = false;
         }
     }
 }

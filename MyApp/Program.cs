@@ -17,7 +17,7 @@ public class Program
             new GetsRandomItems(player);
             new PeersComponent(player);
             new RefillsStamina(player);
-            
+
             player.SubscribeAll();
         }
         world.TurnManager.StartGameLoop();
