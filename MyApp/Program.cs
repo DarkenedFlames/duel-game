@@ -13,7 +13,6 @@ public class Program
             new PlayerData(player, name);
             new StatsComponent(player);
             new ResourcesComponent(player);
-            new TakesTurns(player); 
             new GetsRandomItems(player);
             new PeersComponent(player);
             new RefillsStamina(player);

@@ -184,13 +184,11 @@ namespace CBA
             if (entity.GetComponent<PlayerData>() != null)
             {
                 Console.WriteLine($"\n{entity.GetComponent<PlayerData>()?.Name} has joined the game!");
-                InputHandler.WaitForKey();
             }
             if (entity.GetComponent<ItemData>() != null)
             {
                 var itemData = entity.GetComponent<ItemData>();
                 Console.WriteLine($"\n{itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name} has picked up {itemData?.Name}!");
-                InputHandler.WaitForKey();
             }
             if (entity.GetComponent<EffectData>() != null)
             {
@@ -199,12 +197,10 @@ namespace CBA
                 if (effectDuration != null)
                 {
                     Console.WriteLine($"\n{effectData?.PlayerEntity.GetComponent<PlayerData>()?.Name} has gained an effect: {effectData?.Name}! Remaining turns: {effectDuration.Remaining}");
-                    InputHandler.WaitForKey();
                 }
                 else
                 {
                     Console.WriteLine($"\n{effectData?.PlayerEntity.GetComponent<PlayerData>()?.Name} has gained an effect: {effectData?.Name}!");
-                    InputHandler.WaitForKey();
                 }
             }
         }
@@ -213,13 +209,11 @@ namespace CBA
             if (entity.GetComponent<PlayerData>() != null)
             {
                 Console.WriteLine($"\n{entity.GetComponent<PlayerData>()?.Name} has died!");
-                InputHandler.WaitForKey();
             }
             if (entity.GetComponent<ItemData>() != null)
             {
                 var itemData = entity.GetComponent<ItemData>();
                 Console.WriteLine($"\n{itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name} has lost {itemData?.Name}!");
-                InputHandler.WaitForKey();
             }
             if (entity.GetComponent<EffectData>() != null)
             {
@@ -228,12 +222,10 @@ namespace CBA
                 if (effectDuration != null)
                 {
                     Console.WriteLine($"\n{effectData?.PlayerEntity.GetComponent<PlayerData>()?.Name}'s effect: {effectData?.Name} has expired!");
-                    InputHandler.WaitForKey();
                 }
                 else
                 {
                     Console.WriteLine($"\n{effectData?.PlayerEntity.GetComponent<PlayerData>()?.Name} has lost an effect: {effectData?.Name}!");
-                    InputHandler.WaitForKey();
                 }
             }
         }
@@ -242,13 +234,11 @@ namespace CBA
         {
             var itemData = item.GetComponent<ItemData>();
             Console.WriteLine($"\n{itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name} equipped {itemData?.Name}!");
-            InputHandler.WaitForKey();
         }
         public static void PrintItemUnequipped(Entity item)
         {
             var itemData = item.GetComponent<ItemData>();
             Console.WriteLine($"\n{itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name} unequipped {itemData?.Name}!");
-            InputHandler.WaitForKey();
         }
         public static void PrintItemUsed(Entity item, Entity target)
         {
@@ -259,15 +249,13 @@ namespace CBA
             var playerName = player?.GetComponent<PlayerData>()?.Name;
             var targetName = target.GetComponent<PlayerData>()?.Name;
 
-            if (!usedOnSelf)
+            if (usedOnSelf)
             {
                 Console.WriteLine($"\n{playerName} used {itemName} on themselves!");
-                InputHandler.WaitForKey();
             }
             else
             {
                 Console.WriteLine($"\n{playerName} used {itemName} on {targetName}!");
-                InputHandler.WaitForKey();
             }
 
         }
@@ -277,30 +265,25 @@ namespace CBA
             var itemName = itemData?.Name;
             var playerName = itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name;
             Console.WriteLine($"\n{playerName} consumed their {itemName}!");
-            InputHandler.WaitForKey();
         }
 
         public static void PrintInsufficientStamina(Entity item)
         {
             var itemData = item.GetComponent<ItemData>();
             Console.WriteLine($"\n{itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name} lacks stamina to use {itemData?.Name}.");
-            InputHandler.WaitForKey();
         }
 
         public static void PrintStatChanged(StatsComponent stats, string statName)
         {
             Console.WriteLine($"\n{stats.Owner.GetComponent<PlayerData>()?.Name}'s {statName} changed to {stats.Get(statName)}.");
-            InputHandler.WaitForKey();
         }
         public static void PrintResourceChanged(ResourcesComponent resources, string resourceName)
         {
             Console.WriteLine($"\n{resources.Owner.GetComponent<PlayerData>()?.Name}'s {resourceName} is now {resources.Get(resourceName)}.");
-            InputHandler.WaitForKey();
         }
         public static void PrintResourceDepleted(ResourcesComponent resources, string resourceName)
         {
             Console.WriteLine($"\n{resources.Owner.GetComponent<PlayerData>()?.Name}'s {resourceName} has been depleted!");
-            InputHandler.WaitForKey();
         }
 
         public static void PrintDamageDealt(Entity itemOrEffect, Entity target, int finalDamage)
@@ -321,18 +304,15 @@ namespace CBA
                 if (selfDamage)
                 {
                     Console.WriteLine($"\n{userName} damaged themselves with {sourceName} for {finalDamage} damage!");
-                    InputHandler.WaitForKey();
                 }
                 else
                 {
                     Console.WriteLine($"\n{userName} dealt {finalDamage} damage to {targetName} with {sourceName}!");
-                    InputHandler.WaitForKey();
                 }
             }
             else
             {
                 Console.WriteLine($"\n{userName} took {finalDamage} damage from {sourceName}!");
-                InputHandler.WaitForKey();
             }
         }
 
@@ -347,14 +327,12 @@ namespace CBA
                 var itemName = itemData.Name;
                 var playerName = itemData.PlayerEntity.GetComponent<PlayerData>()?.Name;
                 Console.WriteLine($"\n{playerName}'s attack with {itemName} was dodged by {targetName}!");
-                InputHandler.WaitForKey();
 
             }
             else if (effectData != null)
             {
                 var effectName = effectData.Name;
                 Console.WriteLine($"\n{targetName} dodged damage from their {effectName} effect!");
-                InputHandler.WaitForKey();
             }
             else
             {
@@ -373,14 +351,12 @@ namespace CBA
                 var itemName = itemData.Name;
                 var playerName = itemData.PlayerEntity.GetComponent<PlayerData>()?.Name;
                 Console.WriteLine($"\n{playerName}'s attack with {itemName} scored a critical hit on {targetName}!");
-                InputHandler.WaitForKey();
 
             }
             else if (effectData != null)
             {
                 var effectName = effectData.Name;
                 Console.WriteLine($"\n{targetName} was critically damaged by their {effectName} effect!");
-                InputHandler.WaitForKey();
             }
             else
             {

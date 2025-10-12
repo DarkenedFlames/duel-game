@@ -7,84 +7,109 @@ namespace CBA
 {
     public class TurnManager
     {
+        public event Action<Entity>? OnTurnStart;
+        public event Action<Entity>? OnTurnEnd;
+
         public void StartGameLoop()
         {
-            var turnEntities = World.Instance.GetEntitiesWith<TakesTurns>().ToList();
-            if (turnEntities.Count == 0)
+            bool gameEnded = false;
+
+            while (!gameEnded)
             {
-                Printer.PrintMessage("No entities have TakesTurns component.");
-                return;
-            }
-
-            while (true) // main game loop
-            {
-                // Order turns for this round
-                var orderedTurns = turnEntities
-                    .Select(e => e.GetComponent<TakesTurns>())
-                    .OrderBy(t => t!.TurnOrder)
-                    .ToList();
-
-                foreach (var currentTurn in orderedTurns)
-                {
-                    if (currentTurn == null) continue;
-
-                    var player = currentTurn.Owner;
-                    var playerData = player.GetComponent<PlayerData>();
-
-                    currentTurn.StartTurn(); // fires OnTurnStart
-
-                    HandlePlayerMenu(player, playerData);
-
-                    currentTurn.EndTurn(); // fires OnTurnEnd
-                }
-
-                // Check game over: if <=1 alive player remains
-                var alivePlayers = turnEntities
-                    .Where(e => e.GetComponent<PlayerData>() != null)
+                var alivePlayers = World.Instance
+                    .GetEntitiesWith<PlayerData>()
+                    .Where(p => p.GetComponent<ResourcesComponent>()?.Get("Health") > 0)
                     .ToList();
 
                 if (alivePlayers.Count <= 1)
+                {
+                    gameEnded = true;
                     break;
+                }
+
+                foreach (var player in alivePlayers.ToList())
+                {
+                    var resources = player.GetComponent<ResourcesComponent>();
+                    if (resources == null || resources.Get("Health") <= 0)
+                        continue;
+
+                    OnTurnStart?.Invoke(player);
+
+                    var playerData = player.GetComponent<PlayerData>();
+                    bool menuSignaledEnd = HandlePlayerMenu(player, playerData);
+
+                    OnTurnEnd?.Invoke(player);
+
+                    if (resources.Get("Health") <= 0)
+                        World.Instance.RemoveEntity(player);
+
+                    if (menuSignaledEnd)
+                    {
+                        gameEnded = true;
+                        break;
+                    }
+                }
             }
 
-            Printer.PrintMessage("\nGame Over.");
+            // When loop exits, print game over and winner
+            var survivors = World.Instance
+                .GetEntitiesWith<PlayerData>()
+                .Where(p => p.GetComponent<ResourcesComponent>()?.Get("Health") > 0)
+                .ToList();
+
+            if (survivors.Count == 1)
+            {
+                var winnerName = survivors[0].GetComponent<PlayerData>()?.Name ?? "Unknown";
+                Printer.PrintMessage($"\nGame Over! {winnerName} wins!");
+            }
+            else
+            {
+                Printer.PrintMessage("\nGame Over! No one survived.");
+            }
         }
 
-
-
-        private void HandlePlayerMenu(Entity player, PlayerData? playerData)
+        private bool HandlePlayerMenu(Entity player, PlayerData? playerData)
         {
             bool endTurn = false;
 
             while (!endTurn)
             {
+                var stillAlive = World.Instance
+                    .GetEntitiesWith<PlayerData>()
+                    .Where(p => p.GetComponent<ResourcesComponent>()?.Get("Health") > 0)
+                    .ToList();
+
+                // signal game end to loop but don't print
+                if (stillAlive.Count <= 1)
+                    return true;
+
                 Printer.ClearAndHeader($"Main Menu: {playerData?.Name}'s Turn");
                 Printer.PrintMenu(new List<string> { "Stats", "Inventory", "Equipment", "Status", "End Turn" });
                 int choice = InputHandler.GetNumberInput(1, 5);
 
                 switch (choice)
                 {
-                    case 1: // Stats
+                    case 1:
                         Printer.ClearAndHeader($"{playerData?.Name}'s Stats");
                         Printer.PrintStats(player);
                         InputHandler.WaitForKey();
                         break;
 
-                    case 2: // Inventory
+                    case 2:
                         HandleInventoryMenu(player, playerData);
                         break;
 
-                    case 3: // Equipment
+                    case 3:
                         HandleEquipmentMenu(player, playerData);
                         break;
 
-                    case 4: // Status
+                    case 4:
                         Printer.ClearAndHeader($"{playerData?.Name}'s Status");
                         Printer.PrintEffects(player);
                         InputHandler.WaitForKey();
                         break;
 
-                    case 5: // End Turn
+                    case 5:
                         endTurn = true;
                         break;
 
@@ -94,6 +119,8 @@ namespace CBA
                         break;
                 }
             }
+
+            return false; // normal turn end
         }
 
         private void HandleInventoryMenu(Entity player, PlayerData? playerData)

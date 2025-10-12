@@ -7,7 +7,14 @@ namespace CBA
 
         public override void Subscribe()
         {
-            Owner.GetComponent<EffectData>()?.PlayerEntity?.GetComponent<TakesTurns>()?.OnTurnStart += _ => TickDuration();
+            World.Instance.TurnManager.OnTurnStart += (player) =>
+            {
+                if (player == Owner.GetComponent<EffectData>()?.PlayerEntity)
+                {
+                    TickDuration();
+                }
+            };
+            
         }
 
         public void TickDuration()

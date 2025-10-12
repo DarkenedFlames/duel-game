@@ -4,7 +4,13 @@ namespace CBA
     {
         public override void Subscribe()
         {
-            Owner.GetComponent<TakesTurns>()?.OnTurnStart += RevealInventory;
+            World.Instance.TurnManager.OnTurnStart += (player) =>
+            {
+                if (player == Owner)
+                {
+                    RevealInventory(player);
+                }
+            };
         }
 
         private void RevealInventory(Entity playerEntity)

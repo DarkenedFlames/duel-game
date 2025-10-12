@@ -4,7 +4,13 @@ namespace CBA
     {
         public override void Subscribe()
         {
-            Owner.GetComponent<TakesTurns>()?.OnTurnStart += RefillStamina;
+            World.Instance.TurnManager.OnTurnStart += (player) =>
+            {
+                if (player == Owner)
+                {
+                    RefillStamina(player);
+                }
+            };
         }
 
         private void RefillStamina(Entity owner)

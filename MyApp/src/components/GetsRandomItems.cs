@@ -4,7 +4,13 @@ namespace CBA
     {
         public override void Subscribe()
         {
-            Owner.GetComponent<TakesTurns>()?.OnTurnStart += GiveRandomItem;
+            World.Instance.TurnManager.OnTurnStart += (player) =>
+            {
+                if (player == Owner)
+                {
+                    GiveRandomItem(player);
+                }
+            };
         }
 
         private void GiveRandomItem(Entity player)

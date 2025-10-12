@@ -21,12 +21,40 @@ namespace CBA
 
         private void OnStatChange(string statName)
         {
-            if (_stats != null)
+            if (_stats == null) return;
+
+            switch (statName)
             {
-                if (statName == "MaximumHealth") Clamp("Health", _stats.Get(statName));
-                if (statName == "MaximumStamina") Clamp("Stamina", _stats.Get(statName));
+                case "MaximumHealth":
+                    AdjustResourceForNewMax("Health", _stats.Get(statName));
+                    break;
+                case "MaximumStamina":
+                    AdjustResourceForNewMax("Stamina", _stats.Get(statName));
+                    break;
             }
         }
+
+        /// <summary>
+        /// Adjusts a resource when its maximum changes: increases the current value by the same delta.
+        /// </summary>
+        private void AdjustResourceForNewMax(string resourceName, int newMax)
+        {
+            if (!_values.TryGetValue(resourceName, out var value)) return;
+
+            int oldMax = resourceName switch
+            {
+                "Health" => _stats!.Get("MaximumHealth") - (newMax - Get("Health")),
+                "Stamina" => _stats!.Get("MaximumStamina") - (newMax - Get("Stamina")),
+                _ => newMax
+            };
+
+            int delta = newMax - oldMax;
+            int newValue = Math.Clamp(value.Value + delta, 0, newMax);
+
+            _values[resourceName] = (newValue, value.RestoreMult, value.SpendMult);
+            OnResourceChanged?.Invoke(resourceName);
+        }
+
 
         private void Clamp(string resourceName, int newMax)
         {

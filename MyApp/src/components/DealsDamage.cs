@@ -45,9 +45,13 @@ namespace CBA
             Owner.GetComponent<Usable>()?.OnUseSuccess += ApplyDamage;
 
             // --- Effect logic ---
-            var player = Owner.GetComponent<EffectData>()?.PlayerEntity;
-            player?.GetComponent<TakesTurns>()?.OnTurnStart += _ =>
-                ApplyDamage(Owner, player); // self-targeting effect
+            World.Instance.TurnManager.OnTurnStart += (player) =>
+            {
+                if (player == Owner.GetComponent<EffectData>()?.PlayerEntity)
+                {
+                    ApplyDamage(Owner, player);
+                }
+            };
         }
 
         private void ApplyDamage(Entity source, Entity? target)

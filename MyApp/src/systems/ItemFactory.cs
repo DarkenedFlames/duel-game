@@ -67,7 +67,7 @@ namespace CBA
                 {
                     // Order matters, some components depend on others.
                     new ItemData(itemEntity, "Baby Blue Brew", ItemRarity.Common, ItemType.Consumable, player);
-                    new Usable(itemEntity, 15);
+                    new Usable(itemEntity, 0);
                     new Consumable(itemEntity);
                     var modifiesStats = new ModifiesStats(itemEntity, ModifiesStatsTrigger.OnUse);
                     modifiesStats.ResourceAdditions["Stamina"] = 25;
