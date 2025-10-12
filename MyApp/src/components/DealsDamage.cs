@@ -98,10 +98,8 @@ namespace CBA
             if (finalDamage > 0)
             {
                 targetResources?.Change("Health", -finalDamage);
-                Printer.PrintDamageDealt(Owner, target, finalDamage);
+                OnDamageDealt?.Invoke(source, target, finalDamage);
             }
-
-            OnDamageDealt?.Invoke(source, target, finalDamage);
         }
     }
 }

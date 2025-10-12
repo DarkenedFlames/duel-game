@@ -252,6 +252,7 @@ namespace CBA
                     // Order matters, some components depend on others.
                     new ItemData(itemEntity, "Brandish", ItemRarity.Common, ItemType.Weapon, player);
                     new Usable(itemEntity, 25);
+                    new Wearable(itemEntity, EquipType.Weapon);
                     new DealsDamage(itemEntity, damage: 10, DamageType.Physical, canCrit: true, canDodge: true);
                     var modifiesEffects = new ModifiesEffects(itemEntity);
                     modifiesEffects.TriggeredEffects[EffectTrigger.OnUse] = ["Inferno"];

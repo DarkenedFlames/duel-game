@@ -72,7 +72,7 @@ namespace CBA
         }
 
         // === Equipment Slots ===
-        public static void PrintEquipment(Entity player)
+        public static List<Entity> PrintEquipment(Entity player)
         {
             var equippedItems = World.Instance.GetEntitiesWith<Wearable>()
                 .Where(e =>
@@ -80,12 +80,13 @@ namespace CBA
                     var wearable = e.GetComponent<Wearable>();
                     var itemData = e.GetComponent<ItemData>();
                     return wearable != null &&
-                           itemData != null &&
-                           wearable.IsEquipped &&
-                           itemData.PlayerEntity == player;
+                        itemData != null &&
+                        wearable.IsEquipped &&
+                        itemData.PlayerEntity == player;
                 })
                 .ToList();
 
+            // Define slot order
             var slots = new List<(EquipType type, string label)>
             {
                 (EquipType.Weapon, "Weapon"),
@@ -95,22 +96,34 @@ namespace CBA
                 (EquipType.Accessory, "Accessory")
             };
 
-            foreach (var (type, label) in slots)
+            var orderedEquipment = new List<Entity>();
+
+            Console.WriteLine("Equipment:");
+            for (int i = 0; i < slots.Count; i++)
             {
-                var itemName = equippedItems.FirstOrDefault(e => e.GetComponent<Wearable>()?.EquipType == type)
-                    ?.GetComponent<ItemData>()?.Name ?? "(empty)";
-                Console.WriteLine($"{label}: {itemName}");
+                var (type, label) = slots[i];
+                var item = equippedItems.FirstOrDefault(e => e.GetComponent<Wearable>()?.EquipType == type);
+                var itemName = item?.GetComponent<ItemData>()?.Name ?? "(empty)";
+
+                // Print with numeric index
+                Console.WriteLine($"{i + 1}. {label}: {itemName}");
+
+                // Only add to list if there’s an actual item
+                if (item != null)
+                    orderedEquipment.Add(item);
             }
+
+            return orderedEquipment;
         }
 
+
         // === Item Menu Actions ===
-        public static string? PrintItemMenu(Entity itemEntity)
+        public static int? PrintItemMenu(Entity itemEntity)
         {
             var itemData = itemEntity.GetComponent<ItemData>();
             var player = itemData?.PlayerEntity;
             var playerData = player?.GetComponent<PlayerData>();
             var wearable = itemEntity.GetComponent<Wearable>();
-            var allPlayers = World.Instance.GetEntitiesWith<PlayerData>().ToList();
 
             if (itemData == null || playerData == null)
             {
@@ -142,7 +155,7 @@ namespace CBA
             for (int i = 0; i < actions.Count; i++)
                 Console.WriteLine($"{i + 1}. {actions[i]}");
 
-            Console.WriteLine("Enter a number to select an action, or press Enter to cancel.");
+            Console.WriteLine("Enter a number to select an action, or press Enter to cancel:");
 
             string? input = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(input))
@@ -154,18 +167,19 @@ namespace CBA
                 return null;
             }
 
-            return actions[choice - 1]; // return the selected action string
+            return choice; // Return the chosen number instead of the string
         }
+
 
         //================== Event Printers =================//
         public static void PrintTurnStartHeader(Entity player)
         {
             Console.Clear();
-            Console.WriteLine($"-----\n{player.GetComponent<PlayerData>()?.Name}'s turn has began!-----");
+            Console.WriteLine($"-----{player.GetComponent<PlayerData>()?.Name}'s turn has began!-----");
         }
         public static void PrintTurnEndHeader(Entity player)
         {
-            Console.WriteLine($"-----\n{player.GetComponent<PlayerData>()?.Name}'s turn has ended!-----");
+            Console.WriteLine($"-----{player.GetComponent<PlayerData>()?.Name}'s turn has ended!-----");
         }
 
 
@@ -231,17 +245,13 @@ namespace CBA
         public static void PrintItemEquipped(Entity item)
         {
             var itemData = item.GetComponent<ItemData>();
-            var playerName = itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name;
-            var itemName = itemData?.Name;
-            Console.WriteLine($"\n{playerName} equipped {itemName}!");
+            Console.WriteLine($"\n{itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name} equipped {itemData?.Name}!");
             TurnManager.WaitForKey();
         }
         public static void PrintItemUnequipped(Entity item)
         {
             var itemData = item.GetComponent<ItemData>();
-            var playerName = itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name;
-            var itemName = itemData?.Name;
-            Console.WriteLine($"\n{playerName} unequipped {itemName}!");
+            Console.WriteLine($"\n{itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name} unequipped {itemData?.Name}!");
             TurnManager.WaitForKey();
         }
         public static void PrintItemUsed(Entity item, Entity target)
@@ -277,28 +287,23 @@ namespace CBA
         public static void PrintInsufficientStamina(Entity item)
         {
             var itemData = item.GetComponent<ItemData>();
-            var playerName = itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name;
-            var itemName = itemData?.Name;
-            Console.WriteLine($"\n{playerName} lacks stamina to use {itemName}.");
+            Console.WriteLine($"\n{itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name} lacks stamina to use {itemData?.Name}.");
             TurnManager.WaitForKey();
         }
 
         public static void PrintStatChanged(StatsComponent stats, string statName)
         {
-            var playerName = stats.Owner.GetComponent<PlayerData>();
-            Console.WriteLine($"\n{playerName}'s {statName} changed to {stats.Get(statName)}.");
+            Console.WriteLine($"\n{stats.Owner.GetComponent<PlayerData>()?.Name}'s {statName} changed to {stats.Get(statName)}.");
             TurnManager.WaitForKey();
         }
         public static void PrintResourceChanged(ResourcesComponent resources, string resourceName)
         {
-            var playerName = resources.Owner.GetComponent<PlayerData>();
-            Console.WriteLine($"\n{playerName}'s {resourceName} is now {resources.Get(resourceName)}.");
+            Console.WriteLine($"\n{resources.Owner.GetComponent<PlayerData>()?.Name}'s {resourceName} is now {resources.Get(resourceName)}.");
             TurnManager.WaitForKey();
         }
         public static void PrintResourceDepleted(ResourcesComponent resources, string resourceName)
         {
-            var playerName = resources.Owner.GetComponent<PlayerData>();
-            Console.WriteLine($"\n{playerName}'s {resourceName} has been depleted!");
+            Console.WriteLine($"\n{resources.Owner.GetComponent<PlayerData>()?.Name}'s {resourceName} has been depleted!");
             TurnManager.WaitForKey();
         }
 

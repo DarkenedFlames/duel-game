@@ -73,7 +73,7 @@ namespace CBA
                             {
                                 var selectedItem = items[idx - 1];
                                 Printer.ClearAndHeader($"Item Menu: {playerData?.Name} using {selectedItem.GetComponent<ItemData>()?.Name}");
-                                string? action = Printer.PrintItemMenu(selectedItem);
+                                int? action = Printer.PrintItemMenu(selectedItem);
                                 HandleItemAction(selectedItem, action);
                                 WaitForKey();
                             }
@@ -81,9 +81,21 @@ namespace CBA
 
                         case "3": // Equipment
                             Printer.ClearAndHeader($"{playerData?.Name}'s Equipment");
-                            Printer.PrintEquipment(player);
-                            WaitForKey();
+
+                            // Collect equipped items
+                            var equippedItems = Printer.PrintEquipment(player);
+                            Console.WriteLine("\nEnter item number to open, or press Enter to go back:");
+                            string? equipInput = Console.ReadLine();
+                            if (int.TryParse(equipInput, out int equipIdx) && equipIdx > 0 && equipIdx <= equippedItems.Count)
+                            {
+                                var selectedEquip = equippedItems[equipIdx - 1];
+                                Printer.ClearAndHeader($"Equipment Menu: {playerData?.Name} using {selectedEquip.GetComponent<ItemData>()?.Name}");
+                                int? equipAction = Printer.PrintItemMenu(selectedEquip);
+                                HandleItemAction(selectedEquip, equipAction);
+                                WaitForKey();
+                            }
                             break;
+
 
                         case "4": // Status
                             Printer.ClearAndHeader($"{playerData?.Name}'s Status");
@@ -118,23 +130,48 @@ namespace CBA
             Console.ReadKey(true);
         }
 
-        private void HandleItemAction(Entity itemEntity, string? action)
+        private void HandleItemAction(Entity itemEntity, int? choice)
         {
-            if (string.IsNullOrWhiteSpace(action)) return;
+            if (choice == null) return;
 
             var itemData = itemEntity.GetComponent<ItemData>();
             var wearable = itemEntity.GetComponent<Wearable>();
             var player = itemData?.PlayerEntity;
             var playerData = player?.GetComponent<PlayerData>();
 
+            // Build the same menu list here to map number to action
+            var actions = new List<string> { "Remove" };
+
+            if (itemData?.PlayerEntity == player)
+            {
+                if (wearable != null)
+                {
+                    actions.Add(wearable.IsEquipped ? "Unequip" : "Equip");
+                    if (itemData?.Type == ItemType.Weapon && wearable.IsEquipped)
+                        actions.Add("Use");
+                }
+                else if (itemData?.Type == ItemType.Consumable)
+                {
+                    actions.Add("Use");
+                }
+            }
+
+            if (choice < 1 || choice > actions.Count)
+            {
+                Console.WriteLine("Invalid choice.");
+                return;
+            }
+
+            string action = actions[(int)choice - 1]; // map number → action
+
             switch (action.ToLower())
             {
-                case "remove item":
+                case "remove":
                     World.Instance.RemoveEntity(itemEntity);
                     Console.WriteLine($"{itemData?.Name} removed from world.");
                     break;
 
-                case "equip item":
+                case "equip":
                     if (wearable != null && !wearable.IsEquipped)
                     {
                         wearable.TryEquip();
@@ -144,7 +181,7 @@ namespace CBA
                         Console.WriteLine("Cannot equip this item.");
                     break;
 
-                case "unequip item":
+                case "unequip":
                     if (wearable != null && wearable.IsEquipped)
                     {
                         wearable.TryUnequip();
@@ -154,20 +191,20 @@ namespace CBA
                         Console.WriteLine("Cannot unequip this item.");
                     break;
 
-                case "use item":
-                    if (itemData != null && 
-                        (itemData.Type == ItemType.Consumable || (itemData.Type == ItemType.Weapon && wearable?.IsEquipped == true)))
+                case "use":
+                    if (itemData != null &&
+                        (itemData.Type == ItemType.Consumable ||
+                        (itemData.Type == ItemType.Weapon && wearable?.IsEquipped == true)))
                     {
-                        // Determine target
                         var allPlayers = World.Instance.GetEntitiesWith<PlayerData>().ToList();
                         Console.WriteLine($"Choose target for {itemData.Name}:");
+
                         for (int i = 0; i < allPlayers.Count; i++)
-                        {
                             Console.WriteLine($"{i + 1}. {allPlayers[i].GetComponent<PlayerData>()?.Name ?? "Unknown"}");
-                        }
 
                         string? targetInput = Console.ReadLine();
-                        if (int.TryParse(targetInput, out int targetIndex) && targetIndex >= 1 && targetIndex <= allPlayers.Count)
+                        if (int.TryParse(targetInput, out int targetIndex) &&
+                            targetIndex >= 1 && targetIndex <= allPlayers.Count)
                         {
                             var target = allPlayers[targetIndex - 1];
                             Console.WriteLine($"{playerData?.Name} used {itemData.Name} on {target.GetComponent<PlayerData>()?.Name ?? "Unknown"}!");
@@ -183,11 +220,8 @@ namespace CBA
                         Console.WriteLine("Cannot use this item right now.");
                     }
                     break;
-
-                default:
-                    Console.WriteLine("Unknown action.");
-                    break;
             }
         }
+
     }
 }

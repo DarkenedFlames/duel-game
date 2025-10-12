@@ -10,14 +10,14 @@ public class Program
         foreach (var name in playerNames)
         {
             var player = new PlayerEntity();
-            player.AddComponent(new PlayerData(player, name));
-            player.AddComponent(new StatsComponent(player));
-            player.AddComponent(new ResourcesComponent(player));
-            player.AddComponent(new TakesTurns(player)); 
-            player.AddComponent(new GetsRandomItems(player));
-            player.AddComponent(new PeersComponent(player));
-            player.AddComponent(new RefillsStamina(player));
-
+            new PlayerData(player, name);
+            new StatsComponent(player);
+            new ResourcesComponent(player);
+            new TakesTurns(player); 
+            new GetsRandomItems(player);
+            new PeersComponent(player);
+            new RefillsStamina(player);
+            
             player.SubscribeAll();
         }
         world.TurnManager.StartGameLoop();
