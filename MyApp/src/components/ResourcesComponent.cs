@@ -5,7 +5,7 @@ namespace CBA
         public event Action<string>? OnResourceChanged;
         public event Action<string>? OnResourceDepleted;
 
-        private StatsComponent? _stats;
+        private readonly StatsComponent? _stats;
 
         private readonly Dictionary<string, (int Value, float RestoreMult, float SpendMult)> _values = new();
 
@@ -34,9 +34,6 @@ namespace CBA
             }
         }
 
-        /// <summary>
-        /// Adjusts a resource when its maximum changes: increases the current value by the same delta.
-        /// </summary>
         private void AdjustResourceForNewMax(string resourceName, int newMax)
         {
             if (!_values.TryGetValue(resourceName, out var value)) return;
@@ -53,14 +50,6 @@ namespace CBA
 
             _values[resourceName] = (newValue, value.RestoreMult, value.SpendMult);
             OnResourceChanged?.Invoke(resourceName);
-        }
-
-
-        private void Clamp(string resourceName, int newMax)
-        {
-            var (Value, RestoreMult, SpendMult) = _values[resourceName];
-            int clamped = Math.Clamp(Value, 0, newMax);
-            _values[resourceName] = (clamped, RestoreMult, SpendMult);
         }
 
         public int Get(string name)

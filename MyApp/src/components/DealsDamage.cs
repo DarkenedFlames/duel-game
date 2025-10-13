@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace CBA
 {
     public class DealsDamage : Component
@@ -41,53 +43,74 @@ namespace CBA
         {
             OnDamageDealt += Printer.PrintDamageDealt;
 
+            Usable? usable = Owner.GetComponent<Usable>();
+            EffectData? effectData = Owner.GetComponent<EffectData>();
+            Helper.NotAllAreNull
+            (
+                $"DealsDamage.Subscribe() requires Usable or EffectData: Source: {Owner}",
+                usable,
+                effectData
+            );
+
             // --- Item logic ---
-            Owner.GetComponent<Usable>()?.OnUseSuccess += ApplyDamage;
+            usable?.OnUseSuccess += ApplyDamage;
 
             // --- Effect logic ---
             World.Instance.TurnManager.OnTurnStart += (player) =>
             {
-                if (player == Owner.GetComponent<EffectData>()?.PlayerEntity)
-                {
-                    ApplyDamage(Owner, player);
-                }
+                if (player == effectData?.PlayerEntity) ApplyDamage(Owner, player);
             };
         }
 
-        private void ApplyDamage(Entity source, Entity? target)
+        private void ApplyDamage(Entity itemOrEffect, Entity target)
         {
-            if (target == null) return;
-
             int finalDamage = Damage;
 
-            var targetStats = target.GetComponent<StatsComponent>();
-            var targetResources = target.GetComponent<ResourcesComponent>();
-            var userStats = source.GetComponent<StatsComponent>();
+            StatsComponent targetStats = Helper.ThisIsNotNull
+            (
+                target.GetComponent<StatsComponent>(),
+                $"DealsDamage.ApplyDamage: Unexpected null value for target's StatsComponent."
+            );
 
-            // --- Dodge ---
-            if (CanDodge && targetStats != null)
+            ResourcesComponent targetResources = Helper.ThisIsNotNull
+            (
+                target.GetComponent<ResourcesComponent>(),
+                $"DealsDamage.ApplyDamage: Unexpected null value for target's ResourcesComponent."
+            );
+
+            // --- Identify source type ---
+            bool isItem = itemOrEffect.HasComponent<ItemData>();
+            bool isEffect = itemOrEffect.HasComponent<EffectData>();
+
+            // Only items have "users" (attackers)
+            StatsComponent? userStats = null;
+
+            // --- Dodge (applies to both) ---
+            if (CanDodge && Random.Shared.NextDouble() < targetStats.GetHyperbolic("Dodge"))
             {
-                if (Random.Shared.NextDouble() < targetStats.GetHyperbolic("Dodge"))
-                {
-                    Printer.PrintDodged(Owner, target);
-                    finalDamage = 0;
-                }
+                Printer.PrintDodged(Owner, target);
+                finalDamage = 0;
             }
 
-            // --- Crit ---
-            if (CanCrit && userStats != null && finalDamage > 0)
+            if (finalDamage > 0)
             {
-                
-                if (Random.Shared.NextDouble() < userStats.GetHyperbolic("Critical"))
+                // --- Crit (items only) ---
+                if (isItem && CanCrit)
                 {
-                    finalDamage = (int)(finalDamage * 2.0f);
-                    Printer.PrintCritical(Owner, target);
-                }
-            }
+                    userStats = Helper.ThisIsNotNull
+                    (
+                        World.Instance.GetPlayerOf(itemOrEffect)?.GetComponent<StatsComponent>(),
+                        "DealsDamage.ApplyDamage: Unexpected null value for user's StatsComponent."
+                    );
 
-            // --- Damage Reduction ---
-            if (targetStats != null && finalDamage > 0)
-            {
+                    if (Random.Shared.NextDouble() < userStats.GetHyperbolic("Critical"))
+                    {
+                        finalDamage = (int)(finalDamage * 2.0f);
+                        Printer.PrintCritical(Owner, target);
+                    }
+                }
+
+                // --- Damage Reduction ---
                 float divisor = DamageType switch
                 {
                     DamageType.Physical => targetStats.GetHyperbolic("Armor"),
@@ -96,13 +119,10 @@ namespace CBA
                 };
 
                 finalDamage = (int)(finalDamage / divisor);
-            }
 
-            // --- Apply Damage ---
-            if (finalDamage > 0)
-            {
-                targetResources?.Change("Health", -finalDamage);
-                OnDamageDealt?.Invoke(source, target, finalDamage);
+                // --- Apply Damage ---
+                targetResources.Change("Health", -finalDamage);
+                OnDamageDealt?.Invoke(itemOrEffect, target, finalDamage);
             }
         }
     }

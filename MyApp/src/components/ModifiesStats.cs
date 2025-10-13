@@ -26,19 +26,55 @@ namespace CBA
         {
             // --- Item logic ---
             if (Triggers.HasFlag(ModifiesStatsTrigger.OnUse))
-                Owner.GetComponent<Usable>()?.OnUseSuccess += (_, target) => Modify(target, true);
-
-            if (Triggers.HasFlag(ModifiesStatsTrigger.OnEquip) || Triggers.HasFlag(ModifiesStatsTrigger.OnUnequip))
             {
-                var wearable = Owner.GetComponent<Wearable>();
+                var usable = Helper.ThisIsNotNull(
+                    Owner.GetComponent<Usable>(),
+                    "ModifiesStats requires Usable for OnUse trigger."
+                );
+
+                usable.OnUseSuccess += (_, target) =>
+                    Modify(Helper.ThisIsNotNull(target, "Target cannot be null on use."), true);
+            }
+
+            if (Triggers.HasFlag(ModifiesStatsTrigger.OnEquip) || 
+                Triggers.HasFlag(ModifiesStatsTrigger.OnUnequip))
+            {
+                var wearable = Helper.ThisIsNotNull(
+                    Owner.GetComponent<Wearable>(),
+                    "ModifiesStats requires Wearable for OnEquip/OnUnequip trigger."
+                );
 
                 if (Triggers.HasFlag(ModifiesStatsTrigger.OnEquip))
-                    wearable?.OnEquipSuccess += item =>
-                        Modify(item.GetComponent<ItemData>()?.PlayerEntity, true);
+                {
+                    wearable.OnEquipSuccess += item =>
+                    {
+                        var itemData = Helper.ThisIsNotNull(
+                            item.GetComponent<ItemData>(),
+                            "ItemData missing for OnEquip."
+                        );
+                        var wearer = Helper.ThisIsNotNull(
+                            itemData.PlayerEntity,
+                            "PlayerEntity missing for OnEquip."
+                        );
+                        Modify(wearer, true);
+                    };
+                }
 
                 if (Triggers.HasFlag(ModifiesStatsTrigger.OnUnequip))
-                    wearable?.OnUnequipSuccess += item =>
-                        Modify(item.GetComponent<ItemData>()?.PlayerEntity, false);
+                {
+                    wearable.OnUnequipSuccess += item =>
+                    {
+                        var itemData = Helper.ThisIsNotNull(
+                            item.GetComponent<ItemData>(),
+                            "ItemData missing for OnUnequip."
+                        );
+                        var wearer = Helper.ThisIsNotNull(
+                            itemData.PlayerEntity,
+                            "PlayerEntity missing for OnUnequip."
+                        );
+                        Modify(wearer, false);
+                    };
+                }
             }
 
             // --- Effect logic ---
@@ -46,8 +82,8 @@ namespace CBA
             {
                 World.Instance.OnEntityAdded += entity =>
                 {
-                    var player = entity.GetComponent<EffectData>()?.PlayerEntity;
-                    if (entity == Owner && player != null)
+                    var effectData = entity.GetComponent<EffectData>();
+                    if (entity == Owner && effectData?.PlayerEntity is Entity player)
                         Modify(player, true);
                 };
             }
@@ -56,45 +92,50 @@ namespace CBA
             {
                 World.Instance.OnEntityRemoved += entity =>
                 {
-                    var player = entity.GetComponent<EffectData>()?.PlayerEntity;
-                    if (entity == Owner && player != null)
+                    var effectData = entity.GetComponent<EffectData>();
+                    if (entity == Owner && effectData?.PlayerEntity is Entity player)
                         Modify(player, false);
                 };
             }
         }
 
-        private void Modify(Entity? target, bool isApplying)
+        private void Modify(Entity target, bool isApplying)
         {
-            if (target == null) return;
+            var stats = Helper.ThisIsNotNull(
+                target.GetComponent<StatsComponent>(),
+                $"StatsComponent missing on {target}."
+            );
 
-            var stats = target.GetComponent<StatsComponent>();
-            var resources = target.GetComponent<ResourcesComponent>();
+            var resources = Helper.ThisIsNotNull(
+                target.GetComponent<ResourcesComponent>(),
+                $"ResourcesComponent missing on {target}."
+            );
 
             // --- Stats ---
             foreach (var (key, value) in StatAdditions)
             {
                 if (isApplying)
-                    stats?.IncreaseBase(key, value);
+                    stats.IncreaseBase(key, value);
                 else
-                    stats?.DecreaseBase(key, value);
+                    stats.DecreaseBase(key, value);
             }
 
             foreach (var (key, value) in StatModifiers)
             {
                 if (isApplying)
-                    stats?.IncreaseModifier(key, value);
+                    stats.IncreaseModifier(key, value);
                 else
-                    stats?.DecreaseModifier(key, value);
+                    stats.DecreaseModifier(key, value);
             }
 
             // --- Resources ---
             foreach (var (key, value) in ResourceAdditions)
-                resources?.Change(key, isApplying ? value : -value);
+                resources.Change(key, isApplying ? value : -value);
 
             foreach (var (key, value) in ResourceModifiers)
             {
                 if (value == 0f) continue;
-                resources?.ChangeMultiplier(key, isApplying ? value : 1f / value);
+                resources.ChangeMultiplier(key, isApplying ? value : 1f / value);
             }
 
             OnStatsModified?.Invoke(Owner, target);

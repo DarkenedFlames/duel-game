@@ -22,45 +22,86 @@ namespace CBA
             var usable = Owner.GetComponent<Usable>();
             var wearable = Owner.GetComponent<Wearable>();
 
+            // At least one of these must exist
+            Helper.NotAllAreNull(
+                "ModifiesEffects.Subscribe(): Expected either Usable or Wearable on entity " + Owner,
+                usable,
+                wearable
+            );
+
+            // --- Item use ---
             usable?.OnUseSuccess += (item, target) =>
                 ApplyByTrigger(EffectTrigger.OnUse, item, target);
 
-            wearable?.OnEquipSuccess += item =>
+            // --- Equip / Unequip logic ---
+            if (wearable is not null)
             {
-                var wearer = item.GetComponent<ItemData>()?.PlayerEntity;
-                if (wearer != null) ApplyByTrigger(EffectTrigger.OnEquip, item, wearer);
-            };
+                wearable.OnEquipSuccess += item =>
+                {
+                    var itemData = Helper.ThisIsNotNull(
+                        item.GetComponent<ItemData>(),
+                        "ItemData missing on equipped item."
+                    );
 
-            wearable?.OnUnequipSuccess += item =>
-            {
-                var wearer = item.GetComponent<ItemData>()?.PlayerEntity;
-                if (wearer != null) ApplyByTrigger(EffectTrigger.OnUnequip, item, wearer);
-            };
+                    var wearer = Helper.ThisIsNotNull(
+                        itemData.PlayerEntity,
+                        "PlayerEntity missing on equipped item."
+                    );
+
+                    ApplyByTrigger(EffectTrigger.OnEquip, item, wearer);
+                };
+
+                wearable.OnUnequipSuccess += item =>
+                {
+                    var itemData = Helper.ThisIsNotNull(
+                        item.GetComponent<ItemData>(),
+                        "ItemData missing on unequipped item."
+                    );
+
+                    var wearer = Helper.ThisIsNotNull(
+                        itemData.PlayerEntity,
+                        "PlayerEntity missing on unequipped item."
+                    );
+
+                    ApplyByTrigger(EffectTrigger.OnUnequip, item, wearer);
+                };
+            }
         }
 
         private void ApplyByTrigger(EffectTrigger trigger, Entity item, Entity target)
         {
-            if (!TriggeredEffects.TryGetValue(trigger, out var effects) || target == null) 
+            if (!TriggeredEffects.TryGetValue(trigger, out var effects))
                 return;
 
-            var user = item.GetComponent<ItemData>()?.PlayerEntity;
-            if (user == null) return;
+            // Ensure target and user are valid
+            var itemData = Helper.ThisIsNotNull(
+                item.GetComponent<ItemData>(),
+                "ItemData missing in ApplyByTrigger"
+            );
+
+            var user = Helper.ThisIsNotNull(
+                itemData.PlayerEntity,
+                "PlayerEntity missing for item in ApplyByTrigger"
+            );
+
+            var actualTarget = Helper.ThisIsNotNull(
+                target,
+                "Target cannot be null in ApplyByTrigger"
+            );
 
             foreach (var effectName in effects)
             {
                 if (trigger == EffectTrigger.OnUnequip)
-                    RemoveEffect(effectName, target);
+                    RemoveEffect(effectName, actualTarget);
                 else
-                    ApplyEffect(effectName, user, target);
+                    ApplyEffect(effectName, user, actualTarget);
             }
         }
 
         private void ApplyEffect(string effectName, Entity user, Entity target)
         {
-            var actualTarget = target ?? user; // fallback to user if target null
-
+            var actualTarget = target ?? user;
             EffectFactory.ApplyEffect(effectName, actualTarget);
-
             OnEffectApplied?.Invoke(Owner, actualTarget, effectName);
         }
 
@@ -68,8 +109,12 @@ namespace CBA
         {
             foreach (var e in World.Instance.GetEntitiesWith<EffectData>())
             {
-                var effectData = e.GetComponent<EffectData>();
-                if (effectData?.Name == effectName &&
+                var effectData = Helper.ThisIsNotNull(
+                    e.GetComponent<EffectData>(),
+                    $"Effect entity {e} missing EffectData."
+                );
+
+                if (effectData.Name == effectName &&
                     effectData.PlayerEntity == target)
                 {
                     World.Instance.RemoveEntity(e);

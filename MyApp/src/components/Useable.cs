@@ -14,11 +14,23 @@ namespace CBA
 
         public void TryUse(Entity target)
         {
-            var itemData = Owner.GetComponent<ItemData>() ?? throw new InvalidOperationException("ItemData component missing");
-            var user = itemData.PlayerEntity;
+            ItemData itemData = Helper.ThisIsNotNull(
+                Owner.GetComponent<ItemData>(),
+                "Useable.TryUse: Unexpected null value for itemData."
+            );
 
-            var resources = user.GetComponent<ResourcesComponent>();
-            if (resources == null || resources.Get("Stamina") < StaminaCost)
+            Entity user = Helper.ThisIsNotNull(
+                itemData.PlayerEntity,
+                "Usable.TryUse: Unexpected null value for user."
+            );
+
+            ResourcesComponent resources = Helper.ThisIsNotNull(
+                user.GetComponent<ResourcesComponent>(),
+                "Useable.TryUse: Unexpected null value for resources."
+            );
+
+
+            if (resources.Get("Stamina") < StaminaCost)
             {
                 OnUseFailed?.Invoke(Owner, target);
                 return;

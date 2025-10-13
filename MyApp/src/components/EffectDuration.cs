@@ -7,12 +7,11 @@ namespace CBA
 
         public override void Subscribe()
         {
+            EffectData effectData = Helper.ThisIsNotNull(Owner.GetComponent<EffectData>());
+
             World.Instance.TurnManager.OnTurnStart += (player) =>
             {
-                if (player == Owner.GetComponent<EffectData>()?.PlayerEntity)
-                {
-                    TickDuration();
-                }
+                if (player == effectData.PlayerEntity) TickDuration();
             };
             
         }

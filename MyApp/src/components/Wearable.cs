@@ -19,31 +19,34 @@ namespace CBA
         // Query for all items of the same ItemType and Owner and unequip them. Then, equip this item and fire OnEquipSuccess/Failed.
         public void TryEquip()
         {
-            var itemData = Owner.GetComponent<ItemData>();
-            if (itemData == null)
-            {
-                OnEquipFail?.Invoke(Owner);
-                return;
-            }
+            // Ensure we have ItemData for this item
+            ItemData itemData = Helper.ThisIsNotNull(
+                Owner.GetComponent<ItemData>(),
+                "Wearable.TryEquip: Unexpected null value for itemData."
+            );
 
-            // Find any other equipped item of the same type for this player
-            var conflicting = World.Instance.GetEntitiesWith<Wearable>()
+            Entity player = Helper.ThisIsNotNull(
+                itemData.PlayerEntity,
+                "Wearable.TryEquip: Unexpected null value for player."
+            );
+
+            // --- Find conflicting equipped item of the same type for this player ---
+            var conflicting = World.Instance
+                .GetItemsForPlayer(player)
                 .Select(e => e.GetComponent<Wearable>())
-                .Where(w =>
-                    w != null &&
-                    w.IsEquipped &&
-                    w.EquipType == EquipType &&
-                    w.Owner != Owner &&
-                    w.Owner.GetComponent<ItemData>()?.PlayerEntity == itemData.PlayerEntity)
+                .Where(w => w != null &&
+                            w.IsEquipped &&
+                            w.EquipType == EquipType &&
+                            w.Owner != Owner)
                 .FirstOrDefault();
 
-
-            // If there’s a conflicting item, unequip it first
+            // Unequip the conflicting item if it exists
             conflicting?.TryUnequip();
 
             // Equip this item
             IsEquipped = true;
             OnEquipSuccess?.Invoke(Owner);
+
         }
 
         // If item is equipped, unequip it. Fire OnUnequipSuccess/Failed event.

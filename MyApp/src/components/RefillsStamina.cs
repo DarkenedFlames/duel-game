@@ -6,16 +6,18 @@ namespace CBA
         {
             World.Instance.TurnManager.OnTurnStart += (player) =>
             {
-                if (player == Owner)
-                {
-                    RefillStamina(player);
-                }
+                if (player == Owner) RefillStamina();
             };
         }
 
-        private void RefillStamina(Entity owner)
+        private void RefillStamina()
         {
-            Owner.GetComponent<ResourcesComponent>()?.Refill("Stamina");
+            ResourcesComponent playerResources = Helper.ThisIsNotNull(
+                Owner.GetComponent<ResourcesComponent>(),
+                "RefillsStamina.RefillStamina: Unexpected null value for player's ResourcesComponent."
+            );
+            
+            playerResources.Refill("Stamina");
         }
     }
 

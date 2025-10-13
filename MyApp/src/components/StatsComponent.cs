@@ -19,8 +19,7 @@ namespace CBA
         public bool HasStat(string name) => _values.ContainsKey(name);
         private void ValidateStat(string name)
         {
-            if (!HasStat(name))
-                throw new ArgumentException($"Stat '{name}' does not exist.");
+            if (!HasStat(name)) throw new ArgumentException($"Stat '{name}' does not exist.");
         }
 
         public int Get(string name)
@@ -33,7 +32,7 @@ namespace CBA
         {
             ValidateStat(name);
             float hyperbolic = Get(name);
-            hyperbolic /= (hyperbolic + 100);
+            hyperbolic /= hyperbolic + 100;
             return hyperbolic;
         }
 
@@ -58,14 +57,6 @@ namespace CBA
         public override void Subscribe()
         {
             OnStatChanged += name => Printer.PrintStatChanged(this, name);
-        }
-
-        public override string ToString()
-        {
-            string result = "";
-            foreach (var kvp in _values)
-                result += $"{kvp.Key}: Base {kvp.Value.Base}, Modifier {kvp.Value.Modifier}, Final {Get(kvp.Key)}\n";
-            return result;
         }
     }
 }

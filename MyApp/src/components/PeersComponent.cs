@@ -6,41 +6,39 @@ namespace CBA
         {
             World.Instance.TurnManager.OnTurnStart += (player) =>
             {
-                if (player == Owner)
-                {
-                    RevealInventory(player);
-                }
+                Helper.ThisIsNotNull(player, "PeersComponent: Player entity in OnTurnStart was null.");
+                if (player == Owner) RevealInventory(player);
             };
         }
 
         private void RevealInventory(Entity playerEntity)
         {
-            if (playerEntity == null) return;
+            StatsComponent stats = Helper.ThisIsNotNull(
+                playerEntity.GetComponent<StatsComponent>(),
+                "PeersComponent.RevealInventory: StatsComponent was missing from playerEntity."
+            );
 
-            var stats = playerEntity.GetComponent<StatsComponent>();
-            var chance = stats?.GetHyperbolic("Peer");
+            float chance = stats.GetHyperbolic("Peer");
             if (chance <= 0) return;
 
             if (Random.Shared.NextDouble() >= chance) return;
 
             // --- Get all other players ---
-            var allPlayers = World.Instance.GetEntitiesWith<PlayerData>().ToList();
-            var enemies = allPlayers.Where(p => p != playerEntity).ToList();
+            List<Entity> allPlayers = World.Instance.GetAllPlayers().ToList();
+            Helper.ThisIsNotNull(allPlayers, "PeersComponent.RevealInventory: GetAllPlayers returned null or empty list.");
+
+            List<Entity> enemies = allPlayers.Where(p => p != playerEntity).ToList();
             if (enemies.Count == 0) return;
 
             // --- Pick one random enemy ---
-            var enemy = enemies[Random.Shared.Next(enemies.Count)];
+            Entity enemy = enemies[Random.Shared.Next(enemies.Count)];
+            Helper.ThisIsNotNull(enemy, "PeersComponent.RevealInventory: Selected enemy was null.");
 
             // --- Find all items belonging to that enemy ---
-            var enemyItems = World.Instance.GetEntitiesWith<ItemData>()
-                .Where(i => i.GetComponent<ItemData>()?.PlayerEntity == enemy)
-                .Select(i => i.GetComponent<ItemData>()?.Name ?? "Unknown")
-                .ToList();
+            List<string> enemyItems = [.. World.Instance.GetItemsForPlayer(enemy)
+                .Select(i => i.GetComponent<ItemData>()?.Name ?? "Unknown")];
 
-            if (enemyItems.Count > 0)
-            {
-                Printer.PrintPeered(enemyItems, enemy);
-            }
+            if (enemyItems.Count > 0) Printer.PrintPeered(enemyItems, enemy);
         }
     }
 }
