@@ -28,8 +28,8 @@ namespace CBA
         // --- Stats ---
         public static void PrintStats(Entity player)
         {
-            var resources = player.GetComponent<ResourcesComponent>();
-            var stats = player.GetComponent<StatsComponent>();
+            ResourcesComponent? resources = player.GetComponent<ResourcesComponent>();
+            StatsComponent? stats = player.GetComponent<StatsComponent>();
 
             if (resources != null && stats != null)
             {
@@ -50,15 +50,15 @@ namespace CBA
         // --- Status Effects ---
         public static void PrintEffects(Entity player)
         {
-            var effects = World.Instance.GetEntitiesWith<EffectData>()
+            IEnumerable<Entity>? effects = World.Instance.GetEntitiesWith<EffectData>()
                 .Where(e => e.GetComponent<EffectData>()?.PlayerEntity == player);
 
             if (!effects.Any()) { Console.WriteLine("(No active effects)"); return; }
 
-            foreach (var effect in effects)
+            foreach (Entity effect in effects)
             {
-                var data = effect.GetComponent<EffectData>();
-                var duration = effect.GetComponent<EffectDuration>()?.Remaining;
+                EffectData? data = effect.GetComponent<EffectData>();
+                int? duration = effect.GetComponent<EffectDuration>()?.Remaining;
                 Console.WriteLine($"- {data?.Name ?? "Unknown"} (Duration: {duration} turns)");
             }
         }
@@ -67,9 +67,9 @@ namespace CBA
         public static void PrintItemList(IEnumerable<Entity> items)
         {
             int idx = 1;
-            foreach (var item in items)
+            foreach (Entity? item in items)
             {
-                var name = item.GetComponent<ItemData>()?.Name ?? "Unknown";
+                string? name = item.GetComponent<ItemData>()?.Name;
                 Console.WriteLine($"{idx}. {name}");
                 idx++;
             }
@@ -79,34 +79,33 @@ namespace CBA
         // --- Equipment ---
         public static List<Entity> PrintEquipment(Entity player)
         {
-            var equippedItems = World.Instance.GetEntitiesWith<Wearable>()
+            List<Entity>? equippedItems = [.. World.Instance.GetEntitiesWith<Wearable>()
                 .Where(e =>
                 {
-                    var wearable = e.GetComponent<Wearable>();
-                    var itemData = e.GetComponent<ItemData>();
+                    Wearable? wearable = e.GetComponent<Wearable>();
+                    ItemData? itemData = e.GetComponent<ItemData>();
                     return wearable != null &&
                            itemData != null &&
                            wearable.IsEquipped &&
                            itemData.PlayerEntity == player;
-                })
-                .ToList();
+                })];
 
-            var slots = new List<(EquipType type, string label)>
-            {
+            List<(EquipType type, string label)>? slots =
+            [
                 (EquipType.Weapon, "Weapon"),
                 (EquipType.Helmet, "Helmet"),
                 (EquipType.Chestplate, "Chestplate"),
                 (EquipType.Leggings, "Leggings"),
                 (EquipType.Accessory, "Accessory")
-            };
+            ];
 
-            var orderedEquipment = new List<Entity>();
+            List<Entity>? orderedEquipment = [];
             Console.WriteLine("Equipment:");
             for (int i = 0; i < slots.Count; i++)
             {
-                var (type, label) = slots[i];
-                var item = equippedItems.FirstOrDefault(e => e.GetComponent<Wearable>()?.EquipType == type);
-                var itemName = item?.GetComponent<ItemData>()?.Name ?? "(empty)";
+                (EquipType type, string label) = slots[i];
+                Entity? item = equippedItems.FirstOrDefault(e => e.GetComponent<Wearable>()?.EquipType == type);
+                string? itemName = item?.GetComponent<ItemData>()?.Name;
                 Console.WriteLine($"{i + 1}. {label}: {itemName}");
                 if (item != null) orderedEquipment.Add(item);
             }
@@ -117,10 +116,10 @@ namespace CBA
         // --- Item Menu ---
         public static int? PrintItemMenu(Entity itemEntity)
         {
-            var itemData = itemEntity.GetComponent<ItemData>();
-            var player = itemData?.PlayerEntity;
-            var playerData = player?.GetComponent<PlayerData>();
-            var wearable = itemEntity.GetComponent<Wearable>();
+            ItemData? itemData = itemEntity.GetComponent<ItemData>();
+            Entity? player = itemData?.PlayerEntity;
+            PlayerData? playerData = player?.GetComponent<PlayerData>();
+            Wearable? wearable = itemEntity.GetComponent<Wearable>();
 
             if (itemData == null || playerData == null)
             {
@@ -130,7 +129,7 @@ namespace CBA
 
             ClearAndHeader($"Item Menu: {playerData.Name} using {itemData.Name}");
 
-            var actions = new List<string> { "Remove" };
+            List<string>? actions = ["Remove"];
 
             if (itemData.PlayerEntity == player)
             {
@@ -187,13 +186,13 @@ namespace CBA
             }
             if (entity.GetComponent<ItemData>() != null)
             {
-                var itemData = entity.GetComponent<ItemData>();
+                ItemData? itemData = entity.GetComponent<ItemData>();
                 Console.WriteLine($"\n{itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name} has picked up {itemData?.Name}!");
             }
             if (entity.GetComponent<EffectData>() != null)
             {
-                var effectData = entity.GetComponent<EffectData>();
-                var effectDuration = entity.GetComponent<EffectDuration>();
+                EffectData? effectData = entity.GetComponent<EffectData>();
+                EffectDuration? effectDuration = entity.GetComponent<EffectDuration>();
                 if (effectDuration != null)
                 {
                     Console.WriteLine($"\n{effectData?.PlayerEntity.GetComponent<PlayerData>()?.Name} has gained an effect: {effectData?.Name}! Remaining turns: {effectDuration.Remaining}");
@@ -212,13 +211,13 @@ namespace CBA
             }
             if (entity.GetComponent<ItemData>() != null)
             {
-                var itemData = entity.GetComponent<ItemData>();
+                ItemData? itemData = entity.GetComponent<ItemData>();
                 Console.WriteLine($"\n{itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name} has lost {itemData?.Name}!");
             }
             if (entity.GetComponent<EffectData>() != null)
             {
-                var effectData = entity.GetComponent<EffectData>();
-                var effectDuration = entity.GetComponent<EffectDuration>();
+                EffectData? effectData = entity.GetComponent<EffectData>();
+                EffectDuration? effectDuration = entity.GetComponent<EffectDuration>();
                 if (effectDuration != null)
                 {
                     Console.WriteLine($"\n{effectData?.PlayerEntity.GetComponent<PlayerData>()?.Name}'s effect: {effectData?.Name} has expired!");
@@ -232,22 +231,22 @@ namespace CBA
 
         public static void PrintItemEquipped(Entity item)
         {
-            var itemData = item.GetComponent<ItemData>();
+            ItemData? itemData = item.GetComponent<ItemData>();
             Console.WriteLine($"\n{itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name} equipped {itemData?.Name}!");
         }
         public static void PrintItemUnequipped(Entity item)
         {
-            var itemData = item.GetComponent<ItemData>();
+            ItemData? itemData = item.GetComponent<ItemData>();
             Console.WriteLine($"\n{itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name} unequipped {itemData?.Name}!");
         }
         public static void PrintItemUsed(Entity item, Entity target)
         {
-            var itemData = item.GetComponent<ItemData>();
-            var itemName = itemData?.Name;
-            var player = itemData?.PlayerEntity;
+            ItemData? itemData = item.GetComponent<ItemData>();
+            string? itemName = itemData?.Name;
+            Entity? player = itemData?.PlayerEntity;
             bool usedOnSelf = player == target;
-            var playerName = player?.GetComponent<PlayerData>()?.Name;
-            var targetName = target.GetComponent<PlayerData>()?.Name;
+            string? playerName = player?.GetComponent<PlayerData>()?.Name;
+            string? targetName = target.GetComponent<PlayerData>()?.Name;
 
             if (usedOnSelf)
             {
@@ -261,15 +260,15 @@ namespace CBA
         }
         public static void PrintItemConsumed(Entity item)
         {
-            var itemData = item.GetComponent<ItemData>();
-            var itemName = itemData?.Name;
-            var playerName = itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name;
+            ItemData? itemData = item.GetComponent<ItemData>();
+            string? itemName = itemData?.Name;
+            string? playerName = itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name;
             Console.WriteLine($"\n{playerName} consumed their {itemName}!");
         }
 
         public static void PrintInsufficientStamina(Entity item)
         {
-            var itemData = item.GetComponent<ItemData>();
+            ItemData? itemData = item.GetComponent<ItemData>();
             Console.WriteLine($"\n{itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name} lacks stamina to use {itemData?.Name}.");
         }
 
@@ -288,11 +287,11 @@ namespace CBA
 
         public static void PrintDamageDealt(Entity itemOrEffect, Entity target, int finalDamage)
         {
-            var itemData = itemOrEffect.GetComponent<ItemData>();
-            var effectData = itemOrEffect.GetComponent<EffectData>();
+            ItemData? itemData = itemOrEffect.GetComponent<ItemData>();
+            EffectData? effectData = itemOrEffect.GetComponent<EffectData>();
 
             bool isItem = itemData != null;
-            var user = isItem ? itemData?.PlayerEntity : effectData?.PlayerEntity;
+            Entity? user = isItem ? itemData?.PlayerEntity : effectData?.PlayerEntity;
             bool selfDamage = user == target;
 
             string? userName = user?.GetComponent<PlayerData>()?.Name;
@@ -318,20 +317,20 @@ namespace CBA
 
         public static void PrintDodged(Entity itemOrEffect, Entity target)
         {
-            var itemData = itemOrEffect.GetComponent<ItemData>();
-            var effectData = itemOrEffect.GetComponent<EffectData>();
-            var targetName = target.GetComponent<PlayerData>()?.Name;
+            ItemData? itemData = itemOrEffect.GetComponent<ItemData>();
+            EffectData? effectData = itemOrEffect.GetComponent<EffectData>();
+            string? targetName = target.GetComponent<PlayerData>()?.Name;
 
             if (itemData != null)
             {
-                var itemName = itemData.Name;
-                var playerName = itemData.PlayerEntity.GetComponent<PlayerData>()?.Name;
+                string itemName = itemData.Name;
+                string? playerName = itemData.PlayerEntity.GetComponent<PlayerData>()?.Name;
                 Console.WriteLine($"\n{playerName}'s attack with {itemName} was dodged by {targetName}!");
 
             }
             else if (effectData != null)
             {
-                var effectName = effectData.Name;
+                string effectName = effectData.Name;
                 Console.WriteLine($"\n{targetName} dodged damage from their {effectName} effect!");
             }
             else
@@ -342,20 +341,20 @@ namespace CBA
 
         public static void PrintCritical(Entity itemOrEffect, Entity target)
         {
-            var itemData = itemOrEffect.GetComponent<ItemData>();
-            var effectData = itemOrEffect.GetComponent<EffectData>();
-            var targetName = target.GetComponent<PlayerData>()?.Name;
+            ItemData? itemData = itemOrEffect.GetComponent<ItemData>();
+            EffectData? effectData = itemOrEffect.GetComponent<EffectData>();
+            string? targetName = target.GetComponent<PlayerData>()?.Name;
 
             if (itemData != null)
             {
-                var itemName = itemData.Name;
-                var playerName = itemData.PlayerEntity.GetComponent<PlayerData>()?.Name;
+                string? itemName = itemData.Name;
+                string? playerName = itemData.PlayerEntity.GetComponent<PlayerData>()?.Name;
                 Console.WriteLine($"\n{playerName}'s attack with {itemName} scored a critical hit on {targetName}!");
 
             }
             else if (effectData != null)
             {
-                var effectName = effectData.Name;
+                string effectName = effectData.Name;
                 Console.WriteLine($"\n{targetName} was critically damaged by their {effectName} effect!");
             }
             else

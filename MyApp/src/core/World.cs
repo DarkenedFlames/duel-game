@@ -80,25 +80,25 @@ namespace CBA
 
         public Entity? GetPlayerOfItem(Entity item)
         {
-            var itemData = item.GetComponent<ItemData>();
+            ItemData? itemData = item.GetComponent<ItemData>();
             return itemData?.PlayerEntity;
         }
 
         public Entity? GetPlayerOfEffect(Entity effect)
         {
-            var effectData = effect.GetComponent<EffectData>();
+            EffectData? effectData = effect.GetComponent<EffectData>();
             return effectData?.PlayerEntity;
         }
 
         public Entity? GetPlayerOf(Entity entity)
         {
             // Check if it’s an item
-            var itemData = entity.GetComponent<ItemData>();
+            ItemData? itemData = entity.GetComponent<ItemData>();
             if (itemData?.PlayerEntity != null)
                 return itemData.PlayerEntity;
 
             // Check if it’s an effect
-            var effectData = entity.GetComponent<EffectData>();
+            EffectData? effectData = entity.GetComponent<EffectData>();
             if (effectData?.PlayerEntity != null)
                 return effectData.PlayerEntity;
 

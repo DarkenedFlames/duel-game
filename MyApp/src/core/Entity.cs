@@ -22,7 +22,7 @@ namespace CBA
 
         public void RemoveComponent<T>() where T : Component
         {
-            var c = _components.OfType<T>().FirstOrDefault();
+            T? c = _components.OfType<T>().FirstOrDefault();
             if (c != null) _components.Remove(c);
         }
 
@@ -38,7 +38,7 @@ namespace CBA
         /// </summary>
         public void SubscribeAll()
         {
-            foreach (var component in _components)
+            foreach (Component? component in _components)
             {
                 component.Subscribe();
             }

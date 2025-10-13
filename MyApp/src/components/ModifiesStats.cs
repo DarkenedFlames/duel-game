@@ -27,7 +27,7 @@ namespace CBA
             // --- Item logic ---
             if (Triggers.HasFlag(ModifiesStatsTrigger.OnUse))
             {
-                var usable = Helper.ThisIsNotNull(
+                Usable usable = Helper.ThisIsNotNull(
                     Owner.GetComponent<Usable>(),
                     "ModifiesStats requires Usable for OnUse trigger."
                 );
@@ -39,7 +39,7 @@ namespace CBA
             if (Triggers.HasFlag(ModifiesStatsTrigger.OnEquip) || 
                 Triggers.HasFlag(ModifiesStatsTrigger.OnUnequip))
             {
-                var wearable = Helper.ThisIsNotNull(
+                Wearable wearable = Helper.ThisIsNotNull(
                     Owner.GetComponent<Wearable>(),
                     "ModifiesStats requires Wearable for OnEquip/OnUnequip trigger."
                 );
@@ -48,11 +48,11 @@ namespace CBA
                 {
                     wearable.OnEquipSuccess += item =>
                     {
-                        var itemData = Helper.ThisIsNotNull(
+                        ItemData itemData = Helper.ThisIsNotNull(
                             item.GetComponent<ItemData>(),
                             "ItemData missing for OnEquip."
                         );
-                        var wearer = Helper.ThisIsNotNull(
+                        Entity wearer = Helper.ThisIsNotNull(
                             itemData.PlayerEntity,
                             "PlayerEntity missing for OnEquip."
                         );
@@ -64,11 +64,11 @@ namespace CBA
                 {
                     wearable.OnUnequipSuccess += item =>
                     {
-                        var itemData = Helper.ThisIsNotNull(
+                        ItemData itemData = Helper.ThisIsNotNull(
                             item.GetComponent<ItemData>(),
                             "ItemData missing for OnUnequip."
                         );
-                        var wearer = Helper.ThisIsNotNull(
+                        Entity wearer = Helper.ThisIsNotNull(
                             itemData.PlayerEntity,
                             "PlayerEntity missing for OnUnequip."
                         );
@@ -82,7 +82,7 @@ namespace CBA
             {
                 World.Instance.OnEntityAdded += entity =>
                 {
-                    var effectData = entity.GetComponent<EffectData>();
+                    EffectData? effectData = entity.GetComponent<EffectData>();
                     if (entity == Owner && effectData?.PlayerEntity is Entity player)
                         Modify(player, true);
                 };
@@ -92,7 +92,7 @@ namespace CBA
             {
                 World.Instance.OnEntityRemoved += entity =>
                 {
-                    var effectData = entity.GetComponent<EffectData>();
+                    EffectData? effectData = entity.GetComponent<EffectData>();
                     if (entity == Owner && effectData?.PlayerEntity is Entity player)
                         Modify(player, false);
                 };
@@ -101,18 +101,18 @@ namespace CBA
 
         private void Modify(Entity target, bool isApplying)
         {
-            var stats = Helper.ThisIsNotNull(
+            StatsComponent stats = Helper.ThisIsNotNull(
                 target.GetComponent<StatsComponent>(),
                 $"StatsComponent missing on {target}."
             );
 
-            var resources = Helper.ThisIsNotNull(
+            ResourcesComponent resources = Helper.ThisIsNotNull(
                 target.GetComponent<ResourcesComponent>(),
                 $"ResourcesComponent missing on {target}."
             );
 
             // --- Stats ---
-            foreach (var (key, value) in StatAdditions)
+            foreach ((string key, int value) in StatAdditions)
             {
                 if (isApplying)
                     stats.IncreaseBase(key, value);
@@ -120,7 +120,7 @@ namespace CBA
                     stats.DecreaseBase(key, value);
             }
 
-            foreach (var (key, value) in StatModifiers)
+            foreach ((string key, float value) in StatModifiers)
             {
                 if (isApplying)
                     stats.IncreaseModifier(key, value);
@@ -129,10 +129,10 @@ namespace CBA
             }
 
             // --- Resources ---
-            foreach (var (key, value) in ResourceAdditions)
+            foreach ((string key, int value) in ResourceAdditions)
                 resources.Change(key, isApplying ? value : -value);
 
-            foreach (var (key, value) in ResourceModifiers)
+            foreach ((string key, float value) in ResourceModifiers)
             {
                 if (value == 0f) continue;
                 resources.ChangeMultiplier(key, isApplying ? value : 1f / value);

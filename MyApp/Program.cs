@@ -5,11 +5,11 @@ public class Program
     static void Main()
     {
         World world = new();
-        var playerNames = new List<string> { "Bob", "Alice" };
+        List<string> playerNames = ["Bob", "Alice"];
 
-        foreach (var name in playerNames)
+        foreach (string? name in playerNames)
         {
-            var player = new PlayerEntity();
+            Entity player = new PlayerEntity();
             new PlayerData(player, name);
             new StatsComponent(player);
             new ResourcesComponent(player);

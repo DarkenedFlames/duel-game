@@ -25,7 +25,7 @@ namespace CBA
         public int Get(string name)
         {
             ValidateStat(name);
-            var (Base, Modifier) = _values[name];
+            (int Base, float Modifier) = _values[name];
             return (int)(Base * Modifier);
         }
         public float GetHyperbolic(string name)
@@ -39,7 +39,7 @@ namespace CBA
         public void IncreaseBase(string name, int delta)
         {
             ValidateStat(name);
-            var (Base, Modifier) = _values[name];
+            (int Base, float Modifier) = _values[name];
             _values[name] = (Base + delta, Modifier);
             OnStatChanged?.Invoke(name);
         }
@@ -48,7 +48,7 @@ namespace CBA
         public void IncreaseModifier(string name, float factor)
         {
             ValidateStat(name);
-            var (Base, Modifier) = _values[name];
+            (int Base, float Modifier) = _values[name];
             _values[name] = (Base, Modifier * factor);
             OnStatChanged?.Invoke(name);
         }

@@ -15,7 +15,7 @@ namespace CBA
         public static void NotAllAreNull(string? message = null, params object?[] values)
         {
             bool allNull = true;
-            foreach (var value in values)
+            foreach (object? value in values)
             {
                 if (value is not null)
                 {

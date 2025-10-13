@@ -55,7 +55,7 @@ namespace CBA
                     new ItemData(itemEntity, "Ruby Red Remedy", ItemRarity.Common, ItemType.Consumable, player);
                     new Usable(itemEntity, 15);
                     new Consumable(itemEntity);
-                    var modifiesStats = new ModifiesStats(itemEntity, ModifiesStatsTrigger.OnUse);
+                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
                     modifiesStats.ResourceAdditions["Health"] = 25;
                 }
             },
@@ -69,7 +69,7 @@ namespace CBA
                     new ItemData(itemEntity, "Baby Blue Brew", ItemRarity.Common, ItemType.Consumable, player);
                     new Usable(itemEntity, 0);
                     new Consumable(itemEntity);
-                    var modifiesStats = new ModifiesStats(itemEntity, ModifiesStatsTrigger.OnUse);
+                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
                     modifiesStats.ResourceAdditions["Stamina"] = 25;
                 }
             },
@@ -83,7 +83,7 @@ namespace CBA
                     new ItemData(itemEntity, "Oozing Orange Oil", ItemRarity.Common, ItemType.Consumable, player);
                     new Usable(itemEntity, 15);
                     new Consumable(itemEntity);
-                    var modifiesStats = new ModifiesStats(itemEntity, ModifiesStatsTrigger.OnUse);
+                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
                     modifiesStats.StatAdditions["MaximumHealth"] = 5;
                 }
             },
@@ -97,7 +97,7 @@ namespace CBA
                     new ItemData(itemEntity, "Glowing Green Grog", ItemRarity.Common, ItemType.Consumable, player);
                     new Usable(itemEntity, 15);
                     new Consumable(itemEntity);
-                    var modifiesStats = new ModifiesStats(itemEntity, ModifiesStatsTrigger.OnUse);
+                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
                     modifiesStats.StatAdditions["MaximumStamina"] = 5;
                 }
             },
@@ -111,7 +111,7 @@ namespace CBA
                     new ItemData(itemEntity, "Yielding Yellow Yarb", ItemRarity.Common, ItemType.Consumable, player);
                     new Usable(itemEntity, 15);
                     new Consumable(itemEntity);
-                    var modifiesStats = new ModifiesStats(itemEntity, ModifiesStatsTrigger.OnUse);
+                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
                     modifiesStats.StatAdditions["Armor"] = 5;
                 }
             },
@@ -125,7 +125,7 @@ namespace CBA
                     new ItemData(itemEntity, "Pale Purple Potion", ItemRarity.Common, ItemType.Consumable, player);
                     new Usable(itemEntity, 15);
                     new Consumable(itemEntity);
-                    var modifiesStats = new ModifiesStats(itemEntity, ModifiesStatsTrigger.OnUse);
+                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
                     modifiesStats.StatAdditions["Shield"] = 5;
                 }
             },
@@ -139,7 +139,7 @@ namespace CBA
                     new ItemData(itemEntity, "Pupil Porridge", ItemRarity.Common, ItemType.Consumable, player);
                     new Usable(itemEntity, 15);
                     new Consumable(itemEntity);
-                    var modifiesStats = new ModifiesStats(itemEntity, ModifiesStatsTrigger.OnUse);
+                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
                     modifiesStats.StatAdditions["Critical"] = 5;
                 }
             },
@@ -153,7 +153,7 @@ namespace CBA
                     new ItemData(itemEntity, "Cartilage Chowder", ItemRarity.Common, ItemType.Consumable, player);
                     new Usable(itemEntity, 15);
                     new Consumable(itemEntity);
-                    var modifiesStats = new ModifiesStats(itemEntity, ModifiesStatsTrigger.OnUse);
+                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
                     modifiesStats.StatAdditions["Dodge"] = 5;
                 }
             },
@@ -167,7 +167,7 @@ namespace CBA
                     new ItemData(itemEntity, "Magpie Morsel", ItemRarity.Common, ItemType.Consumable, player);
                     new Usable(itemEntity, 15);
                     new Consumable(itemEntity);
-                    var modifiesStats = new ModifiesStats(itemEntity, ModifiesStatsTrigger.OnUse);
+                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
                     modifiesStats.StatAdditions["Luck"] = 5;
                 }
             },
@@ -181,7 +181,7 @@ namespace CBA
                     new ItemData(itemEntity, "Vulture Vittles", ItemRarity.Common, ItemType.Consumable, player);
                     new Usable(itemEntity, 15);
                     new Consumable(itemEntity);
-                    var modifiesStats = new ModifiesStats(itemEntity, ModifiesStatsTrigger.OnUse);
+                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
                     modifiesStats.StatAdditions["Peer"] = 5;
                 }
             },
@@ -200,7 +200,7 @@ namespace CBA
                     new ItemData(itemEntity, "Auburn Amalgam", ItemRarity.Uncommon, ItemType.Consumable, player);
                     new Usable(itemEntity, 15);
                     new Consumable(itemEntity);
-                    var modifiesStats = new ModifiesStats(itemEntity, ModifiesStatsTrigger.OnUse);
+                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
                     modifiesStats.StatModifiers["MaximumHealth"] = 1.25f;
                     modifiesStats.ResourceModifiers["Health"] = 1.25f;
                 }
@@ -215,7 +215,7 @@ namespace CBA
                     new ItemData(itemEntity, "Teal Tincture", ItemRarity.Uncommon, ItemType.Consumable, player);
                     new Usable(itemEntity, 15);
                     new Consumable(itemEntity);
-                    var modifiesStats = new ModifiesStats(itemEntity, ModifiesStatsTrigger.OnUse);
+                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
                     modifiesStats.StatModifiers["MaximumStamina"] = 1.25f;
                     modifiesStats.ResourceModifiers["Stamina"] = 1.25f;
                 }
@@ -230,7 +230,7 @@ namespace CBA
                     new ItemData(itemEntity, "Earthy Elixir", ItemRarity.Uncommon, ItemType.Consumable, player);
                     new Usable(itemEntity, 15);
                     new Consumable(itemEntity);
-                    var modifiesStats = new ModifiesStats(itemEntity, ModifiesStatsTrigger.OnUse);
+                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
                     modifiesStats.StatModifiers["Armor"] = 1.25f;
                     modifiesStats.StatModifiers["Shield"] = 1.25f;
                 }
@@ -254,7 +254,7 @@ namespace CBA
                     new Usable(itemEntity, 25);
                     new Wearable(itemEntity, EquipType.Weapon);
                     new DealsDamage(itemEntity, damage: 10, DamageType.Physical, canCrit: true, canDodge: true);
-                    var modifiesEffects = new ModifiesEffects(itemEntity);
+                    ModifiesEffects modifiesEffects = new(itemEntity);
                     modifiesEffects.TriggeredEffects[EffectTrigger.OnUse] = ["Inferno"];
                 }
             },
@@ -268,7 +268,7 @@ namespace CBA
             double roll = rng.NextDouble() * total;
             double cumulative = 0;
 
-            foreach (var kvp in chances)
+            foreach (KeyValuePair<T, double> kvp in chances)
             {
                 cumulative += kvp.Value;
                 if (roll <= cumulative)
@@ -282,26 +282,22 @@ namespace CBA
         public static Entity CreateRandomItem(Entity player)
         {
             // --- Step 1: Pick type and rarity based on weights ---
-            var itemType = PickRandom(TypeChances);
-            var rarity = PickRandom(RarityChances);
+            ItemType itemType = PickRandom(TypeChances);
+            ItemRarity rarity = PickRandom(RarityChances);
 
             // --- Step 2: Find exact matches ---
-            var candidates = ItemTemplates
-                .Where(t => t.Type == itemType && t.Rarity == rarity)
-                .ToList();
+            List<ItemTemplate>? candidates = [.. ItemTemplates.Where(t => t.Type == itemType && t.Rarity == rarity)];
 
             // --- Step 3: Fallback: same type, lower rarities ---
             if (candidates.Count == 0)
             {
-                var lowerRarities = RarityChances.Keys
+                IOrderedEnumerable<ItemRarity>? lowerRarities = RarityChances.Keys
                     .Where(r => r < rarity)
                     .OrderByDescending(r => r); // closest lower rarity first
 
-                foreach (var r in lowerRarities)
+                foreach (ItemRarity r in lowerRarities)
                 {
-                    candidates = ItemTemplates
-                        .Where(t => t.Type == itemType && t.Rarity == r)
-                        .ToList();
+                    candidates = [.. ItemTemplates.Where(t => t.Type == itemType && t.Rarity == r)];
                     if (candidates.Count > 0) break;
                 }
             }
@@ -309,10 +305,10 @@ namespace CBA
             // --- Step 4: Fallback: any type, closest rarity ---
             if (candidates.Count == 0)
             {
-                var raritiesByDistance = RarityChances.Keys
+                IOrderedEnumerable<ItemRarity>? raritiesByDistance = RarityChances.Keys
                     .OrderBy(r => Math.Abs((int)r - (int)rarity));
 
-                foreach (var r in raritiesByDistance)
+                foreach (ItemRarity r in raritiesByDistance)
                 {
                     candidates = [.. ItemTemplates.Where(t => t.Rarity == r)];
                     if (candidates.Count > 0) break;
@@ -324,16 +320,13 @@ namespace CBA
                 candidates = [.. ItemTemplates];
 
             // --- Step 6: Pick one randomly from remaining candidates ---
-            var chosenTemplate = candidates[rng.Next(candidates.Count)];
+            ItemTemplate chosenTemplate = candidates[rng.Next(candidates.Count)];
 
             // --- Step 7: Instantiate the entity and apply components ---
-            var itemEntity = new ItemEntity();
+            Entity itemEntity = new ItemEntity();
             chosenTemplate.Factory(itemEntity, player);
             itemEntity.SubscribeAll();
             World.Instance.AddEntity(itemEntity);
-
-            // --- Step 8: Add to world ---
-            // automatic
 
             return itemEntity;
         }

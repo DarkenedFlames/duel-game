@@ -30,7 +30,7 @@ namespace CBA
             );
 
             // --- Find conflicting equipped item of the same type for this player ---
-            var conflicting = World.Instance
+            Wearable? conflicting = World.Instance
                 .GetItemsForPlayer(player)
                 .Select(e => e.GetComponent<Wearable>())
                 .Where(w => w != null &&

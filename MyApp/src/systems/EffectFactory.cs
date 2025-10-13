@@ -4,6 +4,8 @@ namespace CBA
 
     public static class EffectFactory
     {
+        // OnEffectApplied: (player entity, effect entity)
+        public static event Action<Entity, Entity>? OnEffectApplied;
         public class EffectTemplate
         {
             public string Name { get; init; } = string.Empty;
@@ -28,7 +30,7 @@ namespace CBA
 
                     new EffectDuration(effectEntity, 3);
 
-                    var playerStats = Helper.ThisIsNotNull(
+                    StatsComponent playerStats = Helper.ThisIsNotNull(
                         player.GetComponent<StatsComponent>(),
                         "EffectTemplate 'Inferno': Unexpected null value for player StatComponent."
                     );
@@ -71,54 +73,51 @@ namespace CBA
 
         public static EffectTemplate GetTemplate(string name)
         {
-            var template = EffectTemplates.FirstOrDefault(t =>
-                t.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-
-            if (template == null)
-                throw new Exception($"Effect template '{name}' not found.");
-
+            EffectTemplate template = EffectTemplates.FirstOrDefault(t =>
+                t.Name.Equals(name, StringComparison.OrdinalIgnoreCase)) ?? throw new Exception($"Effect template '{name}' not found.");
             return template;
         }
 
         public static void ApplyEffect(string name, Entity playerEntity)
         {
-            var template = GetTemplate(name);
+            EffectTemplate template = GetTemplate(name);
 
             // Find existing instance on player
-            var existingEffect = World.Instance.GetEntitiesWith<EffectData>()
+            EffectData? existingEffect = World.Instance
+                .GetEffectsForPlayer(playerEntity)
                 .Select(e => e.GetComponent<EffectData>()!)
-                .FirstOrDefault(ed => ed.PlayerEntity == playerEntity &&
-                                      ed.Name == template.Name);
+                .FirstOrDefault(ed => ed.Name == template.Name);
+
 
             // Handle stacking/refresh before creating a new one
-            if (existingEffect != null)
+            switch (existingEffect?.StackingType)
             {
-                switch (existingEffect.StackingType)
-                {
-                    case StackingType.RefreshOnly:
-                        var dur = existingEffect.Owner.GetComponent<EffectDuration>();
-                        if (dur != null) dur.Remaining = dur.Maximum;
-                        return; // don’t create new
+                case StackingType.RefreshOnly:
+                    EffectDuration? dur = existingEffect.Owner.GetComponent<EffectDuration>();
+                    dur?.Remaining = dur.Maximum;
+                    return; // don’t create new
 
-                    case StackingType.AddStack:
-                        if (existingEffect.CurrentStacks < existingEffect.MaximumStacks)
-                        {
-                            existingEffect.CurrentStacks++;
-                            var d = existingEffect.Owner.GetComponent<EffectDuration>();
-                            if (d != null) d.Remaining = d.Maximum;
-                        }
-                        return;
+                case StackingType.AddStack:
+                    if (existingEffect.CurrentStacks < existingEffect.MaximumStacks)
+                    {
+                        existingEffect.CurrentStacks++;
+                        EffectDuration? d = existingEffect.Owner.GetComponent<EffectDuration>();
+                        d?.Remaining = d.Maximum;
+                    }
+                    return;
 
-                    case StackingType.Ignore:
-                        return;
+                case StackingType.Ignore:
+                    return;
                 }
-            }
+            
 
             // No existing effect → create a new one
-            var effectEntity = new EffectEntity();
+            Entity effectEntity = new EffectEntity();
             template.Factory?.Invoke(effectEntity, playerEntity);
             effectEntity.SubscribeAll();
             World.Instance.AddEntity(effectEntity);
+
+            OnEffectApplied?.Invoke(playerEntity, effectEntity);
         }
     }
 }

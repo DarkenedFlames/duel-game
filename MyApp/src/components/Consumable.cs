@@ -8,7 +8,7 @@ namespace CBA
 
         public override void Subscribe()
         {
-            var usable = Helper.ThisIsNotNull(
+            Usable usable = Helper.ThisIsNotNull(
                 Owner.GetComponent<Usable>(),
                 $"Consumable component requires Usable Component:" +
                 $"\n\tItem entity: {Owner.GetComponent<ItemData>()?.Name}, " +
