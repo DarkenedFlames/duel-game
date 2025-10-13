@@ -28,11 +28,14 @@ namespace CBA
 
                     new EffectDuration(effectEntity, 3);
 
-                    var playerStats = player.GetComponent<StatsComponent>();
+                    var playerStats = Helper.ThisIsNotNull(
+                        player.GetComponent<StatsComponent>(),
+                        "EffectTemplate 'Inferno': Unexpected null value for player StatComponent."
+                    );
 
                     new DealsDamage(
                         effectEntity,
-                        getDamage: () => {return (int)((playerStats?.Get("Health") ?? 0) * 0.01f);},
+                        getDamage: () => {return (int)((playerStats?.Get("MaximumHealth") ?? 0) * 0.01f);},
                         damageType: DamageType.Magical,
                         canCrit: false,
                         canDodge: false
@@ -115,6 +118,7 @@ namespace CBA
             var effectEntity = new EffectEntity();
             template.Factory?.Invoke(effectEntity, playerEntity);
             effectEntity.SubscribeAll();
+            World.Instance.AddEntity(effectEntity);
         }
     }
 }

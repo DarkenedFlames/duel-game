@@ -18,6 +18,7 @@ public class Program
             new RefillsStamina(player);
 
             player.SubscribeAll();
+            World.Instance.AddEntity(player);
         }
         world.TurnManager.StartGameLoop();
     }

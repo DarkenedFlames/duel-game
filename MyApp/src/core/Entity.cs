@@ -6,7 +6,7 @@ namespace CBA
 
         public Entity()
         {
-            World.Instance.AddEntity(this);
+            //World.Instance.AddEntity(this);
         }
 
         public void AddComponent<T>(T component) where T : Component

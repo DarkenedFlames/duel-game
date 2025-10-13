@@ -24,10 +24,10 @@ namespace CBA
             if (Random.Shared.NextDouble() >= chance) return;
 
             // --- Get all other players ---
-            List<Entity> allPlayers = World.Instance.GetAllPlayers().ToList();
+            List<Entity> allPlayers = [.. World.Instance.GetAllPlayers()];
             Helper.ThisIsNotNull(allPlayers, "PeersComponent.RevealInventory: GetAllPlayers returned null or empty list.");
 
-            List<Entity> enemies = allPlayers.Where(p => p != playerEntity).ToList();
+            List<Entity> enemies = [.. allPlayers.Where(p => p != playerEntity)];
             if (enemies.Count == 0) return;
 
             // --- Pick one random enemy ---

@@ -76,17 +76,17 @@ namespace CBA
             // Ensure target and user are valid
             var itemData = Helper.ThisIsNotNull(
                 item.GetComponent<ItemData>(),
-                "ItemData missing in ApplyByTrigger"
+                "ItemData missing in ModifiesEffects.ApplyByTrigger"
             );
 
             var user = Helper.ThisIsNotNull(
                 itemData.PlayerEntity,
-                "PlayerEntity missing for item in ApplyByTrigger"
+                "PlayerEntity missing for item in ModifiesEffects.ApplyByTrigger"
             );
 
             var actualTarget = Helper.ThisIsNotNull(
                 target,
-                "Target cannot be null in ApplyByTrigger"
+                "Target cannot be null in ModifiesEffects.ApplyByTrigger"
             );
 
             foreach (var effectName in effects)
@@ -100,7 +100,7 @@ namespace CBA
 
         private void ApplyEffect(string effectName, Entity user, Entity target)
         {
-            var actualTarget = target ?? user;
+            var actualTarget = target;
             EffectFactory.ApplyEffect(effectName, actualTarget);
             OnEffectApplied?.Invoke(Owner, actualTarget, effectName);
         }

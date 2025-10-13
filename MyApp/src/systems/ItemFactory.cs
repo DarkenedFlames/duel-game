@@ -330,6 +330,7 @@ namespace CBA
             var itemEntity = new ItemEntity();
             chosenTemplate.Factory(itemEntity, player);
             itemEntity.SubscribeAll();
+            World.Instance.AddEntity(itemEntity);
 
             // --- Step 8: Add to world ---
             // automatic

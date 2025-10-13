@@ -7,7 +7,6 @@ namespace CBA
         public EquipType EquipType { get; init; } = equipType;
 
         public event Action<Entity>? OnEquipSuccess;
-        public event Action<Entity>? OnEquipFail;
         public event Action<Entity>? OnUnequipSuccess;
         public event Action<Entity>? OnUnequipFail;
 
@@ -46,7 +45,6 @@ namespace CBA
             // Equip this item
             IsEquipped = true;
             OnEquipSuccess?.Invoke(Owner);
-
         }
 
         // If item is equipped, unequip it. Fire OnUnequipSuccess/Failed event.
