@@ -28,38 +28,33 @@ namespace CBA
         // --- Stats ---
         public static void PrintStats(Entity player)
         {
-            ResourcesComponent? resources = player.GetComponent<ResourcesComponent>();
-            StatsComponent? stats = player.GetComponent<StatsComponent>();
+            ResourcesComponent resources = player.GetComponent<ResourcesComponent>();
+            StatsComponent stats = player.GetComponent<StatsComponent>();
 
-            if (resources != null && stats != null)
-            {
-                Console.WriteLine($"Health: {resources.Get("Health")} / {stats.Get("MaximumHealth")}");
-                Console.WriteLine($"Stamina: {resources.Get("Stamina")} / {stats.Get("MaximumStamina")}");
-                Console.WriteLine($"Armor: {stats.Get("Armor")}");
-                Console.WriteLine($"Shield: {stats.Get("Shield")}");
-                Console.WriteLine($"Critical: {stats.Get("Critical")}");
-                Console.WriteLine($"Dodge: {stats.Get("Dodge")}");
-                Console.WriteLine($"Peer: {stats.Get("Peer")}");
-                Console.WriteLine($"Luck: {stats.Get("Luck")}");
-                Console.WriteLine($"Healing Modifier: {resources.GetRestoreMultiplier("Health"):P}");
-                Console.WriteLine($"Stimming Modifier: {resources.GetRestoreMultiplier("Stamina"):P}");
-            }
-            else Console.WriteLine($"{player.GetComponent<PlayerData>()?.Name} missing Stats or Resources component.");
+            Console.WriteLine($"Health: {resources.Get("Health")} / {stats.Get("MaximumHealth")}");
+            Console.WriteLine($"Stamina: {resources.Get("Stamina")} / {stats.Get("MaximumStamina")}");
+            Console.WriteLine($"Armor: {stats.Get("Armor")}");
+            Console.WriteLine($"Shield: {stats.Get("Shield")}");
+            Console.WriteLine($"Critical: {stats.Get("Critical")}");
+            Console.WriteLine($"Dodge: {stats.Get("Dodge")}");
+            Console.WriteLine($"Peer: {stats.Get("Peer")}");
+            Console.WriteLine($"Luck: {stats.Get("Luck")}");
+            Console.WriteLine($"Healing Modifier: {resources.GetRestoreMultiplier("Health"):P}");
+            Console.WriteLine($"Stimming Modifier: {resources.GetRestoreMultiplier("Stamina"):P}");
         }
 
         // --- Status Effects ---
         public static void PrintEffects(Entity player)
         {
-            IEnumerable<Entity>? effects = World.Instance.GetEntitiesWith<EffectData>()
-                .Where(e => e.GetComponent<EffectData>()?.PlayerEntity == player);
+            IEnumerable<Entity>? effects = World.Instance
+                .GetById(EntityCategory.Effect)
+                .Where(e => e.GetComponent<EffectData>().PlayerEntity == player);
 
             if (!effects.Any()) { Console.WriteLine("(No active effects)"); return; }
 
             foreach (Entity effect in effects)
             {
-                EffectData? data = effect.GetComponent<EffectData>();
-                int? duration = effect.GetComponent<EffectDuration>()?.Remaining;
-                Console.WriteLine($"- {data?.Name ?? "Unknown"} (Duration: {duration} turns)");
+                Console.WriteLine($"- {effect.DisplayName} (Duration: {effect.GetComponent<EffectDuration>().Remaining} turns)");
             }
         }
 

@@ -22,110 +22,86 @@ namespace CBA
 
         public event Action<Entity, Entity>? OnStatsModified;
 
+        public override void ValidateDependencies()
+        {
+            if (Owner.Id.Category != EntityCategory.Item || Owner.Id.Category != EntityCategory.Effect)
+                throw new InvalidOperationException($"ModifiesStats was given to an invalid category of entity: {Owner.Id}.");
+            
+            if (Owner.Id.Category == EntityCategory.Item && !Owner.HasComponent<Usable>() && !Owner.HasComponent<Wearable>())
+                throw new InvalidOperationException($"Component Missing a Dependency: (Owner: {Owner.Id}, Component: ModifiesStats, Dependency: Usable or Wearable.");            
+        }
         public override void Subscribe()
         {
-            // --- Item logic ---
-            if (Triggers.HasFlag(ModifiesStatsTrigger.OnUse))
-            {
-                Usable usable = Helper.ThisIsNotNull(
-                    Owner.GetComponent<Usable>(),
-                    "ModifiesStats requires Usable for OnUse trigger."
-                );
 
-                usable.OnUseSuccess += (_, target) =>
-                    Modify(Helper.ThisIsNotNull(target, "Target cannot be null on use."), true);
-            }
+            if (Owner.Id.Category == EntityCategory.Item)
 
-            if (Triggers.HasFlag(ModifiesStatsTrigger.OnEquip) || 
-                Triggers.HasFlag(ModifiesStatsTrigger.OnUnequip))
-            {
-                Wearable wearable = Helper.ThisIsNotNull(
-                    Owner.GetComponent<Wearable>(),
-                    "ModifiesStats requires Wearable for OnEquip/OnUnequip trigger."
-                );
+                if (!Triggers.HasFlag(ModifiesStatsTrigger.OnUse) && !Triggers.HasFlag(ModifiesStatsTrigger.OnEquip))
+                {
+                    throw new InvalidOperationException($"ModifiesStats was given to a valid item {Owner.Id}, but no valid trigger was provided.");
+                }
+
+                if (Triggers.HasFlag(ModifiesStatsTrigger.OnUse))
+                {
+                    if (Owner.HasComponent<Usable>())
+                    {
+                        Owner.GetComponent<Usable>().OnUseSuccess += (_, target) =>
+                        {
+                            if (target.Id.Category != EntityCategory.Player)
+                                throw new InvalidOperationException($"[{Owner.Id}] ModifiesStats was passed a non-player target: {target.Id}.");
+                            Modify(target, true);
+                        };
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"ModifiesStats has the OnUse trigger but {Owner.Id} is missing Usable.");
+                    }
+                }
 
                 if (Triggers.HasFlag(ModifiesStatsTrigger.OnEquip))
                 {
-                    wearable.OnEquipSuccess += item =>
+                    if (Owner.HasComponent<Wearable>())
                     {
-                        ItemData itemData = Helper.ThisIsNotNull(
-                            item.GetComponent<ItemData>(),
-                            "ItemData missing for OnEquip."
-                        );
-                        Entity wearer = Helper.ThisIsNotNull(
-                            itemData.PlayerEntity,
-                            "PlayerEntity missing for OnEquip."
-                        );
-                        Modify(wearer, true);
-                    };
+                        Wearable wearable = Owner.GetComponent<Wearable>();
+                        Entity wearer = Owner.GetComponent<ItemData>().PlayerEntity;
+                        wearable.OnEquipSuccess += _ => Modify(wearer, true);
+                        wearable.OnUnequipSuccess += _ => Modify(wearer, false);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"ModifiesStats has the OnEquip trigger but {Owner.Id} is missing Wearable.");
+                    }
                 }
 
-                if (Triggers.HasFlag(ModifiesStatsTrigger.OnUnequip))
+
+            if (Owner.Id.Category == EntityCategory.Effect)
+            {
+                if (Triggers.HasFlag(ModifiesStatsTrigger.OnApply))
                 {
-                    wearable.OnUnequipSuccess += item =>
-                    {
-                        ItemData itemData = Helper.ThisIsNotNull(
-                            item.GetComponent<ItemData>(),
-                            "ItemData missing for OnUnequip."
-                        );
-                        Entity wearer = Helper.ThisIsNotNull(
-                            itemData.PlayerEntity,
-                            "PlayerEntity missing for OnUnequip."
-                        );
-                        Modify(wearer, false);
-                    };
+                    Entity player = Owner.GetComponent<EffectData>().PlayerEntity;
+                    World.Instance.OnEntityAdded += entity => { if (entity == Owner) Modify(player, true); };
+                    World.Instance.OnEntityRemoved += entity => { if (entity == Owner) Modify(player, false); };
                 }
-            }
-
-            // --- Effect logic ---
-            if (Triggers.HasFlag(ModifiesStatsTrigger.OnApply))
-            {
-                World.Instance.OnEntityAdded += entity =>
-                {
-                    EffectData? effectData = entity.GetComponent<EffectData>();
-                    if (entity == Owner && effectData?.PlayerEntity is Entity player)
-                        Modify(player, true);
-                };
-            }
-
-            if (Triggers.HasFlag(ModifiesStatsTrigger.OnRemove))
-            {
-                World.Instance.OnEntityRemoved += entity =>
-                {
-                    EffectData? effectData = entity.GetComponent<EffectData>();
-                    if (entity == Owner && effectData?.PlayerEntity is Entity player)
-                        Modify(player, false);
-                };
             }
         }
-
         private void Modify(Entity target, bool isApplying)
         {
-            StatsComponent stats = Helper.ThisIsNotNull(
-                target.GetComponent<StatsComponent>(),
-                $"StatsComponent missing on {target}."
-            );
+            if (target.Id.Category != EntityCategory.Player)
+                throw new InvalidOperationException($"[{Owner.Id}] ModifiesStats.Modify was passed a non-player target.");
 
-            ResourcesComponent resources = Helper.ThisIsNotNull(
-                target.GetComponent<ResourcesComponent>(),
-                $"ResourcesComponent missing on {target}."
-            );
+            StatsComponent stats = target.GetComponent<StatsComponent>();
+            ResourcesComponent resources = target.GetComponent<ResourcesComponent>();
 
             // --- Stats ---
             foreach ((string key, int value) in StatAdditions)
             {
-                if (isApplying)
-                    stats.IncreaseBase(key, value);
-                else
-                    stats.DecreaseBase(key, value);
+                if (isApplying) stats.IncreaseBase(key, value);
+                else            stats.DecreaseBase(key, value);
             }
 
             foreach ((string key, float value) in StatModifiers)
             {
-                if (isApplying)
-                    stats.IncreaseModifier(key, value);
-                else
-                    stats.DecreaseModifier(key, value);
+                if (isApplying) stats.IncreaseModifier(key, value);
+                else            stats.DecreaseModifier(key, value);
             }
 
             // --- Resources ---

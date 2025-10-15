@@ -16,6 +16,11 @@ namespace CBA
             { "Luck", (0, 1.0f) }
         };
 
+        public override void ValidateDependencies()
+        {
+            if (Owner.Id.Category != EntityCategory.Player)
+                throw new InvalidOperationException($"StatsComponent was given to an invalid category of entity: {Owner.Id}.");
+        }
         public bool HasStat(string name) => _values.ContainsKey(name);
         private void ValidateStat(string name)
         {

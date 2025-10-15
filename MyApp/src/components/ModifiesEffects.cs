@@ -7,102 +7,55 @@ namespace CBA
         OnUse     = 1 << 0,
         OnEquip   = 1 << 1,
         OnUnequip = 1 << 2
-        // Future triggers: OnAttack, OnDefend, etc.
     }
 
     public class ModifiesEffects(Entity owner) : Component(owner)
     {
-        // Map triggers to list of effect names
         public Dictionary<EffectTrigger, List<string>> TriggeredEffects { get; } = new();
-
         public event Action<Entity, Entity, string>? OnEffectApplied;
 
+        public override void ValidateDependencies()
+        {
+            if (Owner.Id.Category != EntityCategory.Item)
+                throw new InvalidOperationException($"{Owner.Id} was given an invalid Component: ModifiesEffects.");
+
+            if (!Owner.HasComponent<Usable>() || !Owner.HasComponent<Wearable>())
+                throw new InvalidOperationException($"Component Missing a Dependency: (Owner: {Owner.Id}, Component: ModifiesEffects, Dependency: Usable or Wearable.");
+        }
         public override void Subscribe()
         {
-            Usable? usable = Owner.GetComponent<Usable>();
-            Wearable? wearable = Owner.GetComponent<Wearable>();
+            if (Owner.HasComponent<Usable>())
+                Owner.GetComponent<Usable>().OnUseSuccess += (_, target) => ApplyByTrigger(EffectTrigger.OnUse, target);
 
-            // At least one of these must exist
-            Helper.NotAllAreNull(
-                "ModifiesEffects.Subscribe(): Expected either Usable or Wearable on entity " + Owner,
-                usable,
-                wearable
-            );
-
-            // --- Item use ---
-            usable?.OnUseSuccess += (_, target) =>
-                ApplyByTrigger(EffectTrigger.OnUse, target);
-
-            // --- Equip / Unequip logic ---
-            if (wearable is not null)
+            if (Owner.HasComponent<Wearable>())
             {
-                wearable.OnEquipSuccess += item =>
-                {
-                    ItemData itemData = Helper.ThisIsNotNull(
-                        item.GetComponent<ItemData>(),
-                        "ItemData missing on equipped item."
-                    );
-
-                    Entity wearer = Helper.ThisIsNotNull(
-                        itemData.PlayerEntity,
-                        "PlayerEntity missing on equipped item."
-                    );
-
-                    ApplyByTrigger(EffectTrigger.OnEquip, wearer);
-                };
-
-                wearable.OnUnequipSuccess += item =>
-                {
-                    ItemData itemData = Helper.ThisIsNotNull(
-                        item.GetComponent<ItemData>(),
-                        "ItemData missing on unequipped item."
-                    );
-
-                    Entity wearer = Helper.ThisIsNotNull(
-                        itemData.PlayerEntity,
-                        "PlayerEntity missing on unequipped item."
-                    );
-
-                    ApplyByTrigger(EffectTrigger.OnUnequip, wearer);
-                };
+                Wearable wearable = Owner.GetComponent<Wearable>();
+                Entity wearer = Owner.GetComponent<ItemData>().PlayerEntity;
+                wearable.OnEquipSuccess += _ => { ApplyByTrigger(EffectTrigger.OnEquip, wearer); };
+                wearable.OnUnequipSuccess += _ => { ApplyByTrigger(EffectTrigger.OnUnequip, wearer); };   
             }
         }
-
         private void ApplyByTrigger(EffectTrigger trigger, Entity target)
         {
             if (!TriggeredEffects.TryGetValue(trigger, out List<string>? effects))
-                return;
-
-            foreach (string effectName in effects)
+                throw new InvalidOperationException($"[{Owner.Id}] Required trigger missing in TriggeredEffects: {nameof(trigger)}.");
+            
+            foreach (string effectTypeId in effects)
             {
-                if (trigger == EffectTrigger.OnUnequip)
-                    RemoveEffect(effectName, target);
-                else
-                    ApplyEffect(effectName, target);
+                if (trigger == EffectTrigger.OnUnequip) RemoveEffect(effectTypeId, target);
+                else ApplyEffect(effectTypeId, target);
             }
         }
-
-        private void ApplyEffect(string effectName, Entity target)
+        private void ApplyEffect(string effectTypeId, Entity target)
         {
-            EffectFactory.ApplyEffect(effectName, target);
-            OnEffectApplied?.Invoke(Owner, target, effectName);
+            EffectFactory.ApplyEffect(effectTypeId, target);
+            OnEffectApplied?.Invoke(Owner, target, effectTypeId);
         }
-
-        private static void RemoveEffect(string effectName, Entity target)
+        private static void RemoveEffect(string effectTypeId, Entity target)
         {
-            foreach (Entity e in World.Instance.GetEntitiesWith<EffectData>())
-            {
-                EffectData effectData = Helper.ThisIsNotNull(
-                    e.GetComponent<EffectData>(),
-                    $"Effect entity {e} missing EffectData."
-                );
-
-                if (effectData.Name == effectName &&
-                    effectData.PlayerEntity == target)
-                {
+            foreach (Entity e in World.Instance.GetById(EntityCategory.Effect, effectTypeId))
+                if (e.GetComponent<EffectData>().PlayerEntity == target)
                     World.Instance.RemoveEntity(e);
-                }
-            }
         }
     }
 }

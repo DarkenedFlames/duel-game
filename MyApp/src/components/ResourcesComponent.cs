@@ -6,14 +6,16 @@ namespace CBA
         public event Action<string>? OnResourceDepleted;
 
         private readonly StatsComponent _stats;
-        private readonly Dictionary<string, (int Value, float RestoreMult, float SpendMult)> _values = new();
+        private readonly Dictionary<string, (int Value, float RestoreMult, float SpendMult)> _values = [];
 
+        public override void ValidateDependencies()
+        {
+            if (Owner.Id.Category != EntityCategory.Player)
+                throw new InvalidOperationException($"ResourcesComponent was given to an invalid category of entity: {Owner.Id}.");
+        }
         public ResourcesComponent(Entity owner) : base(owner)
         {
-            _stats = Helper.ThisIsNotNull(
-                Owner.GetComponent<StatsComponent>(),
-                "ResourcesComponent (Constructor): Unexpected null value for _stats."
-            );
+            _stats = Owner.GetComponent<StatsComponent>();
 
             _values["Health"] = (_stats.Get("MaximumHealth"), 1f, 1f);
             _values["Stamina"] = (_stats.Get("MaximumStamina"), 1f, 1f);

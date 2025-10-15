@@ -10,6 +10,11 @@ namespace CBA
         public event Action<Entity>? OnUnequipSuccess;
         public event Action<Entity>? OnUnequipFail;
 
+        public override void ValidateDependencies()
+        {
+            if (Owner.Id.Category != EntityCategory.Item)
+                throw new InvalidOperationException($"Wearable was given to an invalid category of entity: {Owner.Id}.");
+        }
         public override void Subscribe()
         {
             // Optional subscriptions to world events
@@ -19,15 +24,7 @@ namespace CBA
         public void TryEquip()
         {
             // Ensure we have ItemData for this item
-            ItemData itemData = Helper.ThisIsNotNull(
-                Owner.GetComponent<ItemData>(),
-                "Wearable.TryEquip: Unexpected null value for itemData."
-            );
-
-            Entity player = Helper.ThisIsNotNull(
-                itemData.PlayerEntity,
-                "Wearable.TryEquip: Unexpected null value for player."
-            );
+            Entity player = Owner.GetComponent<ItemData>().PlayerEntity;
 
             // --- Find conflicting equipped item of the same type for this player ---
             Wearable? conflicting = World.Instance

@@ -2,21 +2,18 @@ namespace CBA
 {
     public class PeersComponent(Entity owner) : Component(owner)
     {
+        public override void ValidateDependencies()
+        {
+            if (Owner.Id.Category != EntityCategory.Player)
+                throw new InvalidOperationException($"PeersComponent was given to an invalid category of entity: {Owner.Id}.");
+        }
         public override void Subscribe()
         {
-            World.Instance.TurnManager.OnTurnStart += (player) =>
-            {
-                Helper.ThisIsNotNull(player, "PeersComponent: Player entity in OnTurnStart was null.");
-                if (player == Owner) RevealInventory(player);
-            };
+            World.Instance.TurnManager.OnTurnStart += (player) => { if (player == Owner) RevealInventory(); };
         }
-
-        private void RevealInventory(Entity playerEntity)
+        private void RevealInventory()
         {
-            StatsComponent stats = Helper.ThisIsNotNull(
-                playerEntity.GetComponent<StatsComponent>(),
-                "PeersComponent.RevealInventory: StatsComponent was missing from playerEntity."
-            );
+            StatsComponent stats = Owner.GetComponent<StatsComponent>();
 
             float chance = stats.GetHyperbolic("Peer");
             if (chance <= 0) return;
@@ -24,21 +21,19 @@ namespace CBA
             if (Random.Shared.NextDouble() >= chance) return;
 
             // --- Get all other players ---
-            List<Entity> allPlayers = [.. World.Instance.GetAllPlayers()];
-            Helper.ThisIsNotNull(allPlayers, "PeersComponent.RevealInventory: GetAllPlayers returned null or empty list.");
-
-            List<Entity> enemies = [.. allPlayers.Where(p => p != playerEntity)];
+            List<Entity> enemies = [..World.Instance.GetById(EntityCategory.Player).Where(p => p != Owner)];
             if (enemies.Count == 0) return;
 
             // --- Pick one random enemy ---
             Entity enemy = enemies[Random.Shared.Next(enemies.Count)];
-            Helper.ThisIsNotNull(enemy, "PeersComponent.RevealInventory: Selected enemy was null.");
 
             // --- Find all items belonging to that enemy ---
-            List<string> enemyItems = [.. World.Instance.GetItemsForPlayer(enemy)
-                .Select(i => i.GetComponent<ItemData>()?.Name ?? "Unknown")];
+            List<string> enemyItemNames = [..World.Instance
+                .GetById(EntityCategory.Item)
+                .Where(e => e.GetComponent<ItemData>().PlayerEntity == enemy)
+                .Select(e => e.DisplayName)];
 
-            if (enemyItems.Count > 0) Printer.PrintPeered(enemyItems, enemy);
+            if (enemyItemNames.Count > 0) Printer.PrintPeered(enemyItemNames, enemy);
         }
     }
 }

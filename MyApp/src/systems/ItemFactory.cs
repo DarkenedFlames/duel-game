@@ -1,10 +1,28 @@
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+
 namespace CBA
 {
-    // Concrete entity class for items
-    public class ItemEntity : Entity
-    {
-        // No extra members; just concrete so we can instantiate
-    }
+    public record ItemTemplate
+    (
+        EntityCategory Category,
+        string TypeId,
+        string DisplayName,
+        ItemType Type,
+        ItemRarity Rarity,
+        int? StaminaCost = null,
+        EquipType? EquipType = null,
+        ModifiesStatsTrigger? StatsTrigger = null,
+        Dictionary<string, int>? StatAdditions = null,
+        Dictionary<string, int>? ResourceAdditions = null,
+        Dictionary<string, float>? StatModifiers = null,
+        Dictionary<string, float>? ResourceModifiers = null,
+        Dictionary<EffectTrigger, List<string>>? EffectsByTrigger = null,
+        int Damage = 0,
+        DamageType DamageType = DamageType.Physical,
+        bool CanCrit = true,
+        bool CanDodge = true
+    );
 
     public static class ItemFactory
     {
@@ -27,17 +45,9 @@ namespace CBA
             { ItemRarity.Mythical, 0.001 }
         };
 
-        // Templates for all possible items
-        public class ItemTemplate
-        {
-            public ItemType Type { get; init; }
-            public ItemRarity Rarity { get; init; }
-            public Action<Entity, Entity> Factory { get; init; } = null!;
-        }
 
-        // Soon change how components subscribe so that order won't matter.
-        public static readonly List<ItemTemplate> ItemTemplates = new()
-        {
+        public static readonly List<ItemTemplate> ItemTemplates =
+        [
             // ==========================================================
             // Consumables
             // ==========================================================
@@ -45,196 +55,143 @@ namespace CBA
             //     Common
             //     ======================================================
 
-            new ItemTemplate
-            {
-                Type = ItemType.Consumable,
-                Rarity = ItemRarity.Common,
-                Factory = (itemEntity, player) =>
-                {
-                    // Order matters, some components depend on others.
-                    new ItemData(itemEntity, "Ruby Red Remedy", ItemRarity.Common, ItemType.Consumable, player);
-                    new Usable(itemEntity, 15);
-                    new Consumable(itemEntity);
-                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
-                    modifiesStats.ResourceAdditions["Health"] = 25;
-                }
-            },
-            new ItemTemplate
-            {
-                Type = ItemType.Consumable,
-                Rarity = ItemRarity.Common,
-                Factory = (itemEntity, player) =>
-                {
-                    // Order matters, some components depend on others.
-                    new ItemData(itemEntity, "Baby Blue Brew", ItemRarity.Common, ItemType.Consumable, player);
-                    new Usable(itemEntity, 0);
-                    new Consumable(itemEntity);
-                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
-                    modifiesStats.ResourceAdditions["Stamina"] = 25;
-                }
-            },
-            new ItemTemplate
-            {
-                Type = ItemType.Consumable,
-                Rarity = ItemRarity.Common,
-                Factory = (itemEntity, player) =>
-                {
-                    // Order matters, some components depend on others.
-                    new ItemData(itemEntity, "Oozing Orange Oil", ItemRarity.Common, ItemType.Consumable, player);
-                    new Usable(itemEntity, 15);
-                    new Consumable(itemEntity);
-                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
-                    modifiesStats.StatAdditions["MaximumHealth"] = 5;
-                }
-            },
-            new ItemTemplate
-            {
-                Type = ItemType.Consumable,
-                Rarity = ItemRarity.Common,
-                Factory = (itemEntity, player) =>
-                {
-                    // Order matters, some components depend on others.
-                    new ItemData(itemEntity, "Glowing Green Grog", ItemRarity.Common, ItemType.Consumable, player);
-                    new Usable(itemEntity, 15);
-                    new Consumable(itemEntity);
-                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
-                    modifiesStats.StatAdditions["MaximumStamina"] = 5;
-                }
-            },
-            new ItemTemplate
-            {
-                Type = ItemType.Consumable,
-                Rarity = ItemRarity.Common,
-                Factory = (itemEntity, player) =>
-                {
-                    // Order matters, some components depend on others.
-                    new ItemData(itemEntity, "Yielding Yellow Yarb", ItemRarity.Common, ItemType.Consumable, player);
-                    new Usable(itemEntity, 15);
-                    new Consumable(itemEntity);
-                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
-                    modifiesStats.StatAdditions["Armor"] = 5;
-                }
-            },
-            new ItemTemplate
-            {
-                Type = ItemType.Consumable,
-                Rarity = ItemRarity.Common,
-                Factory = (itemEntity, player) =>
-                {
-                    // Order matters, some components depend on others.
-                    new ItemData(itemEntity, "Pale Purple Potion", ItemRarity.Common, ItemType.Consumable, player);
-                    new Usable(itemEntity, 15);
-                    new Consumable(itemEntity);
-                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
-                    modifiesStats.StatAdditions["Shield"] = 5;
-                }
-            },
-            new ItemTemplate
-            {
-                Type = ItemType.Consumable,
-                Rarity = ItemRarity.Common,
-                Factory = (itemEntity, player) =>
-                {
-                    // Order matters, some components depend on others.
-                    new ItemData(itemEntity, "Pupil Porridge", ItemRarity.Common, ItemType.Consumable, player);
-                    new Usable(itemEntity, 15);
-                    new Consumable(itemEntity);
-                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
-                    modifiesStats.StatAdditions["Critical"] = 5;
-                }
-            },
-            new ItemTemplate
-            {
-                Type = ItemType.Consumable,
-                Rarity = ItemRarity.Common,
-                Factory = (itemEntity, player) =>
-                {
-                    // Order matters, some components depend on others.
-                    new ItemData(itemEntity, "Cartilage Chowder", ItemRarity.Common, ItemType.Consumable, player);
-                    new Usable(itemEntity, 15);
-                    new Consumable(itemEntity);
-                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
-                    modifiesStats.StatAdditions["Dodge"] = 5;
-                }
-            },
-            new ItemTemplate
-            {
-                Type = ItemType.Consumable,
-                Rarity = ItemRarity.Common,
-                Factory = (itemEntity, player) =>
-                {
-                    // Order matters, some components depend on others.
-                    new ItemData(itemEntity, "Magpie Morsel", ItemRarity.Common, ItemType.Consumable, player);
-                    new Usable(itemEntity, 15);
-                    new Consumable(itemEntity);
-                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
-                    modifiesStats.StatAdditions["Luck"] = 5;
-                }
-            },
-            new ItemTemplate
-            {
-                Type = ItemType.Consumable,
-                Rarity = ItemRarity.Common,
-                Factory = (itemEntity, player) =>
-                {
-                    // Order matters, some components depend on others.
-                    new ItemData(itemEntity, "Vulture Vittles", ItemRarity.Common, ItemType.Consumable, player);
-                    new Usable(itemEntity, 15);
-                    new Consumable(itemEntity);
-                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
-                    modifiesStats.StatAdditions["Peer"] = 5;
-                }
-            },
+            new(
+                EntityCategory.Item,
+                "ruby_red_remedy",
+                "Ruby Red Remedy",
+                ItemType.Consumable,
+                ItemRarity.Common,
+                StaminaCost: 15,
+                StatsTrigger: ModifiesStatsTrigger.OnUse,
+                ResourceAdditions: new() { { "Health", 25 } }
+            ),
+            new(
+                EntityCategory.Item,
+                "baby_blue_brew",
+                "Baby Blue Brew",
+                ItemType.Consumable,
+                ItemRarity.Common,
+                StaminaCost: 0,
+                StatsTrigger: ModifiesStatsTrigger.OnUse,
+                ResourceAdditions: new() { { "Stamina", 25 } }
+            ),
+            new(
+                EntityCategory.Item,
+                "oozing_orange_oil",
+                "Oozing Orange Oil",
+                ItemType.Consumable,
+                ItemRarity.Common,
+                StaminaCost: 15,
+                StatsTrigger: ModifiesStatsTrigger.OnUse,
+                StatAdditions: new() { { "MaximumHealth", 5 } }
+            ),
+            new(
+                EntityCategory.Item,
+                "glowing_green_grog",
+                "Glowing Green Grog",
+                ItemType.Consumable,
+                ItemRarity.Common,
+                StaminaCost: 15,
+                StatsTrigger: ModifiesStatsTrigger.OnUse,
+                StatAdditions: new() { { "MaximumStamina", 5 } }
+            ),
+            new(
+                EntityCategory.Item,
+                "yielding_yellow_yarb",
+                "Yielding Yellow Yarb",
+                ItemType.Consumable,
+                ItemRarity.Common,
+                StaminaCost: 15,
+                StatsTrigger: ModifiesStatsTrigger.OnUse,
+                StatAdditions: new() { { "Armor", 5 } }
+            ),
+            new(
+                EntityCategory.Item,
+                "pale_purple_potion",
+                "Pale Purple Potion",
+                ItemType.Consumable,
+                ItemRarity.Common,
+                StaminaCost: 15,
+                StatsTrigger: ModifiesStatsTrigger.OnUse,
+                StatAdditions: new() { { "Shield", 5 } }
+            ),
+            new(
+                EntityCategory.Item,
+                "pupil_porridge",
+                "Pupil Porridge",
+                ItemType.Consumable,
+                ItemRarity.Common,
+                StaminaCost: 15,
+                StatsTrigger: ModifiesStatsTrigger.OnUse,
+                StatAdditions: new() { { "Critical", 5 } }
+            ),
+            new(
+                EntityCategory.Item,
+                "cartilage_chowder",
+                "Cartilage Chowder",
+                ItemType.Consumable,
+                ItemRarity.Common,
+                StaminaCost: 15,
+                StatsTrigger: ModifiesStatsTrigger.OnUse,
+                StatAdditions: new() { { "Dodge", 5 } }
+            ),
+            new(
+                EntityCategory.Item,
+                "magpie_morsel",
+                "Magpie Morsel",
+                ItemType.Consumable,
+                ItemRarity.Common,
+                StaminaCost: 15,
+                StatsTrigger: ModifiesStatsTrigger.OnUse,
+                StatAdditions: new() { { "Luck", 5 } }
+            ),
+            new(
+                EntityCategory.Item,
+                "vulture_vittles",
+                "Vulture Vittles",
+                ItemType.Consumable,
+                ItemRarity.Common,
+                StaminaCost: 15,
+                StatsTrigger: ModifiesStatsTrigger.OnUse,
+                StatAdditions: new() { { "Peer", 5 } }
+            ),
 
             //     ======================================================
             //     Uncommon
             //     ======================================================
 
-            new ItemTemplate
-            {
-                Type = ItemType.Consumable,
-                Rarity = ItemRarity.Uncommon,
-                Factory = (itemEntity, player) =>
-                {
-                    // Order matters, some components depend on others.
-                    new ItemData(itemEntity, "Auburn Amalgam", ItemRarity.Uncommon, ItemType.Consumable, player);
-                    new Usable(itemEntity, 15);
-                    new Consumable(itemEntity);
-                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
-                    modifiesStats.StatModifiers["MaximumHealth"] = 1.25f;
-                    modifiesStats.ResourceModifiers["Health"] = 1.25f;
-                }
-            },
-            new ItemTemplate
-            {
-                Type = ItemType.Consumable,
-                Rarity = ItemRarity.Uncommon,
-                Factory = (itemEntity, player) =>
-                {
-                    // Order matters, some components depend on others.
-                    new ItemData(itemEntity, "Teal Tincture", ItemRarity.Uncommon, ItemType.Consumable, player);
-                    new Usable(itemEntity, 15);
-                    new Consumable(itemEntity);
-                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
-                    modifiesStats.StatModifiers["MaximumStamina"] = 1.25f;
-                    modifiesStats.ResourceModifiers["Stamina"] = 1.25f;
-                }
-            },
-            new ItemTemplate
-            {
-                Type = ItemType.Consumable,
-                Rarity = ItemRarity.Uncommon,
-                Factory = (itemEntity, player) =>
-                {
-                    // Order matters, some components depend on others.
-                    new ItemData(itemEntity, "Earthy Elixir", ItemRarity.Uncommon, ItemType.Consumable, player);
-                    new Usable(itemEntity, 15);
-                    new Consumable(itemEntity);
-                    ModifiesStats modifiesStats = new(itemEntity, ModifiesStatsTrigger.OnUse);
-                    modifiesStats.StatModifiers["Armor"] = 1.25f;
-                    modifiesStats.StatModifiers["Shield"] = 1.25f;
-                }
-            },
+            new(
+                EntityCategory.Item,
+                "auburn_amalgam",
+                "Auburn Amalgam",
+                ItemType.Consumable,
+                ItemRarity.Uncommon,
+                StaminaCost: 15,
+                StatsTrigger: ModifiesStatsTrigger.OnUse,
+                StatModifiers: new() { { "MaximumHealth", 1.25f } },
+                ResourceModifiers: new() { {"Health", 1.25f} }
+            ),
+            new(
+                EntityCategory.Item,
+                "teal_tincture",
+                "Teal Tincture",
+                ItemType.Consumable,
+                ItemRarity.Uncommon,
+                StaminaCost: 15,
+                StatsTrigger: ModifiesStatsTrigger.OnUse,
+                StatModifiers: new() { { "MaximumStamina", 1.25f } },
+                ResourceModifiers: new() { {"Stamina", 1.25f} }
+            ),
+            new(
+                EntityCategory.Item,
+                "earthy_elixir",
+                "Earthy Elixir",
+                ItemType.Consumable,
+                ItemRarity.Uncommon,
+                StaminaCost: 15,
+                StatsTrigger: ModifiesStatsTrigger.OnUse,
+                StatModifiers: new() { { "Armor", 1.25f }, {"Shield", 1.25f} }
+            ),
 
             // ==========================================================
             // Weapons
@@ -243,23 +200,90 @@ namespace CBA
             //     Common
             //     ======================================================
 
-            new ItemTemplate
-            {
-                Type = ItemType.Weapon,
-                Rarity = ItemRarity.Common,
-                Factory = (itemEntity, player) =>
-                {
-                    // Order matters, some components depend on others.
-                    new ItemData(itemEntity, "Brandish", ItemRarity.Common, ItemType.Weapon, player);
-                    new Usable(itemEntity, 25);
-                    new Wearable(itemEntity, EquipType.Weapon);
-                    new DealsDamage(itemEntity, damage: 10, DamageType.Physical, canCrit: true, canDodge: true);
-                    ModifiesEffects modifiesEffects = new(itemEntity);
-                    modifiesEffects.TriggeredEffects[EffectTrigger.OnUse] = ["Inferno"];
-                }
-            },
+            new(
+                EntityCategory.Item,
+                "brandish",
+                "Brandish",
+                ItemType.Weapon,
+                ItemRarity.Common,
+                StaminaCost: 25,
+                EquipType: EquipType.Weapon,
+                Damage: 10,
+                DamageType: DamageType.Physical,
+                CanCrit: true,
+                CanDodge: true,
+                EffectsByTrigger: new() {{EffectTrigger.OnUse, ["inferno"]}}
+            ),
             // Add more templates as needed
-        };
+        ];
+
+        public static void AddComponents(Entity item, Entity player, ItemTemplate template)
+        {
+            // Change Item Data to not take display name
+            new ItemData(item, template.DisplayName, template.Rarity, template.Type, player);
+
+            if (template.Type == ItemType.Consumable) // Only Consumables get Consumable
+                new Consumable(item);
+
+            if ((template.Type == ItemType.Consumable || template.Type == ItemType.Weapon) &&
+                template.StaminaCost is int staminaCost)
+            {
+                new Usable(item, staminaCost);
+            }    // Consumables or Weapons get Usable if their StaminaCost is defined.
+            
+            if (template.Type == ItemType.Weapon)
+            {
+                new DealsDamage(item, template.Damage, template.DamageType, template.CanCrit, template.CanDodge);
+            }
+            
+            if (template.EquipType is EquipType equipType) // Non-null EquipType gets Wearable
+                new Wearable(item, equipType);
+
+            if
+            (
+                template.StatAdditions != null ||
+                template.StatModifiers != null ||
+                template.ResourceAdditions != null ||
+                template.ResourceModifiers != null
+            )
+            {
+                if (template.StatsTrigger is ModifiesStatsTrigger statsTrigger)
+                {
+                    var modifiesStats = new ModifiesStats(item, statsTrigger);
+
+                    if (template.StatAdditions != null)
+                    {
+                        foreach (var (k, v) in template.StatAdditions)
+                            modifiesStats.StatAdditions[k] = v;
+                    }
+                    if (template.StatModifiers != null)
+                    {
+                        foreach (var (k, v) in template.StatModifiers)
+                            modifiesStats.StatModifiers[k] = v;
+                    }
+                    if (template.ResourceAdditions != null)
+                    {
+                        foreach (var (k, v) in template.ResourceAdditions)
+                            modifiesStats.ResourceAdditions[k] = v;
+                    }
+                    if (template.ResourceModifiers != null)
+                    {
+                        foreach (var (k, v) in template.ResourceModifiers)
+                            modifiesStats.ResourceModifiers[k] = v;
+                    }
+                }
+
+            }
+        
+            if (template.EffectsByTrigger != null)
+            {
+                var modifiesEffects = new ModifiesEffects(item);
+                foreach(var (k, v) in template.EffectsByTrigger)
+                {
+                    modifiesEffects.TriggeredEffects[k] = v;
+                }
+            }
+        }
 
         // Generic method to pick a random key from a dictionary based on chance
         private static T PickRandom<T>(Dictionary<T, double> chances) where T : struct, Enum
@@ -320,12 +344,11 @@ namespace CBA
                 candidates = [.. ItemTemplates];
 
             // --- Step 6: Pick one randomly from remaining candidates ---
-            ItemTemplate chosenTemplate = candidates[rng.Next(candidates.Count)];
+            ItemTemplate temp = candidates[rng.Next(candidates.Count)];
 
             // --- Step 7: Instantiate the entity and apply components ---
-            Entity itemEntity = new ItemEntity();
-            chosenTemplate.Factory(itemEntity, player);
-            itemEntity.SubscribeAll();
+            Entity itemEntity = new(temp.Category, temp.TypeId, temp.DisplayName);
+            AddComponents(itemEntity, player, temp);
             World.Instance.AddEntity(itemEntity);
 
             return itemEntity;

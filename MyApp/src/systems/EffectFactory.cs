@@ -1,123 +1,154 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace CBA
 {
-    public class EffectEntity : Entity { }
+    public record EffectTemplate
+    (
+        EntityCategory Category,
+        string TypeId,
+        string DisplayName,
+        bool IsNegative,
+        bool IsHidden,
+        StackingType StackingType = StackingType.AddStack,
+        int MaxStacks = 1,
+        ModifiesStatsTrigger? StatsTrigger = null,
+        Dictionary<string, int>? StatAdditions = null,
+        Dictionary<string, int>? ResourceAdditions = null,
+        Dictionary<string, float>? StatModifiers = null,
+        Dictionary<string, float>? ResourceModifiers = null,
+        Dictionary<EffectTrigger, List<string>>? EffectsByTrigger = null,
+        int Damage = 0,
+        DamageType DamageType = DamageType.Physical,
+        bool CanCrit = true,
+        bool CanDodge = true
+
+    );
 
     public static class EffectFactory
     {
-        // OnEffectApplied: (player entity, effect entity)
         public static event Action<Entity, Entity>? OnEffectApplied;
-        public class EffectTemplate
+
+        public static readonly List<EffectTemplate> Templates = new()
         {
-            public string Name { get; init; } = string.Empty;
-            public bool IsNegative { get; init; } = false;
-            public bool IsHidden { get; init; } = false;
-            public StackingType StackingType { get; init; } = StackingType.AddStack;
-            public int MaxStacks { get; init; } = 1;
-            public Action<Entity, Entity>? Factory { get; init; }
-        }
+            new(
+                EntityCategory.Effect,
+                "inferno",
+                "Inferno",
+                IsNegative: true,
+                IsHidden: false,
+                StackingType: StackingType.AddStack,
+                MaxStacks: 5,
+                Damage: 1, // 1% health per turn
+                DamageType: DamageType.Magical,
+                CanCrit: false,
+                CanDodge: false
+            ),
 
-        public static readonly List<EffectTemplate> EffectTemplates = new()
-        {
-            new EffectTemplate
-            {
-                Name = "Inferno",
-                StackingType = StackingType.AddStack,
-                MaxStacks = 5,
-                Factory = (effectEntity, player) =>
-                {
-                    new EffectData(effectEntity, player, "Inferno", isNegative: true,
-                        stackingType: StackingType.AddStack, maxStacks: 5);
+            new(
+                EntityCategory.Effect,
+                "poison",
+                "Poison",
+                IsNegative: true,
+                IsHidden: false,
+                StackingType: StackingType.RefreshOnly,
+                MaxStacks: 1,
+                Damage: 5,
+                DamageType: DamageType.Physical
+            ),
 
-                    new EffectDuration(effectEntity, 3);
-
-                    StatsComponent playerStats = Helper.ThisIsNotNull(
-                        player.GetComponent<StatsComponent>(),
-                        "EffectTemplate 'Inferno': Unexpected null value for player StatComponent."
-                    );
-
-                    new DealsDamage(
-                        effectEntity,
-                        getDamage: () => {return (int)((playerStats?.Get("MaximumHealth") ?? 0) * 0.01f);},
-                        damageType: DamageType.Magical,
-                        canCrit: false,
-                        canDodge: false
-                    );
-                }
-            },
-            new EffectTemplate
-            {
-                Name = "Poison",
-                IsNegative = true,
-                StackingType = StackingType.RefreshOnly,
-                Factory = (effectEntity, player) =>
-                {
-                    new EffectData(effectEntity, player, "Poison", isNegative: true,
-                        stackingType: StackingType.RefreshOnly);
-
-                    new EffectDuration(effectEntity, 5);
-                }
-            },
-            new EffectTemplate
-            {
-                Name = "Shield",
-                IsNegative = false,
-                StackingType = StackingType.Ignore,
-                Factory = (effectEntity, player) =>
-                {
-                    new EffectData(effectEntity, player, "Shield", isNegative: false,
-                        stackingType: StackingType.Ignore);
-                    // no duration = permanent shield
-                }
-            }
+            new(
+                EntityCategory.Effect,
+                "shield",
+                "Shield",
+                IsNegative: false,
+                IsHidden: false,
+                StackingType: StackingType.Ignore
+            )
         };
 
-        public static EffectTemplate GetTemplate(string name)
+        public static EffectTemplate GetTemplate(string typeId)
         {
-            EffectTemplate template = EffectTemplates.FirstOrDefault(t =>
-                t.Name.Equals(name, StringComparison.OrdinalIgnoreCase)) ?? throw new Exception($"Effect template '{name}' not found.");
-            return template;
+            return Templates.FirstOrDefault(t =>
+                t.TypeId.Equals(typeId, StringComparison.OrdinalIgnoreCase))
+                ?? throw new Exception($"Effect template '{typeId}' not found.");
         }
 
-        public static void ApplyEffect(string name, Entity playerEntity)
+        public static void ApplyEffect(string typeId, Entity playerEntity)
         {
-            EffectTemplate template = GetTemplate(name);
+            EffectTemplate template = GetTemplate(typeId);
 
-            // Find existing instance on player
-            EffectData? existingEffect = World.Instance
+            // Handle stacking
+            EffectData? existing = World.Instance
                 .GetEffectsForPlayer(playerEntity)
-                .Select(e => e.GetComponent<EffectData>()!)
-                .FirstOrDefault(ed => ed.Name == template.Name);
+                .Where(e => e.Id.TypeId == template.TypeId)
+                .Select(e => e.GetComponent<EffectData>())
+                .FirstOrDefault();
 
-
-            // Handle stacking/refresh before creating a new one
-            switch (existingEffect?.StackingType)
+            switch (existing?.StackingType)
             {
                 case StackingType.RefreshOnly:
-                    EffectDuration? dur = existingEffect.Owner.GetComponent<EffectDuration>();
+                    EffectDuration? dur = existing.Owner.GetComponent<EffectDuration>();
                     dur?.Remaining = dur.Maximum;
                     return; // don’t create new
 
                 case StackingType.AddStack:
-                    if (existingEffect.CurrentStacks < existingEffect.MaximumStacks)
+                    if (existing.CurrentStacks < existing.MaximumStacks)
                     {
-                        existingEffect.CurrentStacks++;
-                        EffectDuration? d = existingEffect.Owner.GetComponent<EffectDuration>();
+                        existing.CurrentStacks++;
+                        EffectDuration? d = existing.Owner.GetComponent<EffectDuration>();
                         d?.Remaining = d.Maximum;
                     }
                     return;
 
                 case StackingType.Ignore:
                     return;
-                }
-            
+            }
 
-            // No existing effect → create a new one
-            Entity effectEntity = new EffectEntity();
-            template.Factory?.Invoke(effectEntity, playerEntity);
-            effectEntity.SubscribeAll();
+            // Create new effect entity
+            Entity effectEntity = new(EntityCategory.Effect, template.TypeId, template.DisplayName);
+            AddComponents(effectEntity, template, playerEntity);
             World.Instance.AddEntity(effectEntity);
 
             OnEffectApplied?.Invoke(playerEntity, effectEntity);
+        }
+
+        private static void AddComponents(Entity effect, EffectTemplate template, Entity player)
+        {
+            // Core data
+            new EffectData(
+                effect,
+                player,
+                template.DisplayName,
+                template.IsNegative,
+                template.IsHidden,
+                template.StackingType,
+                template.MaxStacks
+            );
+
+            // Duration (e.g., Inferno and Poison)
+            if (template.TypeId is "inferno" or "poison")
+                new EffectDuration(effect, 3);
+
+            // Damage-over-time effects
+            if (template.Damage > 0)
+            {
+                StatsComponent? playerStats = player.GetComponent<StatsComponent>();
+                int damageValue = template.DisplayName == "Inferno"
+                    ? (int)((playerStats?.Get("MaximumHealth") ?? 0) * 0.01f)
+                    : template.Damage;
+
+                new DealsDamage(
+                    effect,
+                    getDamage: () => damageValue,
+                    damageType: template.DamageType,
+                    canCrit: template.CanCrit,
+                    canDodge: template.CanDodge
+                );
+            }
+
+            // Future: apply stat/resource mods, triggers, etc.
         }
     }
 }

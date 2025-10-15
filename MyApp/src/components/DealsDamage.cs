@@ -39,51 +39,50 @@ namespace CBA
             CanDodge = canDodge;
         }
 
+        public override void ValidateDependencies()
+        {
+            // Validate Owner Category
+            if (Owner.Id.Category != EntityCategory.Item && Owner.Id.Category != EntityCategory.Effect)
+                throw new InvalidOperationException($"{Owner.Id} was given an incompatible Component: DealsDamage.");
+
+            // Validate Component Dependencies
+            if (Owner.Id.Category == EntityCategory.Item && !Owner.HasComponent<Usable>())
+                throw new InvalidOperationException($"Component Missing a Dependency: (Owner: {Owner.Id}, Component: DealsDamage, Dependency: Usable.");
+        }
         public override void Subscribe()
         {
             OnDamageDealt += Printer.PrintDamageDealt;
 
-            Usable? usable = Owner.GetComponent<Usable>();
-            EffectData? effectData = Owner.GetComponent<EffectData>();
-            Helper.NotAllAreNull
-            (
-                $"DealsDamage.Subscribe() requires Usable or EffectData: Source: {Owner}",
-                usable,
-                effectData
-            );
-
-            // --- Item logic ---
-            usable?.OnUseSuccess += ApplyDamage;
-
-            // --- Effect logic ---
-            World.Instance.TurnManager.OnTurnStart += (player) =>
+            switch (Owner.Id.Category)
             {
-                if (player == effectData?.PlayerEntity) ApplyDamage(Owner, player);
-            };
+                case EntityCategory.Item:
+                    Owner.GetComponent<Usable>().OnUseSuccess += ApplyDamage;
+                    break;
+                case EntityCategory.Effect:
+                    World.Instance.TurnManager.OnTurnStart += (player) =>
+                    {
+                        if (player == Owner.GetComponent<EffectData>().PlayerEntity)
+                            ApplyDamage(Owner, player);
+                    };
+                    break;
+                default:
+                    break;
+            }
         }
-
         private void ApplyDamage(Entity itemOrEffect, Entity target)
         {
+            if (target.Id.Category != EntityCategory.Player)
+            {
+                throw new InvalidOperationException($"{Owner.Id} was given an non-player target for DealsDamage.ApplyDamage.");
+            }
+
             int finalDamage = Damage;
 
-            StatsComponent targetStats = Helper.ThisIsNotNull
-            (
-                target.GetComponent<StatsComponent>(),
-                $"DealsDamage.ApplyDamage: Unexpected null value for target's StatsComponent."
-            );
-
-            ResourcesComponent targetResources = Helper.ThisIsNotNull
-            (
-                target.GetComponent<ResourcesComponent>(),
-                $"DealsDamage.ApplyDamage: Unexpected null value for target's ResourcesComponent."
-            );
+            StatsComponent targetStats = target.GetComponent<StatsComponent>();
+            ResourcesComponent targetResources = target.GetComponent<ResourcesComponent>();
 
             // --- Identify source type ---
-            bool isItem = itemOrEffect.HasComponent<ItemData>();
-            bool isEffect = itemOrEffect.HasComponent<EffectData>();
-
-            // Only items have "users" (attackers)
-            StatsComponent? userStats = null;
+            bool isItem = Owner.Id.Category == EntityCategory.Item;
 
             // --- Dodge (applies to both) ---
             if (CanDodge && Random.Shared.NextDouble() < targetStats.GetHyperbolic("Dodge"))
@@ -97,17 +96,13 @@ namespace CBA
                 // --- Crit (items only) ---
                 if (isItem && CanCrit)
                 {
-                    userStats = Helper.ThisIsNotNull
-                    (
-                        World.Instance.GetPlayerOf(itemOrEffect)?.GetComponent<StatsComponent>(),
-                        "DealsDamage.ApplyDamage: Unexpected null value for user's StatsComponent."
-                    );
-
+                    StatsComponent userStats = itemOrEffect.GetComponent<ItemData>().PlayerEntity.GetComponent<StatsComponent>();
                     if (Random.Shared.NextDouble() < userStats.GetHyperbolic("Critical"))
                     {
                         finalDamage = (int)(finalDamage * 2.0f);
                         Printer.PrintCritical(Owner, target);
                     }
+
                 }
 
                 // --- Damage Reduction ---

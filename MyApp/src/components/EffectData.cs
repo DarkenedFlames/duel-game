@@ -18,6 +18,11 @@ namespace CBA
         public int MaximumStacks { get; set; } = maxStacks;
         public StackingType StackingType { get; set; } = stackingType;
 
+        public override void ValidateDependencies()
+        {
+            if (Owner.Id.Category != EntityCategory.Effect)
+                throw new InvalidOperationException($"{Owner.Id} was given an incompatible Component: EffectData.");
+        }
         public override void Subscribe() { }
     }
 }

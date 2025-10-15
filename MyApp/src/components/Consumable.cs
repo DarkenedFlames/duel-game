@@ -1,22 +1,23 @@
-using System.Runtime.CompilerServices;
-
 namespace CBA
 {
     public class Consumable(Entity owner) : Component(owner)
     {
         public event Action<Entity>? OnConsumed;
 
+        public override void ValidateDependencies()
+        {
+            // Validate Owner Category
+            if (Owner.Id.Category != EntityCategory.Item)
+                throw new InvalidOperationException($"{Owner.Id} was given an incompatible Component: Consumable.");
+            
+            // Validate Component Dependencies
+            if (!Owner.HasComponent<Usable>())
+                throw new InvalidOperationException($"Component Missing a Dependency: (Owner: {Owner.Id}, Component: Consumable, Dependency: Usable.");
+        }
         public override void Subscribe()
         {
-            Usable usable = Helper.ThisIsNotNull(
-                Owner.GetComponent<Usable>(),
-                $"Consumable component requires Usable Component:" +
-                $"\n\tItem entity: {Owner.GetComponent<ItemData>()?.Name}, " +
-                $"\n\tPlayer entity: {World.Instance.GetPlayerOfItem(Owner)?.GetComponent<PlayerData>()?.Name}." 
-            );
-            usable.OnUseSuccess += (_, _) => OnUseSuccess();
+            Owner.GetComponent<Usable>().OnUseSuccess += (_, _) => OnUseSuccess();
         }
-
         private void OnUseSuccess()
         {
             // Print, Delete, Invoke Event

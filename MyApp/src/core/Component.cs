@@ -9,6 +9,7 @@ namespace CBA
             Owner.AddComponent(this);
         }
         public abstract void Subscribe();
+        public abstract void ValidateDependencies();
     }
 
 }

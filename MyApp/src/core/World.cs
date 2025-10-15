@@ -9,7 +9,8 @@ namespace CBA
         public static World Instance { get; private set; } = null!;
 
         public TurnManager TurnManager { get; private set; }
-        private readonly List<Entity> _entities = new();
+        private readonly List<Entity> _entities = [];
+        private readonly Dictionary<(EntityCategory, string), int> _instanceCounters = [];
 
         public event Action<Entity>? OnEntityAdded;
         public event Action<Entity>? OnEntityRemoved;
@@ -22,15 +23,26 @@ namespace CBA
             Instance = this;
             TurnManager = new TurnManager();
 
-            OnEntityAdded += entity => Printer.PrintEntityAdded(entity);
-            OnEntityRemoved += entity => Printer.PrintEntityRemoved(entity);
+            OnEntityAdded += Printer.PrintEntityAdded;
+            OnEntityRemoved += Printer.PrintEntityRemoved;
         }
 
         // ========== ENTITY MANAGEMENT ==========
 
         public void AddEntity(Entity entity)
         {
+            if (_entities.Contains(entity))
+                throw new InvalidOperationException($"World.AddEntity: Entity, {entity}, already exists in the world.");
+            if (entity.Id.Category == EntityCategory.Player && !entity.HasComponent<PlayerData>())
+                throw new InvalidOperationException($"World.AddEntity: Entity of Category EntityCategory.Player added with no PlayerData Component.");
+            if (entity.Id.Category == EntityCategory.Item && !entity.HasComponent<ItemData>())
+                throw new InvalidOperationException($"World.AddEntity: Entity of Category EntityCategory.Item added with no ItemData Component.");
+            if (entity.Id.Category == EntityCategory.Effect && !entity.HasComponent<EffectData>())
+                throw new InvalidOperationException($"World.AddEntity: Entity of Category EntityCategory.Effect added with no EffectData Component.");
+
             _entities.Add(entity);
+            entity.ValidateAll();
+            entity.SubscribeAll();
             OnEntityAdded?.Invoke(entity);
         }
 
@@ -40,11 +52,22 @@ namespace CBA
             OnEntityRemoved?.Invoke(entity);
         }
 
+        public IEnumerable<Entity> GetById
+        (
+            EntityCategory? category = null,
+            string? typeId = null,
+            int? instanceId = null
+        )
+        {
+            return _entities.Where(e =>
+                (category == null || e.Id.Category == category) &&
+                (typeId == null || e.Id.TypeId == typeId) &&
+                (instanceId == null || e.Id.InstanceId == instanceId)
+            );
+        }
+
+
         // ========== GENERIC HELPERS ==========
-
-        public IEnumerable<T> GetEntitiesOfType<T>() where T : Entity =>
-            _entities.OfType<T>();
-
         public IEnumerable<Entity> GetEntitiesWith<T>() where T : Component =>
             _entities.Where(e => e.HasComponent<T>());
 
@@ -105,5 +128,14 @@ namespace CBA
             // Not an item or effect, or no owner assigned
             return null;
         }
+
+        public int GenerateInstanceId(EntityCategory category, string typeId)
+        {
+            (EntityCategory, string) key = (category, typeId);
+            if (!_instanceCounters.ContainsKey(key)) _instanceCounters[key] = 0;
+            return ++_instanceCounters[key];
+        }
+
+
     }
 }

@@ -17,7 +17,7 @@ namespace CBA
             while (!gameEnded)
             {
                 var alivePlayers = World.Instance
-                    .GetEntitiesWith<PlayerData>()
+                    .GetById(EntityCategory.Player)
                     .Where(p => p.GetComponent<ResourcesComponent>()?.Get("Health") > 0)
                     .ToList();
 
@@ -29,8 +29,8 @@ namespace CBA
 
                 foreach (var player in alivePlayers.ToList())
                 {
-                    var resources = player.GetComponent<ResourcesComponent>();
-                    if (resources == null || resources.Get("Health") <= 0)
+                    ResourcesComponent resources = player.GetComponent<ResourcesComponent>();
+                    if (resources.Get("Health") <= 0)
                         continue;
 
                     OnTurnStart?.Invoke(player);
@@ -53,13 +53,13 @@ namespace CBA
 
             // When loop exits, print game over and winner
             var survivors = World.Instance
-                .GetEntitiesWith<PlayerData>()
+                .GetById(EntityCategory.Player)
                 .Where(p => p.GetComponent<ResourcesComponent>()?.Get("Health") > 0)
                 .ToList();
 
             if (survivors.Count == 1)
             {
-                var winnerName = survivors[0].GetComponent<PlayerData>()?.Name ?? "Unknown";
+                string winnerName = survivors[0].DisplayName;
                 Printer.PrintMessage($"\nGame Over! {winnerName} wins!");
             }
             else
