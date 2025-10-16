@@ -49,11 +49,23 @@ namespace CBA
                         InputHandler.WaitForKey();
                         break;
                     case 2:
-                        HandleInventoryMenu(player);
+                    {
+                        Printer.ClearAndHeader($"{player.DisplayName}'s Inventory");
+                        var (item, action) = Printer.ShowItemMenu(player);
+                        if (item != null && action != null)
+                            ExecuteItemAction(item, action);                            
+                        InputHandler.WaitForKey();
                         break;
+                    }
                     case 3:
-                        HandleEquipmentMenu(player);
+                    {
+                        Printer.ClearAndHeader($"{player.DisplayName}'s Equipment");
+                        var (item, action) = Printer.ShowItemMenu(player, equipment: true);
+                        if (item != null && action != null)
+                            ExecuteItemAction(item, action);
+                        InputHandler.WaitForKey();
                         break;
+                    }
                     case 4:
                         Printer.ClearAndHeader($"{player.DisplayName}'s Status");
                         Printer.PrintEffects(player);
@@ -65,78 +77,14 @@ namespace CBA
             }
         }
 
-        private void HandleInventoryMenu(Entity player)
-        {
-            var items = World.Instance.GetAllForPlayer<Entity>(player, EntityCategory.Item).ToList();
-            var item = InputHandler.GetChoice(items, i => i.DisplayName, $"{player.DisplayName}'s Inventory");
-            if (item == null) return;
-
-            HandleItemAction(item);
-        }
-
-        private void HandleEquipmentMenu(Entity player)
-        {
-            var equipped = Printer.PrintEquipment(player);
-            var selected = InputHandler.GetChoice(equipped, e => e.DisplayName, $"{player.DisplayName}'s Equipment");
-            if (selected == null) return;
-
-            HandleItemAction(selected);
-        }
-
-        private void HandleItemAction(Entity item)
-        {
-            var actions = BuildItemActions(item);
-
-            int choice = Printer.MultiChoiceList
-            (
-                $"Item Menu: {World.Instance.GetPlayerOf(item).DisplayName} using {item.DisplayName}",
-                actions
-            );
-            if (choice == 0) return;
-
-            string action = actions[choice - 1].ToLower();
-            ExecuteItemAction(item, action);
-        }
-
-        private List<string> BuildItemActions(Entity item)
-        {
-            var actions = new List<string> { "Remove" };
-
-            if (item.HasComponent<Usable>() && !item.HasComponent<Wearable>())
-                actions.Add("Use");
-
-            if (item.HasComponent<Wearable>())
-            {
-                var wearable = item.GetComponent<Wearable>();
-                if (wearable.IsEquipped)
-                {
-                    actions.Add("Unequip");
-                    if (item.HasComponent<Usable>())
-                        actions.Add("Use");
-                }
-                else actions.Add("Equip");
-            }
-
-            return actions;
-        }
-
         private void ExecuteItemAction(Entity item, string action)
         {
             switch (action)
             {
-                case "remove":
-                    World.Instance.RemoveEntity(item);
-                    Printer.PrintMessage($"{item.DisplayName} removed from world.");
-                    break;
-                case "equip":
-                    item.GetComponent<Wearable>()?.TryEquip();
-                    break;
-                case "unequip":
-                    item.GetComponent<Wearable>()?.TryUnequip();
-                    break;
-                case "use":
-                    HandleItemUse(item);
-                    break;
+                case "remove": World.Instance.RemoveEntity(item); break;
+                case "equip": item.GetComponent<Wearable>()?.TryEquip(); break;
+                case "unequip": item.GetComponent<Wearable>()?.TryUnequip(); break;
+                case "use": HandleItemUse(item); break;
             }
 
             InputHandler.WaitForKey();
@@ -155,5 +103,4 @@ namespace CBA
             item.GetComponent<Usable>().TryUse(target);
         }
     }
-
 }

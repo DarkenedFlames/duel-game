@@ -24,7 +24,7 @@ namespace CBA
 
         public override void ValidateDependencies()
         {
-            if (Owner.Id.Category != EntityCategory.Item || Owner.Id.Category != EntityCategory.Effect)
+            if (Owner.Id.Category != EntityCategory.Item && Owner.Id.Category != EntityCategory.Effect)
                 throw new InvalidOperationException($"ModifiesStats was given to an invalid category of entity: {Owner.Id}.");
             
             if (Owner.Id.Category == EntityCategory.Item && !Owner.HasComponent<Usable>() && !Owner.HasComponent<Wearable>())

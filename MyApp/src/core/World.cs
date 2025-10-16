@@ -35,7 +35,6 @@ namespace CBA
         }
 
         // ========== ENTITY MANAGEMENT ==========
-
         public void AddEntity(Entity entity)
         {
             if (_entities.Contains(entity))
@@ -52,19 +51,12 @@ namespace CBA
             entity.SubscribeAll();
             OnEntityAdded?.Invoke(entity);
         }
-
         public void RemoveEntity(Entity entity)
         {
             _entities.Remove(entity);
             OnEntityRemoved?.Invoke(entity);
         }
-
-        public IEnumerable<Entity> GetById
-        (
-            EntityCategory? category = null,
-            string? typeId = null,
-            int? instanceId = null
-        )
+        public IEnumerable<Entity> GetById(EntityCategory? category = null, string? typeId = null, int? instanceId = null)
         {
             return _entities.Where(e =>
                 (category == null || e.Id.Category == category) &&
@@ -72,16 +64,15 @@ namespace CBA
                 (instanceId == null || e.Id.InstanceId == instanceId)
             );
         }
-
+        public int GenerateInstanceId(EntityCategory category, string typeId)
+                {
+                    (EntityCategory, string) key = (category, typeId);
+                    if (!_instanceCounters.ContainsKey(key)) _instanceCounters[key] = 0;
+                    return ++_instanceCounters[key];
+                }
         public IEnumerable<Entity> GetEntitiesWith<T>() where T : Component =>
             _entities.Where(e => e.HasComponent<T>());
-
-
-        public IEnumerable<T> GetAllForPlayer<T>(
-            Entity player,
-            EntityCategory category,
-            string? typeId = null,
-            bool? equipped = null)
+        public IEnumerable<T> GetAllForPlayer<T>(Entity player, EntityCategory category, string? typeId = null, bool? equipped = null)
         {
             // Step 1: Start from all entities in this category (optionally narrowed by typeId)
             var entities = GetById(category, typeId);
@@ -120,13 +111,10 @@ namespace CBA
 
             throw new InvalidOperationException($"Unsupported return type: {typeof(T).Name}");
         }
-    
         public IEnumerable<Entity> GetAllPlayers(Entity? excludePlayer = null)
         {
-            // Get all entities in the Player category
             var players = GetById(EntityCategory.Player);
 
-            // Filter out any dead players and optionally the one passed in
             players = players.Where(e =>
             {
                 var resources = e.GetComponent<ResourcesComponent>();
@@ -136,7 +124,6 @@ namespace CBA
 
             return players;
         }
-    
         public Entity GetPlayerOf(Entity entity)
         {
             switch (entity.Id.Category)
@@ -146,19 +133,5 @@ namespace CBA
                 default: throw new InvalidOperationException($"Invalid category for GetPlayerOf: {entity.Id.Category}");
             }
         }
-
-        public IEnumerable<Entity> GetEffectsForPlayer(Entity player) =>
-            _entities
-                .Where(e => e.HasComponent<EffectData>())
-                .Where(e => e.GetComponent<EffectData>()?.PlayerEntity == player);
-
-        public int GenerateInstanceId(EntityCategory category, string typeId)
-        {
-            (EntityCategory, string) key = (category, typeId);
-            if (!_instanceCounters.ContainsKey(key)) _instanceCounters[key] = 0;
-            return ++_instanceCounters[key];
-        }
-
-
     }
 }

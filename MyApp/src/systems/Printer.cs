@@ -1,14 +1,20 @@
-// ==================== Printer ====================
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Xml.Serialization;
+using System.Text.RegularExpressions;
 
 namespace CBA
 {
     public static class Printer
     {
-        // General helpers
+        public static int MultiChoiceList(string header, List<string> options, bool allowZero = true)
+        {
+            ClearAndHeader(header);
+            PrintMenu(options);
+            return InputHandler.GetNumberInput(options.Count, "Select an option: ", allowZero);
+        }
+        public static void PrintMenu(List<string> options)
+        {
+            for (int i = 0; i < options.Count; i++)
+                Console.WriteLine($"{i + 1}. {options[i]}");
+        }
         public static void ClearAndHeader(string header)
         {
             Console.Clear();
@@ -16,17 +22,8 @@ namespace CBA
             Console.WriteLine(header);
             Console.WriteLine(new string('-', header.Length));
         }
-
         public static void PrintMessage(string message) => Console.WriteLine(message);
 
-        // --- Menu helpers ---
-        public static void PrintMenu(List<string> options)
-        {
-            for (int i = 0; i < options.Count; i++)
-                Console.WriteLine($"{i + 1}. {options[i]}");
-        }
-
-        // --- Stats ---
         public static void PrintStats(Entity player)
         {
             ResourcesComponent resources = player.GetComponent<ResourcesComponent>();
@@ -43,8 +40,6 @@ namespace CBA
             Console.WriteLine($"Healing Modifier: {resources.GetRestoreMultiplier("Health"):P}");
             Console.WriteLine($"Stimming Modifier: {resources.GetRestoreMultiplier("Stamina"):P}");
         }
-
-        // --- Status Effects ---
         public static void PrintEffects(Entity player)
         {
             IEnumerable<Entity> effects = World.Instance.GetAllForPlayer<Entity>(player, EntityCategory.Effect);
@@ -59,112 +54,94 @@ namespace CBA
                     Console.WriteLine($"- {effect.DisplayName}");
             }
         }
-
-        // --- Items ---
-        public static void PrintItemList(IEnumerable<Entity> items)
+        // --- Unified Inventory Menu ---
+        public static (Entity? SelectedItem, string? Action) ShowItemMenu(Entity player, bool equipment = false)
         {
-            int idx = 1;
-            foreach (Entity? item in items)
+            // --- Get items from world ---
+            List<Entity> items = World.Instance
+                .GetAllForPlayer<Entity>(player, EntityCategory.Item, null, equipment) // if equipment true, only equipped
+                .ToList();
+
+            // --- If equipment, order by predefined slots ---
+            if (equipment)
             {
-                string? name = item.GetComponent<ItemData>()?.Name;
-                Console.WriteLine($"{idx}. {name}");
-                idx++;
-            }
-            if (idx == 1) Console.WriteLine("(No items found)");
-        }
-
-        // --- Equipment ---
-        public static List<Entity> PrintEquipment(Entity player)
-        {
-            List<Entity>? equippedItems = [.. World.Instance.GetEntitiesWith<Wearable>()
-                .Where(e =>
+                List<(EquipType type, string label)> equipmentSlots = new()
                 {
-                    Wearable? wearable = e.GetComponent<Wearable>();
-                    ItemData? itemData = e.GetComponent<ItemData>();
-                    return wearable != null &&
-                           itemData != null &&
-                           wearable.IsEquipped &&
-                           itemData.PlayerEntity == player;
-                })];
+                    (EquipType.Weapon, "Weapon"),
+                    (EquipType.Helmet, "Helmet"),
+                    (EquipType.Chestplate, "Chestplate"),
+                    (EquipType.Leggings, "Leggings"),
+                    (EquipType.Accessory, "Accessory")
+                };
 
-            List<(EquipType type, string label)>? slots =
-            [
-                (EquipType.Weapon, "Weapon"),
-                (EquipType.Helmet, "Helmet"),
-                (EquipType.Chestplate, "Chestplate"),
-                (EquipType.Leggings, "Leggings"),
-                (EquipType.Accessory, "Accessory")
-            ];
+                List<Entity> orderedEquipment = new();
 
-            List<Entity>? orderedEquipment = [];
-            Console.WriteLine("Equipment:");
-            for (int i = 0; i < slots.Count; i++)
+                for (int i = 0; i < equipmentSlots.Count; i++)
+                {
+                    var (type, label) = equipmentSlots[i];
+                    Entity? item = items.FirstOrDefault(e => e.HasComponent<Wearable>() && e.GetComponent<Wearable>().EquipType == type);
+                    string itemName = item?.DisplayName ?? "(empty)";
+                    Console.WriteLine($"{i + 1}. {label}: {itemName}");
+                    if (item != null) orderedEquipment.Add(item);
+                }
+
+                if (orderedEquipment.Count == 0)
+                {
+                    Console.WriteLine("(No items found)");
+                    return (null, null);
+                }
+
+                items = orderedEquipment;
+            }
+            else
             {
-                (EquipType type, string label) = slots[i];
-                Entity? item = equippedItems.FirstOrDefault(e => e.GetComponent<Wearable>()?.EquipType == type);
-                string? itemName = item?.GetComponent<ItemData>()?.Name;
-                Console.WriteLine($"{i + 1}. {label}: {itemName}");
-                if (item != null) orderedEquipment.Add(item);
+                if (items.Count == 0)
+                {
+                    Console.WriteLine("(No items found)");
+                    return (null, null);
+                }
+
+                // Print numbered list for inventory
+                for (int i = 0; i < items.Count; i++)
+                    Console.WriteLine($"{i + 1}. {items[i].DisplayName}");
             }
 
-            return orderedEquipment;
+            // --- Player selects an item ---
+            Entity? selected = InputHandler.GetChoice(items, e => e.DisplayName, "Choose an item:");
+            if (selected == null) return (null, null);
+
+            // --- Player selects an action ---
+            List<string> actions = BuildItemActions(selected);
+            int actionChoice = MultiChoiceList($"Item Menu: {player.DisplayName} using {selected.DisplayName}", actions);
+            if (actionChoice == 0) return (null, null);
+
+            return (selected, actions[actionChoice - 1].ToLower());
         }
 
-        // --- Item Menu ---
-        public static int? PrintItemMenu(Entity item)
+        // --- Helper to generate valid actions for the selected item ---
+        private static List<string> BuildItemActions(Entity item)
         {
-            ItemData itemData = item.GetComponent<ItemData>();
-            Entity player = itemData.PlayerEntity;
-            
-            ClearAndHeader($"Item Menu: {player.DisplayName} using {item.DisplayName}");
+            var actions = new List<string> { "Remove" };
 
-            List<string> actions = ["Remove"];
-
-            if (item.HasComponent<Usable>() & !item.HasComponent<Wearable>())
+            if (item.HasComponent<Usable>() && !item.HasComponent<Wearable>())
                 actions.Add("Use");
 
             if (item.HasComponent<Wearable>())
             {
-                if (item.GetComponent<Wearable>().IsEquipped)
+                var wearable = item.GetComponent<Wearable>();
+                if (wearable.IsEquipped)
                 {
                     actions.Add("Unequip");
-                    if (item.HasComponent<Usable>()) actions.Add("Use");
+                    if (item.HasComponent<Usable>())
+                        actions.Add("Use");
                 }
-                else actions.Add("Equip");
+                else
+                {
+                    actions.Add("Equip");
+                }
             }
 
-            for (int i = 0; i < actions.Count; i++)
-                Console.WriteLine($"{i + 1}. {actions[i]}");
-
-            Console.Write("Select an action: ");
-            string? input = Console.ReadLine();
-            if (int.TryParse(input, out int idx) && idx >= 1 && idx <= actions.Count)
-                return idx;
-
-            Console.WriteLine("Invalid choice.");
-            return null;
-        }
-
-        // --- Targets ---
-        public static void PrintTargetList(List<Entity> targets)
-        {
-            for (int i = 0; i < targets.Count; i++)
-            {
-                var name = targets[i].DisplayName;
-                Console.WriteLine($"{i + 1}. {name}");
-            }
-        }
-
-        public static string? MultiChoiceList(List<string> labels)
-        {
-            for (int i = 0; i < labels.Count; i++)
-            {
-                Console.WriteLine($"{i + 1}. {labels[i]}");
-            }
-            int idx = InputHandler.GetNumberInput(labels.Count, "Select a number: ") - 1;
-            if (idx == 0)
-                return null;
-            return labels[0];
+            return actions;
         }
 
         //================== Event Printers =================//
@@ -244,9 +221,9 @@ namespace CBA
         }
         public static void PrintItemUsed(Entity item, Entity target)
         {
-            
+
             Entity user = item.GetComponent<ItemData>().PlayerEntity;
-            
+
             string itemName = item.DisplayName;
             string userName = user.DisplayName;
             string targetName = target.DisplayName;
@@ -275,15 +252,18 @@ namespace CBA
 
         public static void PrintStatChanged(StatsComponent stats, string statName)
         {
-            Console.WriteLine($"\n{stats.Owner.DisplayName}'s {statName} changed to {stats.Get(statName)}.");
+            var formattedStatName =  Regex.Replace(statName, "(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|(?<=[a-zA-Z])(?=[0-9])|(?<=[0-9])(?=[a-zA-Z])", " ");
+            Console.WriteLine($"\n{stats.Owner.DisplayName}'s {formattedStatName} changed to {stats.Get(statName)}.");
         }
         public static void PrintResourceChanged(ResourcesComponent resources, string resourceName)
         {
-            Console.WriteLine($"\n{resources.Owner.DisplayName}'s {resourceName} is now {resources.Get(resourceName)}.");
+            string formattedResourceName =  Regex.Replace(resourceName, "(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|(?<=[a-zA-Z])(?=[0-9])|(?<=[0-9])(?=[a-zA-Z])", " ");
+            Console.WriteLine($"\n{resources.Owner.DisplayName}'s {formattedResourceName} is now {resources.Get(resourceName)}.");
         }
         public static void PrintResourceDepleted(ResourcesComponent resources, string resourceName)
         {
-            Console.WriteLine($"\n{resources.Owner.DisplayName}'s {resourceName} has been depleted!");
+            string formattedResourceName =  Regex.Replace(resourceName, "(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|(?<=[a-zA-Z])(?=[0-9])|(?<=[0-9])(?=[a-zA-Z])", " ");
+            Console.WriteLine($"\n{resources.Owner.DisplayName}'s {formattedResourceName} has been depleted!");
         }
 
         public static void PrintDamageDealt(Entity itemOrEffect, Entity target, int finalDamage)

@@ -18,8 +18,6 @@ public class Program
             new PeersComponent(player);
             new RefillsStamina(player);
 
-            player.ValidateAll();
-            player.SubscribeAll();
             World.Instance.AddEntity(player);
         }
         world.TurnManager.StartGameLoop();

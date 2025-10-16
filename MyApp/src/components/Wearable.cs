@@ -17,7 +17,8 @@ namespace CBA
         }
         public override void Subscribe()
         {
-            // Optional subscriptions to world events
+            OnEquipSuccess += Printer.PrintItemEquipped;
+            OnUnequipSuccess += Printer.PrintItemUnequipped;
         }
 
         // Query for all items of the same ItemType and Owner and unequip them. Then, equip this item and fire OnEquipSuccess/Failed.
