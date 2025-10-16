@@ -1,9 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 
 namespace CBA
 {
+    public enum QueryReturnType
+    {
+        Object,
+        Data,
+        Name
+    }
     public class World
     {
         public static World Instance { get; private set; } = null!;
@@ -66,68 +73,84 @@ namespace CBA
             );
         }
 
-
-        // ========== GENERIC HELPERS ==========
         public IEnumerable<Entity> GetEntitiesWith<T>() where T : Component =>
             _entities.Where(e => e.HasComponent<T>());
 
-        // ========== SPECIFIC HELPERS ==========
 
-        public IEnumerable<Entity> GetAllPlayers() =>
-            _entities.Where(e => e.HasComponent<PlayerData>());
+        public IEnumerable<T> GetAllForPlayer<T>(
+            Entity player,
+            EntityCategory category,
+            string? typeId = null,
+            bool? equipped = null)
+        {
+            // Step 1: Start from all entities in this category (optionally narrowed by typeId)
+            var entities = GetById(category, typeId);
 
-        public IEnumerable<Entity> GetAllItems() =>
-            _entities.Where(e => e.HasComponent<ItemData>());
+            // Step 2: Filter for entities owned by this player
+            entities = category switch
+            {
+                EntityCategory.Item => entities.Where(e => e.GetComponent<ItemData>().PlayerEntity == player),
+                EntityCategory.Effect => entities.Where(e => e.GetComponent<EffectData>().PlayerEntity == player),
+                _ => throw new ArgumentException($"Unsupported category: {category}")
+            };
 
-        public IEnumerable<Entity> GetAllEffects() =>
-            _entities.Where(e => e.HasComponent<EffectData>());
+            // Step 3: Optionally filter for equipped/unequipped items
+            if (category == EntityCategory.Item && equipped.HasValue)
+            {
+                entities = entities.Where(e =>
+                {
+                    if (!e.HasComponent<Wearable>())
+                        return false; // skip non-wearable items when filtering
+                    return e.GetComponent<Wearable>().IsEquipped == equipped.Value;
+                });
+            }
 
-        // ========== OWNERSHIP HELPERS ==========
+            // Step 4: Determine output type
+            if (typeof(T) == typeof(Entity))
+                return entities.Cast<T>();
 
-        public IEnumerable<Entity> GetItemsForPlayer(Entity player) =>
-            _entities
-                .Where(e => e.HasComponent<ItemData>())
-                .Where(e => e.GetComponent<ItemData>()?.PlayerEntity == player);
+            if (typeof(T) == typeof(ItemData))
+                return entities.Select(e => e.GetComponent<ItemData>()).Cast<T>();
+
+            if (typeof(T) == typeof(EffectData))
+                return entities.Select(e => e.GetComponent<EffectData>()).Cast<T>();
+
+            if (typeof(T) == typeof(string))
+                return entities.Select(e => e.DisplayName).Cast<T>();
+
+            throw new InvalidOperationException($"Unsupported return type: {typeof(T).Name}");
+        }
+    
+        public IEnumerable<Entity> GetAllPlayers(Entity? excludePlayer = null)
+        {
+            // Get all entities in the Player category
+            var players = GetById(EntityCategory.Player);
+
+            // Filter out any dead players and optionally the one passed in
+            players = players.Where(e =>
+            {
+                var resources = e.GetComponent<ResourcesComponent>();
+                var health = resources.Get("Health");
+                return health > 0 && (excludePlayer == null || e != excludePlayer);
+            });
+
+            return players;
+        }
+    
+        public Entity GetPlayerOf(Entity entity)
+        {
+            switch (entity.Id.Category)
+            {
+                case EntityCategory.Item: return entity.GetComponent<ItemData>().PlayerEntity;
+                case EntityCategory.Effect: return entity.GetComponent<EffectData>().PlayerEntity;
+                default: throw new InvalidOperationException($"Invalid category for GetPlayerOf: {entity.Id.Category}");
+            }
+        }
 
         public IEnumerable<Entity> GetEffectsForPlayer(Entity player) =>
             _entities
                 .Where(e => e.HasComponent<EffectData>())
                 .Where(e => e.GetComponent<EffectData>()?.PlayerEntity == player);
-
-        // (Optional) Get all entities owned by a player (items, effects, summons, etc.)
-        public IEnumerable<Entity> GetAllOwnedBy(Entity player) =>
-            _entities.Where(e =>
-                (e.GetComponent<ItemData>()?.PlayerEntity == player) ||
-                (e.GetComponent<EffectData>()?.PlayerEntity == player));
-
-
-        public Entity? GetPlayerOfItem(Entity item)
-        {
-            ItemData? itemData = item.GetComponent<ItemData>();
-            return itemData?.PlayerEntity;
-        }
-
-        public Entity? GetPlayerOfEffect(Entity effect)
-        {
-            EffectData? effectData = effect.GetComponent<EffectData>();
-            return effectData?.PlayerEntity;
-        }
-
-        public Entity? GetPlayerOf(Entity entity)
-        {
-            // Check if it’s an item
-            ItemData? itemData = entity.GetComponent<ItemData>();
-            if (itemData?.PlayerEntity != null)
-                return itemData.PlayerEntity;
-
-            // Check if it’s an effect
-            EffectData? effectData = entity.GetComponent<EffectData>();
-            if (effectData?.PlayerEntity != null)
-                return effectData.PlayerEntity;
-
-            // Not an item or effect, or no owner assigned
-            return null;
-        }
 
         public int GenerateInstanceId(EntityCategory category, string typeId)
         {

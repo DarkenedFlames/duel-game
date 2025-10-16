@@ -24,16 +24,14 @@ namespace CBA
         public void TryEquip()
         {
             // Ensure we have ItemData for this item
-            Entity player = Owner.GetComponent<ItemData>().PlayerEntity;
+            Entity player = World.Instance.GetPlayerOf(Owner);
 
             // --- Find conflicting equipped item of the same type for this player ---
             Wearable? conflicting = World.Instance
-                .GetItemsForPlayer(player)
+                .GetAllForPlayer<Entity>(player, EntityCategory.Item, null, true)
+                .Where(e => e != Owner)
                 .Select(e => e.GetComponent<Wearable>())
-                .Where(w => w != null &&
-                            w.IsEquipped &&
-                            w.EquipType == EquipType &&
-                            w.Owner != Owner)
+                .Where(w => w.EquipType == EquipType)
                 .FirstOrDefault();
 
             // Unequip the conflicting item if it exists

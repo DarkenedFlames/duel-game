@@ -9,7 +9,7 @@ namespace CBA
         }
         public override void Subscribe()
         {
-            World.Instance.TurnManager.OnTurnStart += (player) => { if (player == Owner) RevealInventory(); };
+            World.Instance.TurnManager.OnTurnStart += player => { if (player == Owner) RevealInventory(); };
         }
         private void RevealInventory()
         {
@@ -20,18 +20,11 @@ namespace CBA
 
             if (Random.Shared.NextDouble() >= chance) return;
 
-            // --- Get all other players ---
-            List<Entity> enemies = [..World.Instance.GetById(EntityCategory.Player).Where(p => p != Owner)];
+            List<Entity> enemies = [..World.Instance.GetAllPlayers(Owner)];
             if (enemies.Count == 0) return;
-
-            // --- Pick one random enemy ---
+            
             Entity enemy = enemies[Random.Shared.Next(enemies.Count)];
-
-            // --- Find all items belonging to that enemy ---
-            List<string> enemyItemNames = [..World.Instance
-                .GetById(EntityCategory.Item)
-                .Where(e => e.GetComponent<ItemData>().PlayerEntity == enemy)
-                .Select(e => e.DisplayName)];
+            List<string> enemyItemNames = [.. World.Instance.GetAllForPlayer<string>(enemy, EntityCategory.Item)];
 
             if (enemyItemNames.Count > 0) Printer.PrintPeered(enemyItemNames, enemy);
         }

@@ -22,7 +22,7 @@ namespace CBA
             if (target.Id.Category != EntityCategory.Player)
                 throw new InvalidOperationException($"[{Owner.Id}] Usable.TryUse was passed a non-player target.");
             
-            ResourcesComponent resources = Owner.GetComponent<ItemData>().PlayerEntity.GetComponent<ResourcesComponent>();
+            ResourcesComponent resources = World.Instance.GetPlayerOf(Owner).GetComponent<ResourcesComponent>();
             if (resources.Get("Stamina") < StaminaCost)
             {
                 OnUseFailed?.Invoke(Owner, target);

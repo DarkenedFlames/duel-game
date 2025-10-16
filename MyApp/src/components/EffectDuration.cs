@@ -14,7 +14,7 @@ namespace CBA
         {
             World.Instance.TurnManager.OnTurnStart += player =>
             {
-                if (player == Owner.GetComponent<EffectData>().PlayerEntity) TickDuration();
+                if (player == World.Instance.GetPlayerOf(Owner)) TickDuration();
             };
 
         }

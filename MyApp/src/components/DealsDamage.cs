@@ -59,9 +59,9 @@ namespace CBA
                     Owner.GetComponent<Usable>().OnUseSuccess += ApplyDamage;
                     break;
                 case EntityCategory.Effect:
-                    World.Instance.TurnManager.OnTurnStart += (player) =>
+                    World.Instance.TurnManager.OnTurnStart += player =>
                     {
-                        if (player == Owner.GetComponent<EffectData>().PlayerEntity)
+                        if (player == World.Instance.GetPlayerOf(Owner))
                             ApplyDamage(Owner, player);
                     };
                     break;
@@ -81,9 +81,6 @@ namespace CBA
             StatsComponent targetStats = target.GetComponent<StatsComponent>();
             ResourcesComponent targetResources = target.GetComponent<ResourcesComponent>();
 
-            // --- Identify source type ---
-            bool isItem = Owner.Id.Category == EntityCategory.Item;
-
             // --- Dodge (applies to both) ---
             if (CanDodge && Random.Shared.NextDouble() < targetStats.GetHyperbolic("Dodge"))
             {
@@ -94,9 +91,9 @@ namespace CBA
             if (finalDamage > 0)
             {
                 // --- Crit (items only) ---
-                if (isItem && CanCrit)
+                if (Owner.Id.Category == EntityCategory.Item && CanCrit)
                 {
-                    StatsComponent userStats = itemOrEffect.GetComponent<ItemData>().PlayerEntity.GetComponent<StatsComponent>();
+                    StatsComponent userStats = World.Instance.GetPlayerOf(itemOrEffect).GetComponent<StatsComponent>();
                     if (Random.Shared.NextDouble() < userStats.GetHyperbolic("Critical"))
                     {
                         finalDamage = (int)(finalDamage * 2.0f);

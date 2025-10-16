@@ -62,7 +62,7 @@ namespace CBA
                     if (Owner.HasComponent<Wearable>())
                     {
                         Wearable wearable = Owner.GetComponent<Wearable>();
-                        Entity wearer = Owner.GetComponent<ItemData>().PlayerEntity;
+                        Entity wearer = World.Instance.GetPlayerOf(Owner);
                         wearable.OnEquipSuccess += _ => Modify(wearer, true);
                         wearable.OnUnequipSuccess += _ => Modify(wearer, false);
                     }
@@ -72,14 +72,13 @@ namespace CBA
                     }
                 }
 
-
             if (Owner.Id.Category == EntityCategory.Effect)
             {
                 if (Triggers.HasFlag(ModifiesStatsTrigger.OnApply))
                 {
-                    Entity player = Owner.GetComponent<EffectData>().PlayerEntity;
-                    World.Instance.OnEntityAdded += entity => { if (entity == Owner) Modify(player, true); };
-                    World.Instance.OnEntityRemoved += entity => { if (entity == Owner) Modify(player, false); };
+                    Entity target = World.Instance.GetPlayerOf(Owner);
+                    World.Instance.OnEntityAdded += entity => { if (entity == Owner) Modify(target, true); };
+                    World.Instance.OnEntityRemoved += entity => { if (entity == Owner) Modify(target, false); };
                 }
             }
         }

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Serialization;
 
 namespace CBA
 {
@@ -46,15 +47,16 @@ namespace CBA
         // --- Status Effects ---
         public static void PrintEffects(Entity player)
         {
-            IEnumerable<Entity>? effects = World.Instance
-                .GetById(EntityCategory.Effect)
-                .Where(e => e.GetComponent<EffectData>().PlayerEntity == player);
+            IEnumerable<Entity> effects = World.Instance.GetAllForPlayer<Entity>(player, EntityCategory.Effect);
 
             if (!effects.Any()) { Console.WriteLine("(No active effects)"); return; }
 
             foreach (Entity effect in effects)
             {
-                Console.WriteLine($"- {effect.DisplayName} (Duration: {effect.GetComponent<EffectDuration>().Remaining} turns)");
+                if (effect.HasComponent<EffectDuration>())
+                    Console.WriteLine($"- {effect.DisplayName} (Duration: {effect.GetComponent<EffectDuration>().Remaining} turns)");
+                else
+                    Console.WriteLine($"- {effect.DisplayName}");
             }
         }
 
@@ -109,33 +111,26 @@ namespace CBA
         }
 
         // --- Item Menu ---
-        public static int? PrintItemMenu(Entity itemEntity)
+        public static int? PrintItemMenu(Entity item)
         {
-            ItemData? itemData = itemEntity.GetComponent<ItemData>();
-            Entity? player = itemData?.PlayerEntity;
-            PlayerData? playerData = player?.GetComponent<PlayerData>();
-            Wearable? wearable = itemEntity.GetComponent<Wearable>();
+            ItemData itemData = item.GetComponent<ItemData>();
+            Entity player = itemData.PlayerEntity;
+            
+            ClearAndHeader($"Item Menu: {player.DisplayName} using {item.DisplayName}");
 
-            if (itemData == null || playerData == null)
+            List<string> actions = ["Remove"];
+
+            if (item.HasComponent<Usable>() & !item.HasComponent<Wearable>())
+                actions.Add("Use");
+
+            if (item.HasComponent<Wearable>())
             {
-                Console.WriteLine("Invalid entity or missing components.");
-                return null;
-            }
-
-            ClearAndHeader($"Item Menu: {playerData.Name} using {itemData.Name}");
-
-            List<string>? actions = ["Remove"];
-
-            if (itemData.PlayerEntity == player)
-            {
-                if (wearable != null)
+                if (item.GetComponent<Wearable>().IsEquipped)
                 {
-                    actions.Add(wearable.IsEquipped ? "Unequip" : "Equip");
-                    if (itemData.Type == ItemType.Weapon && wearable.IsEquipped)
-                        actions.Add("Use");
+                    actions.Add("Unequip");
+                    if (item.HasComponent<Usable>()) actions.Add("Use");
                 }
-                else if (itemData.Type == ItemType.Consumable)
-                    actions.Add("Use");
+                else actions.Add("Equip");
             }
 
             for (int i = 0; i < actions.Count; i++)
@@ -155,178 +150,183 @@ namespace CBA
         {
             for (int i = 0; i < targets.Count; i++)
             {
-                var name = targets[i].GetComponent<PlayerData>()?.Name ?? $"Target {i + 1}";
+                var name = targets[i].DisplayName;
                 Console.WriteLine($"{i + 1}. {name}");
             }
         }
 
+        public static string? MultiChoiceList(List<string> labels)
+        {
+            for (int i = 0; i < labels.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {labels[i]}");
+            }
+            int idx = InputHandler.GetNumberInput(labels.Count, "Select a number: ") - 1;
+            if (idx == 0)
+                return null;
+            return labels[0];
+        }
 
         //================== Event Printers =================//
         public static void PrintTurnStartHeader(Entity player)
         {
             Console.Clear();
-            Console.WriteLine($"-----{player.GetComponent<PlayerData>()?.Name}'s turn has began!-----");
+            Console.WriteLine($"-----{player.DisplayName}'s turn has began!-----");
         }
         public static void PrintTurnEndHeader(Entity player)
         {
-            Console.WriteLine($"-----{player.GetComponent<PlayerData>()?.Name}'s turn has ended!-----");
+            Console.WriteLine($"-----{player.DisplayName}'s turn has ended!-----");
         }
 
 
         public static void PrintEntityAdded(Entity entity)
         {
-            if (entity.GetComponent<PlayerData>() != null)
+            switch (entity.Id.Category)
             {
-                Console.WriteLine($"\n{entity.GetComponent<PlayerData>()?.Name} has joined the game!");
-            }
-            if (entity.GetComponent<ItemData>() != null)
-            {
-                ItemData? itemData = entity.GetComponent<ItemData>();
-                Console.WriteLine($"\n{itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name} has picked up {itemData?.Name}!");
-            }
-            if (entity.GetComponent<EffectData>() != null)
-            {
-                EffectData? effectData = entity.GetComponent<EffectData>();
-                EffectDuration? effectDuration = entity.GetComponent<EffectDuration>();
-                if (effectDuration != null)
-                {
-                    Console.WriteLine($"\n{effectData?.PlayerEntity.GetComponent<PlayerData>()?.Name} has gained an effect: {effectData?.Name}! Remaining turns: {effectDuration.Remaining}");
-                }
-                else
-                {
-                    Console.WriteLine($"\n{effectData?.PlayerEntity.GetComponent<PlayerData>()?.Name} has gained an effect: {effectData?.Name}!");
-                }
+                case EntityCategory.Player:
+                    Console.WriteLine($"\n{entity.DisplayName} has joined the game!");
+                    break;
+                case EntityCategory.Item:
+                    Console.WriteLine($"\n{entity.GetComponent<ItemData>().PlayerEntity.DisplayName} has picked up {entity.DisplayName}!");
+                    break;
+                case EntityCategory.Effect:
+                    string playerName = entity.GetComponent<EffectData>().PlayerEntity.DisplayName;
+                    string effectName = entity.DisplayName;
+                    if (entity.HasComponent<EffectDuration>())
+                    {
+                        EffectDuration effectDuration = entity.GetComponent<EffectDuration>();
+                        Console.WriteLine($"\n{playerName} has gained an effect: {effectName}! Remaining turns: {effectDuration.Remaining}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"\n{playerName} has gained an effect: {effectName}!");
+                    }
+                    break;
+                default:
+                    throw new Exception($"Printer couldn't find type of entity removed.");
             }
         }
         public static void PrintEntityRemoved(Entity entity)
         {
-            if (entity.GetComponent<PlayerData>() != null)
+            switch (entity.Id.Category)
             {
-                Console.WriteLine($"\n{entity.GetComponent<PlayerData>()?.Name} has died!");
-            }
-            if (entity.GetComponent<ItemData>() != null)
-            {
-                ItemData? itemData = entity.GetComponent<ItemData>();
-                Console.WriteLine($"\n{itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name} has lost {itemData?.Name}!");
-            }
-            if (entity.GetComponent<EffectData>() != null)
-            {
-                EffectData? effectData = entity.GetComponent<EffectData>();
-                EffectDuration? effectDuration = entity.GetComponent<EffectDuration>();
-                if (effectDuration != null)
-                {
-                    Console.WriteLine($"\n{effectData?.PlayerEntity.GetComponent<PlayerData>()?.Name}'s effect: {effectData?.Name} has expired!");
-                }
-                else
-                {
-                    Console.WriteLine($"\n{effectData?.PlayerEntity.GetComponent<PlayerData>()?.Name} has lost an effect: {effectData?.Name}!");
-                }
+                case EntityCategory.Player:
+                    Console.WriteLine($"\n{entity.DisplayName} has died!");
+                    break;
+                case EntityCategory.Item:
+                    Console.WriteLine($"\n{entity.GetComponent<ItemData>().PlayerEntity.DisplayName} has lost {entity.DisplayName}!");
+                    break;
+                case EntityCategory.Effect:
+                    string playerName = entity.GetComponent<EffectData>().PlayerEntity.DisplayName;
+                    string effectName = entity.DisplayName;
+
+                    if (entity.HasComponent<EffectDuration>())
+                    {
+                        Console.WriteLine($"\n{playerName}'s effect: {effectName} has expired!");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"\n{playerName} has lost an effect: {effectName}!");
+                    }
+                    break;
+                default:
+                    throw new Exception($"Printer couldn't find type of entity removed.");
             }
         }
 
         public static void PrintItemEquipped(Entity item)
         {
-            ItemData? itemData = item.GetComponent<ItemData>();
-            Console.WriteLine($"\n{itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name} equipped {itemData?.Name}!");
+            Console.WriteLine($"\n{item.GetComponent<ItemData>().PlayerEntity.DisplayName} equipped {item.DisplayName}!");
         }
         public static void PrintItemUnequipped(Entity item)
         {
-            ItemData? itemData = item.GetComponent<ItemData>();
-            Console.WriteLine($"\n{itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name} unequipped {itemData?.Name}!");
+            Console.WriteLine($"\n{item.GetComponent<ItemData>().PlayerEntity.DisplayName} unequipped {item.DisplayName}!");
         }
         public static void PrintItemUsed(Entity item, Entity target)
         {
-            ItemData? itemData = item.GetComponent<ItemData>();
-            string? itemName = itemData?.Name;
-            Entity? player = itemData?.PlayerEntity;
-            bool usedOnSelf = player == target;
-            string? playerName = player?.GetComponent<PlayerData>()?.Name;
-            string? targetName = target.GetComponent<PlayerData>()?.Name;
+            
+            Entity user = item.GetComponent<ItemData>().PlayerEntity;
+            
+            string itemName = item.DisplayName;
+            string userName = user.DisplayName;
+            string targetName = target.DisplayName;
 
-            if (usedOnSelf)
+            if (user == target)
             {
-                Console.WriteLine($"\n{playerName} used {itemName} on themselves!");
+                Console.WriteLine($"\n{userName} used {itemName} on themselves!");
             }
             else
             {
-                Console.WriteLine($"\n{playerName} used {itemName} on {targetName}!");
+                Console.WriteLine($"\n{userName} used {itemName} on {targetName}!");
             }
 
         }
         public static void PrintItemConsumed(Entity item)
         {
-            ItemData? itemData = item.GetComponent<ItemData>();
-            string? itemName = itemData?.Name;
-            string? playerName = itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name;
+            string itemName = item.DisplayName;
+            string playerName = item.GetComponent<ItemData>().PlayerEntity.DisplayName;
             Console.WriteLine($"\n{playerName} consumed their {itemName}!");
         }
 
         public static void PrintInsufficientStamina(Entity item)
         {
-            ItemData? itemData = item.GetComponent<ItemData>();
-            Console.WriteLine($"\n{itemData?.PlayerEntity.GetComponent<PlayerData>()?.Name} lacks stamina to use {itemData?.Name}.");
+            Console.WriteLine($"\n{item.GetComponent<ItemData>().PlayerEntity.DisplayName} lacks stamina to use {item.DisplayName}.");
         }
 
         public static void PrintStatChanged(StatsComponent stats, string statName)
         {
-            Console.WriteLine($"\n{stats.Owner.GetComponent<PlayerData>()?.Name}'s {statName} changed to {stats.Get(statName)}.");
+            Console.WriteLine($"\n{stats.Owner.DisplayName}'s {statName} changed to {stats.Get(statName)}.");
         }
         public static void PrintResourceChanged(ResourcesComponent resources, string resourceName)
         {
-            Console.WriteLine($"\n{resources.Owner.GetComponent<PlayerData>()?.Name}'s {resourceName} is now {resources.Get(resourceName)}.");
+            Console.WriteLine($"\n{resources.Owner.DisplayName}'s {resourceName} is now {resources.Get(resourceName)}.");
         }
         public static void PrintResourceDepleted(ResourcesComponent resources, string resourceName)
         {
-            Console.WriteLine($"\n{resources.Owner.GetComponent<PlayerData>()?.Name}'s {resourceName} has been depleted!");
+            Console.WriteLine($"\n{resources.Owner.DisplayName}'s {resourceName} has been depleted!");
         }
 
         public static void PrintDamageDealt(Entity itemOrEffect, Entity target, int finalDamage)
         {
-            ItemData? itemData = itemOrEffect.GetComponent<ItemData>();
-            EffectData? effectData = itemOrEffect.GetComponent<EffectData>();
+            string userName;
+            string sourceName = itemOrEffect.DisplayName;
+            string targetName = target.DisplayName;
 
-            bool isItem = itemData != null;
-            Entity? user = isItem ? itemData?.PlayerEntity : effectData?.PlayerEntity;
-            bool selfDamage = user == target;
-
-            string? userName = user?.GetComponent<PlayerData>()?.Name;
-            string? targetName = target.GetComponent<PlayerData>()?.Name;
-            string? sourceName = isItem ? itemData?.Name : effectData?.Name;
-
-            if (isItem)
+            if (itemOrEffect.Id.Category == EntityCategory.Item)
             {
-                if (selfDamage)
+                if (itemOrEffect.GetComponent<ItemData>().PlayerEntity == target)
                 {
+                    userName = targetName;
                     Console.WriteLine($"\n{userName} damaged themselves with {sourceName} for {finalDamage} damage!");
                 }
                 else
                 {
+                    userName = itemOrEffect.GetComponent<ItemData>().PlayerEntity.DisplayName;
                     Console.WriteLine($"\n{userName} dealt {finalDamage} damage to {targetName} with {sourceName}!");
                 }
             }
-            else
+            else if (itemOrEffect.Id.Category == EntityCategory.Effect)
             {
-                Console.WriteLine($"\n{userName} took {finalDamage} damage from {sourceName}!");
+                sourceName = itemOrEffect.DisplayName;
+                Console.WriteLine($"\n{targetName} took {finalDamage} damage from {sourceName}!");
             }
         }
 
         public static void PrintDodged(Entity itemOrEffect, Entity target)
         {
-            ItemData? itemData = itemOrEffect.GetComponent<ItemData>();
-            EffectData? effectData = itemOrEffect.GetComponent<EffectData>();
-            string? targetName = target.GetComponent<PlayerData>()?.Name;
+            string userName;
+            string targetName = target.DisplayName;
+            string sourceName = itemOrEffect.DisplayName;
 
-            if (itemData != null)
+            if (itemOrEffect.Id.Category == EntityCategory.Item)
             {
-                string itemName = itemData.Name;
-                string? playerName = itemData.PlayerEntity.GetComponent<PlayerData>()?.Name;
-                Console.WriteLine($"\n{playerName}'s attack with {itemName} was dodged by {targetName}!");
+                userName = itemOrEffect.GetComponent<ItemData>().PlayerEntity.DisplayName;
+                Console.WriteLine($"\n{userName}'s attack with {sourceName} was dodged by {targetName}!");
 
             }
-            else if (effectData != null)
+            else if (itemOrEffect.Id.Category == EntityCategory.Effect)
             {
-                string effectName = effectData.Name;
-                Console.WriteLine($"\n{targetName} dodged damage from their {effectName} effect!");
+                Console.WriteLine($"\n{targetName} dodged damage from their {sourceName} effect!");
             }
             else
             {
@@ -336,21 +336,19 @@ namespace CBA
 
         public static void PrintCritical(Entity itemOrEffect, Entity target)
         {
-            ItemData? itemData = itemOrEffect.GetComponent<ItemData>();
-            EffectData? effectData = itemOrEffect.GetComponent<EffectData>();
-            string? targetName = target.GetComponent<PlayerData>()?.Name;
+            string userName;
+            string targetName = target.DisplayName;
+            string sourceName = itemOrEffect.DisplayName;
 
-            if (itemData != null)
+            if (itemOrEffect.Id.Category == EntityCategory.Item)
             {
-                string? itemName = itemData.Name;
-                string? playerName = itemData.PlayerEntity.GetComponent<PlayerData>()?.Name;
-                Console.WriteLine($"\n{playerName}'s attack with {itemName} scored a critical hit on {targetName}!");
+                userName = itemOrEffect.GetComponent<ItemData>().PlayerEntity.DisplayName;
+                Console.WriteLine($"\n{userName}'s attack with {sourceName} scored a critical hit on {targetName}!");
 
             }
-            else if (effectData != null)
+            else if (itemOrEffect.Id.Category == EntityCategory.Effect)
             {
-                string effectName = effectData.Name;
-                Console.WriteLine($"\n{targetName} was critically damaged by their {effectName} effect!");
+                Console.WriteLine($"\n{targetName} was critically damaged by their {sourceName} effect!");
             }
             else
             {
@@ -358,9 +356,9 @@ namespace CBA
             }
         }
 
-        public static void PrintPeered(List<String> targetItems, Entity target)
+        public static void PrintPeered(List<string> targetItems, Entity target)
         {
-            Console.WriteLine($"\nPeer activated! {target.GetComponent<PlayerData>()?.Name ?? "Enemy"}'s inventory:");
+            Console.WriteLine($"\nPeer activated! {target.DisplayName}'s inventory:");
             Console.WriteLine(string.Join(", ", targetItems));
             InputHandler.WaitForKey();
         }

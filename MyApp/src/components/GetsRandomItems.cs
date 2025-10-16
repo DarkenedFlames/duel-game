@@ -5,7 +5,7 @@ namespace CBA
         public override void ValidateDependencies()
         {
             if (Owner.Id.Category != EntityCategory.Player)
-                throw new InvalidOperationException($"{Owner.Id} was given an invalid Component GetRandomItems.");
+                throw new InvalidOperationException($"{Owner.Id} was given an invalid Component: GetRandomItems.");
         }
         public override void Subscribe()
         {

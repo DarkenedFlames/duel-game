@@ -5,27 +5,23 @@ public class Program
     static void Main()
     {
         World world = new();
-        List<string> playerNames = ["Bob", "Alice"];
+        Entity bob = new(EntityCategory.Player, "Bob", "Bob");
+        Entity alice = new(EntityCategory.Player, "Alice", "Alice");
+        List<Entity> players = [bob, alice];
 
-        foreach (string? name in playerNames)
+        foreach (Entity player in players)
         {
-            Entity player = new PlayerEntity();
-            new PlayerData(player, name);
+            new PlayerData(player, player.DisplayName);
             new StatsComponent(player);
             new ResourcesComponent(player);
             new GetsRandomItems(player);
             new PeersComponent(player);
             new RefillsStamina(player);
 
+            player.ValidateAll();
             player.SubscribeAll();
             World.Instance.AddEntity(player);
         }
         world.TurnManager.StartGameLoop();
     }
-}
-
-
-namespace CBA
-{
-    public class PlayerEntity : Entity { }
 }

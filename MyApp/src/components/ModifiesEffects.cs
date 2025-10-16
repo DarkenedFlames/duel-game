@@ -30,7 +30,7 @@ namespace CBA
             if (Owner.HasComponent<Wearable>())
             {
                 Wearable wearable = Owner.GetComponent<Wearable>();
-                Entity wearer = Owner.GetComponent<ItemData>().PlayerEntity;
+                Entity wearer = World.Instance.GetPlayerOf(Owner);
                 wearable.OnEquipSuccess += _ => { ApplyByTrigger(EffectTrigger.OnEquip, wearer); };
                 wearable.OnUnequipSuccess += _ => { ApplyByTrigger(EffectTrigger.OnUnequip, wearer); };   
             }
@@ -53,9 +53,8 @@ namespace CBA
         }
         private static void RemoveEffect(string effectTypeId, Entity target)
         {
-            foreach (Entity e in World.Instance.GetById(EntityCategory.Effect, effectTypeId))
-                if (e.GetComponent<EffectData>().PlayerEntity == target)
-                    World.Instance.RemoveEntity(e);
+            IEnumerable<Entity> allTargetEffects = World.Instance.GetAllForPlayer<Entity>(target, EntityCategory.Effect, effectTypeId);
+            foreach (Entity effect in allTargetEffects) World.Instance.RemoveEntity(effect);
         }
     }
 }

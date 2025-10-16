@@ -75,43 +75,47 @@ namespace CBA
                 ?? throw new Exception($"Effect template '{typeId}' not found.");
         }
 
-        public static void ApplyEffect(string typeId, Entity playerEntity)
+        public static void ApplyEffect(string typeId, Entity target)
         {
             EffectTemplate template = GetTemplate(typeId);
 
             // Handle stacking
             EffectData? existing = World.Instance
-                .GetEffectsForPlayer(playerEntity)
-                .Where(e => e.Id.TypeId == template.TypeId)
-                .Select(e => e.GetComponent<EffectData>())
+                .GetAllForPlayer<EffectData>(target, EntityCategory.Effect, template.TypeId)
                 .FirstOrDefault();
 
-            switch (existing?.StackingType)
+            if (existing != null)
             {
-                case StackingType.RefreshOnly:
-                    EffectDuration? dur = existing.Owner.GetComponent<EffectDuration>();
-                    dur?.Remaining = dur.Maximum;
-                    return; // don’t create new
+                Entity existingEffect = existing.Owner;
 
-                case StackingType.AddStack:
-                    if (existing.CurrentStacks < existing.MaximumStacks)
-                    {
-                        existing.CurrentStacks++;
-                        EffectDuration? d = existing.Owner.GetComponent<EffectDuration>();
-                        d?.Remaining = d.Maximum;
-                    }
-                    return;
+                switch (existing?.StackingType)
+                {
+                    case StackingType.RefreshOnly:
+                        if (existingEffect.HasComponent<EffectDuration>())
+                        {
+                            EffectDuration effectDuration = existingEffect.GetComponent<EffectDuration>();
+                            effectDuration.Remaining = effectDuration.Maximum;
+                        }
+                        return;
 
-                case StackingType.Ignore:
-                    return;
+                    case StackingType.AddStack:
+                        if (existing.CurrentStacks < existing.MaximumStacks && existingEffect.HasComponent<EffectDuration>())
+                        {
+                            existing.CurrentStacks++;
+                            EffectDuration effectDuration = existingEffect.GetComponent<EffectDuration>();
+                            effectDuration.Remaining = effectDuration.Maximum;
+                        }
+                        return;
+
+                    case StackingType.Ignore:
+                        return;
+                }
             }
-
             // Create new effect entity
-            Entity effectEntity = new(EntityCategory.Effect, template.TypeId, template.DisplayName);
-            AddComponents(effectEntity, template, playerEntity);
-            World.Instance.AddEntity(effectEntity);
-
-            OnEffectApplied?.Invoke(playerEntity, effectEntity);
+            Entity effect = new(EntityCategory.Effect, template.TypeId, template.DisplayName);
+            AddComponents(effect, template, target);
+            World.Instance.AddEntity(effect);
+            OnEffectApplied?.Invoke(target, effect);
         }
 
         private static void AddComponents(Entity effect, EffectTemplate template, Entity player)

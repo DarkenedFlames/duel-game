@@ -12,238 +12,148 @@ namespace CBA
 
         public void StartGameLoop()
         {
-            bool gameEnded = false;
-
-            while (!gameEnded)
+            while (true)
             {
-                var alivePlayers = World.Instance
-                    .GetById(EntityCategory.Player)
-                    .Where(p => p.GetComponent<ResourcesComponent>()?.Get("Health") > 0)
-                    .ToList();
-
-                if (alivePlayers.Count <= 1)
-                {
-                    gameEnded = true;
+                var alive = World.Instance.GetAllPlayers().Where(p => p.GetComponent<ResourcesComponent>().Get("Health") > 0).ToList();
+                if (alive.Count <= 1)
                     break;
-                }
 
-                foreach (var player in alivePlayers.ToList())
+                foreach (var player in alive)
                 {
-                    ResourcesComponent resources = player.GetComponent<ResourcesComponent>();
-                    if (resources.Get("Health") <= 0)
-                        continue;
-
                     OnTurnStart?.Invoke(player);
-
-                    var playerData = player.GetComponent<PlayerData>();
-                    bool menuSignaledEnd = HandlePlayerMenu(player, playerData);
-
+                    bool endGame = HandlePlayerTurn(player);
                     OnTurnEnd?.Invoke(player);
-
-                    if (resources.Get("Health") <= 0)
-                        World.Instance.RemoveEntity(player);
-
-                    if (menuSignaledEnd)
-                    {
-                        gameEnded = true;
-                        break;
-                    }
+                    if (endGame) return;
                 }
             }
 
-            // When loop exits, print game over and winner
-            var survivors = World.Instance
-                .GetById(EntityCategory.Player)
-                .Where(p => p.GetComponent<ResourcesComponent>()?.Get("Health") > 0)
-                .ToList();
-
+            var survivors = World.Instance.GetAllPlayers().Where(p => p.GetComponent<ResourcesComponent>().Get("Health") > 0).ToList();
             if (survivors.Count == 1)
-            {
-                string winnerName = survivors[0].DisplayName;
-                Printer.PrintMessage($"\nGame Over! {winnerName} wins!");
-            }
+                Printer.PrintMessage($"\nGame Over! {survivors[0].DisplayName} wins!");
             else
-            {
                 Printer.PrintMessage("\nGame Over! No one survived.");
-            }
         }
 
-        private bool HandlePlayerMenu(Entity player, PlayerData? playerData)
+        private bool HandlePlayerTurn(Entity player)
         {
-            bool endTurn = false;
-
-            while (!endTurn)
+            while (true)
             {
-                var stillAlive = World.Instance
-                    .GetEntitiesWith<PlayerData>()
-                    .Where(p => p.GetComponent<ResourcesComponent>()?.Get("Health") > 0)
-                    .ToList();
-
-                // signal game end to loop but don't print
-                if (stillAlive.Count <= 1)
-                    return true;
-
-                Printer.ClearAndHeader($"Main Menu: {playerData?.Name}'s Turn");
-                Printer.PrintMenu(new List<string> { "Stats", "Inventory", "Equipment", "Status", "End Turn" });
-                int choice = InputHandler.GetNumberInput(1, 5);
+                int choice = Printer.MultiChoiceList($"{player.DisplayName}'s Turn", 
+                    ["Stats", "Inventory", "Equipment", "Status", "End Turn"]);
 
                 switch (choice)
                 {
                     case 1:
-                        Printer.ClearAndHeader($"{playerData?.Name}'s Stats");
+                        Printer.ClearAndHeader($"{player.DisplayName}'s Stats");
                         Printer.PrintStats(player);
                         InputHandler.WaitForKey();
                         break;
-
                     case 2:
-                        HandleInventoryMenu(player, playerData);
+                        HandleInventoryMenu(player);
                         break;
-
                     case 3:
-                        HandleEquipmentMenu(player, playerData);
+                        HandleEquipmentMenu(player);
                         break;
-
                     case 4:
-                        Printer.ClearAndHeader($"{playerData?.Name}'s Status");
+                        Printer.ClearAndHeader($"{player.DisplayName}'s Status");
                         Printer.PrintEffects(player);
                         InputHandler.WaitForKey();
                         break;
-
                     case 5:
-                        endTurn = true;
-                        break;
-
-                    default:
-                        Printer.PrintMessage("Invalid choice. Try again.");
-                        InputHandler.WaitForKey();
-                        break;
+                        return false; // end turn
                 }
             }
-
-            return false; // normal turn end
         }
 
-        private void HandleInventoryMenu(Entity player, PlayerData? playerData)
+        private void HandleInventoryMenu(Entity player)
         {
-            Printer.ClearAndHeader($"{playerData?.Name}'s Inventory");
-            var items = World.Instance.GetEntitiesWith<ItemData>()
-                .Where(i => i.GetComponent<ItemData>()?.PlayerEntity == player)
-                .ToList();
+            var items = World.Instance.GetAllForPlayer<Entity>(player, EntityCategory.Item).ToList();
+            var item = InputHandler.GetChoice(items, i => i.DisplayName, $"{player.DisplayName}'s Inventory");
+            if (item == null) return;
 
-            Printer.PrintItemList(items);
-            int itemIdx = InputHandler.GetNumberInput(0, items.Count, "Enter item number to open, or 0 to go back:");
-
-            if (itemIdx > 0 && itemIdx <= items.Count)
-            {
-                var selectedItem = items[itemIdx - 1];
-                int? action = Printer.PrintItemMenu(selectedItem);
-                HandleItemAction(selectedItem, action);
-                InputHandler.WaitForKey();
-            }
+            HandleItemAction(item);
         }
 
-        private void HandleEquipmentMenu(Entity player, PlayerData? playerData)
+        private void HandleEquipmentMenu(Entity player)
         {
-            Printer.ClearAndHeader($"{playerData?.Name}'s Equipment");
-            var equippedItems = Printer.PrintEquipment(player);
+            var equipped = Printer.PrintEquipment(player);
+            var selected = InputHandler.GetChoice(equipped, e => e.DisplayName, $"{player.DisplayName}'s Equipment");
+            if (selected == null) return;
 
-            if (!equippedItems.Any())
-            {
-                InputHandler.WaitForKey();
-                return;
-            }
-
-            int equipIdx = InputHandler.GetNumberInput(0, equippedItems.Count, "Enter equipment number to manage, or 0 to go back:");
-            if (equipIdx > 0 && equipIdx <= equippedItems.Count)
-            {
-                var selectedEquip = equippedItems[equipIdx - 1];
-                int? action = Printer.PrintItemMenu(selectedEquip);
-                HandleItemAction(selectedEquip, action);
-                InputHandler.WaitForKey();
-            }
+            HandleItemAction(selected);
         }
 
-        private void HandleItemAction(Entity itemEntity, int? choice)
+        private void HandleItemAction(Entity item)
         {
-            if (choice == null) return;
+            var actions = BuildItemActions(item);
 
-            var itemData = itemEntity.GetComponent<ItemData>();
-            var wearable = itemEntity.GetComponent<Wearable>();
-            var player = itemData?.PlayerEntity;
-            var playerData = player?.GetComponent<PlayerData>();
+            int choice = Printer.MultiChoiceList
+            (
+                $"Item Menu: {World.Instance.GetPlayerOf(item).DisplayName} using {item.DisplayName}",
+                actions
+            );
+            if (choice == 0) return;
 
+            string action = actions[choice - 1].ToLower();
+            ExecuteItemAction(item, action);
+        }
+
+        private List<string> BuildItemActions(Entity item)
+        {
             var actions = new List<string> { "Remove" };
 
-            if (itemData?.PlayerEntity == player)
+            if (item.HasComponent<Usable>() && !item.HasComponent<Wearable>())
+                actions.Add("Use");
+
+            if (item.HasComponent<Wearable>())
             {
-                if (wearable != null)
+                var wearable = item.GetComponent<Wearable>();
+                if (wearable.IsEquipped)
                 {
-                    actions.Add(wearable.IsEquipped ? "Unequip" : "Equip");
-                    if (itemData?.Type == ItemType.Weapon && wearable.IsEquipped)
+                    actions.Add("Unequip");
+                    if (item.HasComponent<Usable>())
                         actions.Add("Use");
                 }
-                else if (itemData?.Type == ItemType.Consumable)
-                {
-                    actions.Add("Use");
-                }
+                else actions.Add("Equip");
             }
 
-            if (choice < 1 || choice > actions.Count)
-            {
-                Printer.PrintMessage("Invalid choice.");
-                return;
-            }
+            return actions;
+        }
 
-            string action = actions[(int)choice - 1].ToLower();
-
+        private void ExecuteItemAction(Entity item, string action)
+        {
             switch (action)
             {
                 case "remove":
-                    World.Instance.RemoveEntity(itemEntity);
-                    Printer.PrintMessage($"{itemData?.Name} removed from world.");
+                    World.Instance.RemoveEntity(item);
+                    Printer.PrintMessage($"{item.DisplayName} removed from world.");
                     break;
-
                 case "equip":
-                    if (wearable != null && !wearable.IsEquipped)
-                    {
-                        wearable.TryEquip();
-                        Printer.PrintItemEquipped(itemEntity);
-                    }
-                    else Printer.PrintMessage("Cannot equip this item.");
+                    item.GetComponent<Wearable>()?.TryEquip();
                     break;
-
                 case "unequip":
-                    if (wearable != null && wearable.IsEquipped)
-                    {
-                        wearable.TryUnequip();
-                        Printer.PrintItemUnequipped(itemEntity);
-                    }
-                    else Printer.PrintMessage("Cannot unequip this item.");
+                    item.GetComponent<Wearable>()?.TryUnequip();
                     break;
-
                 case "use":
-                    HandleItemUse(itemEntity, playerData);
+                    HandleItemUse(item);
                     break;
             }
+
+            InputHandler.WaitForKey();
         }
 
-        private void HandleItemUse(Entity itemEntity, PlayerData? playerData)
+        private void HandleItemUse(Entity item)
         {
-            var itemData = itemEntity.GetComponent<ItemData>();
-            if (itemData == null || playerData == null) return;
-
-            var allPlayers = World.Instance.GetEntitiesWith<PlayerData>().ToList();
-            Printer.PrintMessage($"Choose target for {itemData.Name}:");
-            Printer.PrintTargetList(allPlayers);
-            int targetIndex = InputHandler.GetNumberInput(1, allPlayers.Count);
-
-            if (targetIndex >= 1 && targetIndex <= allPlayers.Count)
+            var players = World.Instance.GetAllPlayers().ToList();
+            var target = InputHandler.GetChoice(players, p => p.DisplayName, $"Choose target for {item.DisplayName}:");
+            if (target == null)
             {
-                var target = allPlayers[targetIndex - 1];
-                itemEntity.GetComponent<Usable>()?.TryUse(target);
-                Printer.PrintItemUsed(itemEntity, target);
+                Printer.PrintMessage("Cancelled.");
+                return;
             }
-            else Printer.PrintMessage("Invalid target selection.");
+
+            item.GetComponent<Usable>().TryUse(target);
         }
     }
+
 }
