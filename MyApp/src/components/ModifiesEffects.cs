@@ -3,16 +3,23 @@ namespace CBA
     [Flags]
     public enum EffectTrigger
     {
-        None      = 0,
-        OnUse     = 1 << 0,
-        OnEquip   = 1 << 1,
-        OnUnequip = 1 << 2
+        None = 0,
+        OnUse = 1 << 0,
+        OnEquip = 1 << 1,
+        OnUnequip = 1 << 2,
+        OnHit = 1 << 3,
+        OnCritical = 1 << 4
+    }
+
+    public enum EffectAction
+    {
+        Apply,
+        Remove
     }
 
     public class ModifiesEffects(Entity owner) : Component(owner)
     {
-        public Dictionary<EffectTrigger, List<string>> TriggeredEffects { get; } = new();
-        public event Action<Entity, Entity, string>? OnEffectApplied;
+        public Dictionary<(EffectAction Action, EffectTrigger Trigger), List<string>> TriggeredEffects { get; } = [];
 
         public override void ValidateDependencies()
         {
@@ -24,49 +31,54 @@ namespace CBA
         }
         public override void Subscribe()
         {
-            bool hasOnUse = TriggeredEffects.ContainsKey(EffectTrigger.OnUse);
-            bool hasOnEquip = TriggeredEffects.ContainsKey(EffectTrigger.OnEquip);
-            bool hasOnUnequip = TriggeredEffects.ContainsKey(EffectTrigger.OnUnequip);
+            if(HasTrigger(EffectTrigger.OnUse)) 
+                Owner.GetComponent<Usable>().OnUseSuccess += (_, target) => ExecuteByTrigger(EffectTrigger.OnUse, target);
 
-            if (hasOnUse && Owner.HasComponent<Usable>())
-            {
-                Owner.GetComponent<Usable>().OnUseSuccess += (_, target) => ApplyByTrigger(EffectTrigger.OnUse, target);
-            }
-
-            if (Owner.HasComponent<Wearable>())
+            if (HasTrigger(EffectTrigger.OnEquip))
             {
                 Wearable wearable = Owner.GetComponent<Wearable>();
                 Entity wearer = World.Instance.GetPlayerOf(Owner);
-
-                if (hasOnEquip)
-                    wearable.OnEquipSuccess += _ => ApplyByTrigger(EffectTrigger.OnEquip, wearer);
-
-                if (hasOnUnequip)
-                    wearable.OnUnequipSuccess += _ => ApplyByTrigger(EffectTrigger.OnUnequip, wearer);
+                wearable.OnEquipSuccess += _ => ExecuteByTrigger(EffectTrigger.OnEquip, wearer);
             }
-        }
-        private void ApplyByTrigger(EffectTrigger trigger, Entity target)
-        {
-            if (!TriggeredEffects.TryGetValue(trigger, out var effects) || effects.Count == 0)
-                return; // no defined effects for this trigger — silently ignore
-
-            foreach (string effectTypeId in effects)
+            if(HasTrigger(EffectTrigger.OnUnequip))
             {
-                if (trigger == EffectTrigger.OnUnequip)
-                    RemoveEffect(effectTypeId, target);
-                else
-                    ApplyEffect(effectTypeId, target);
+                Wearable wearable = Owner.GetComponent<Wearable>();
+                Entity wearer = World.Instance.GetPlayerOf(Owner);
+                wearable.OnUnequipSuccess += _ => ExecuteByTrigger(EffectTrigger.OnUnequip, wearer);
             }
+            if (HasTrigger(EffectTrigger.OnHit))
+                Owner.GetComponent<Hits>().OnHit += (_, target) => ExecuteByTrigger(EffectTrigger.OnHit, target);
+
+            if (HasTrigger(EffectTrigger.OnCritical))
+                Owner.GetComponent<DealsDamage>().OnCritical += (_, target) => ExecuteByTrigger(EffectTrigger.OnCritical, target);
         }
-        private void ApplyEffect(string effectTypeId, Entity target)
+        private void ExecuteByTrigger(EffectTrigger trigger, Entity target)
         {
-            EffectFactory.ApplyEffect(effectTypeId, target);
-            OnEffectApplied?.Invoke(Owner, target, effectTypeId);
+            var matchingEntries = TriggeredEffects
+                .Where(kvp => kvp.Key.Trigger == trigger)
+                .ToList();
+
+            foreach (var ((action, _), effects ) in matchingEntries)
+            {
+                foreach (var effectTypeId in effects)
+                {
+                    if (action == EffectAction.Apply)
+                        EffectFactory.ApplyEffect(effectTypeId, target);
+                    else
+                        RemoveEffect(effectTypeId, target);
+
+                }
+            }
         }
         private static void RemoveEffect(string effectTypeId, Entity target)
         {
             IEnumerable<Entity> allTargetEffects = World.Instance.GetAllForPlayer<Entity>(target, EntityCategory.Effect, effectTypeId);
             foreach (Entity effect in allTargetEffects) World.Instance.RemoveEntity(effect);
         }
+        private bool HasTrigger(EffectTrigger trigger)
+        {
+            return TriggeredEffects.Keys.Any(k => k.Trigger == trigger);
+        }
+    
     }
 }

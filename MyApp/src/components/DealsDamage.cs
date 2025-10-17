@@ -11,32 +11,28 @@ namespace CBA
 
         public DamageType DamageType { get; init; } = DamageType.Physical;
         public bool CanCrit { get; init; }
-        public bool CanDodge { get; init; }
 
         public event Action<Entity, Entity, int>? OnDamageDealt;
+        public event Action<Entity, Entity>? OnCritical;
 
         // --- Static damage constructor ---
         public DealsDamage(Entity owner, int damage,
                            DamageType damageType = DamageType.Physical,
-                           bool canCrit = false,
-                           bool canDodge = false) : base(owner)
+                           bool canCrit = false) : base(owner)
         {
             _staticDamage = damage;
             DamageType = damageType;
             CanCrit = canCrit;
-            CanDodge = canDodge;
         }
 
         // --- Dynamic damage constructor ---
         public DealsDamage(Entity owner, Func<int> getDamage,
                            DamageType damageType = DamageType.Physical,
-                           bool canCrit = false,
-                           bool canDodge = false) : base(owner)
+                           bool canCrit = false) : base(owner)
         {
             _getDamage = getDamage ?? throw new ArgumentNullException(nameof(getDamage));
             DamageType = damageType;
             CanCrit = canCrit;
-            CanDodge = canDodge;
         }
 
         public override void ValidateDependencies()
@@ -56,7 +52,7 @@ namespace CBA
             switch (Owner.Id.Category)
             {
                 case EntityCategory.Item:
-                    Owner.GetComponent<Usable>().OnUseSuccess += ApplyDamage;
+                    Owner.GetComponent<Hits>().OnHit += ApplyDamage;
                     break;
                 case EntityCategory.Effect:
                     World.Instance.TurnManager.OnTurnStart += player =>
@@ -81,41 +77,31 @@ namespace CBA
             StatsComponent targetStats = target.GetComponent<StatsComponent>();
             ResourcesComponent targetResources = target.GetComponent<ResourcesComponent>();
 
-            // --- Dodge (applies to both) ---
-            if (CanDodge && Random.Shared.NextDouble() < targetStats.GetHyperbolic("Dodge"))
+            // --- Crit (items only) ---
+            if (Owner.Id.Category == EntityCategory.Item && CanCrit)
             {
-                Printer.PrintDodged(Owner, target);
-                finalDamage = 0;
+                StatsComponent userStats = World.Instance.GetPlayerOf(itemOrEffect).GetComponent<StatsComponent>();
+                if (Random.Shared.NextDouble() < userStats.GetHyperbolic("Critical"))
+                {
+                    finalDamage = (int)(finalDamage * 2.0f);
+                    Printer.PrintCritical(Owner, target);
+                    OnCritical?.Invoke(Owner, target);
+                }
             }
 
-            if (finalDamage > 0)
+            // --- Damage Reduction ---
+            float divisor = DamageType switch
             {
-                // --- Crit (items only) ---
-                if (Owner.Id.Category == EntityCategory.Item && CanCrit)
-                {
-                    StatsComponent userStats = World.Instance.GetPlayerOf(itemOrEffect).GetComponent<StatsComponent>();
-                    if (Random.Shared.NextDouble() < userStats.GetHyperbolic("Critical"))
-                    {
-                        finalDamage = (int)(finalDamage * 2.0f);
-                        Printer.PrintCritical(Owner, target);
-                    }
+                DamageType.Physical => targetStats.GetHyperbolic("Armor"),
+                DamageType.Magical  => targetStats.GetHyperbolic("Shield"),
+                _                   => 1f
+            };
 
-                }
-
-                // --- Damage Reduction ---
-                float divisor = DamageType switch
-                {
-                    DamageType.Physical => targetStats.GetHyperbolic("Armor"),
-                    DamageType.Magical  => targetStats.GetHyperbolic("Shield"),
-                    _                   => 1f
-                };
-
-                finalDamage = (int)(finalDamage / divisor);
+            finalDamage = (int)(finalDamage / divisor);
 
                 // --- Apply Damage ---
-                targetResources.Change("Health", -finalDamage);
-                OnDamageDealt?.Invoke(itemOrEffect, target, finalDamage);
-            }
+            targetResources.Change("Health", -finalDamage);
+            OnDamageDealt?.Invoke(itemOrEffect, target, finalDamage);
         }
     }
 }

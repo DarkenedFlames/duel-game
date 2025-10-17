@@ -13,11 +13,9 @@ namespace CBA
         int? StaminaCost = null,
         EquipType? EquipType = null,
         ModifiesStatsTrigger? StatsTrigger = null,
-        Dictionary<string, int>? StatAdditions = null,
-        Dictionary<string, int>? ResourceAdditions = null,
-        Dictionary<string, float>? StatModifiers = null,
-        Dictionary<string, float>? ResourceModifiers = null,
-        Dictionary<EffectTrigger, List<string>>? EffectsByTrigger = null,
+        Dictionary<(ModifiesStatsTrigger, ModificationType), Dictionary<string, float>>? StatsByTrigger = null,
+        Dictionary<(ModifiesStatsTrigger, ModificationType), Dictionary<string, float>>? ResourcesByTrigger = null,
+        Dictionary<(EffectAction, EffectTrigger), List<string>>? EffectsByTrigger = null,
         int Damage = 0,
         DamageType DamageType = DamageType.Physical,
         bool CanCrit = true,
@@ -62,8 +60,13 @@ namespace CBA
                 ItemType.Consumable,
                 ItemRarity.Common,
                 StaminaCost: 15,
-                StatsTrigger: ModifiesStatsTrigger.OnUse,
-                ResourceAdditions: new() { { "Health", 25 } }
+                ResourcesByTrigger: new()
+                {
+                    [(ModifiesStatsTrigger.OnUse, ModificationType.Add)] = new()
+                    {
+                        ["Health"]  = 25.0f
+                    }
+                }
             ),
             new(
                 EntityCategory.Item,
@@ -72,8 +75,13 @@ namespace CBA
                 ItemType.Consumable,
                 ItemRarity.Common,
                 StaminaCost: 0,
-                StatsTrigger: ModifiesStatsTrigger.OnUse,
-                ResourceAdditions: new() { { "Stamina", 25 } }
+                ResourcesByTrigger: new()
+                {
+                    [(ModifiesStatsTrigger.OnUse, ModificationType.Add)] = new()
+                    {
+                        ["Stamina"]  = 25.0f
+                    }
+                }
             ),
             new(
                 EntityCategory.Item,
@@ -82,8 +90,13 @@ namespace CBA
                 ItemType.Consumable,
                 ItemRarity.Common,
                 StaminaCost: 15,
-                StatsTrigger: ModifiesStatsTrigger.OnUse,
-                StatAdditions: new() { { "MaximumHealth", 5 } }
+                StatsByTrigger: new()
+                {
+                    [(ModifiesStatsTrigger.OnUse, ModificationType.Add)] = new()
+                    {
+                        ["MaximumHealth"]  = 5.0f
+                    }
+                }
             ),
             new(
                 EntityCategory.Item,
@@ -92,8 +105,13 @@ namespace CBA
                 ItemType.Consumable,
                 ItemRarity.Common,
                 StaminaCost: 15,
-                StatsTrigger: ModifiesStatsTrigger.OnUse,
-                StatAdditions: new() { { "MaximumStamina", 5 } }
+                StatsByTrigger: new()
+                {
+                    [(ModifiesStatsTrigger.OnUse, ModificationType.Add)] = new()
+                    {
+                        ["MaximumStamina"]  = 5.0f
+                    }
+                }
             ),
             new(
                 EntityCategory.Item,
@@ -102,8 +120,13 @@ namespace CBA
                 ItemType.Consumable,
                 ItemRarity.Common,
                 StaminaCost: 15,
-                StatsTrigger: ModifiesStatsTrigger.OnUse,
-                StatAdditions: new() { { "Armor", 5 } }
+                StatsByTrigger: new()
+                {
+                    [(ModifiesStatsTrigger.OnUse, ModificationType.Add)] = new()
+                    {
+                        ["Armor"]  = 5.0f
+                    }
+                }
             ),
             new(
                 EntityCategory.Item,
@@ -112,8 +135,13 @@ namespace CBA
                 ItemType.Consumable,
                 ItemRarity.Common,
                 StaminaCost: 15,
-                StatsTrigger: ModifiesStatsTrigger.OnUse,
-                StatAdditions: new() { { "Shield", 5 } }
+                StatsByTrigger: new()
+                {
+                    [(ModifiesStatsTrigger.OnUse, ModificationType.Add)] = new()
+                    {
+                        ["Shield"]  = 5.0f
+                    }
+                }
             ),
             new(
                 EntityCategory.Item,
@@ -123,7 +151,13 @@ namespace CBA
                 ItemRarity.Common,
                 StaminaCost: 15,
                 StatsTrigger: ModifiesStatsTrigger.OnUse,
-                StatAdditions: new() { { "Critical", 5 } }
+                StatsByTrigger: new()
+                {
+                    [(ModifiesStatsTrigger.OnUse, ModificationType.Add)] = new()
+                    {
+                        ["Critical"]  = 5.0f
+                    }
+                }
             ),
             new(
                 EntityCategory.Item,
@@ -132,8 +166,13 @@ namespace CBA
                 ItemType.Consumable,
                 ItemRarity.Common,
                 StaminaCost: 15,
-                StatsTrigger: ModifiesStatsTrigger.OnUse,
-                StatAdditions: new() { { "Dodge", 5 } }
+                StatsByTrigger: new()
+                {
+                    [(ModifiesStatsTrigger.OnUse, ModificationType.Add)] = new()
+                    {
+                        ["Dodge"]  = 5.0f
+                    }
+                }
             ),
             new(
                 EntityCategory.Item,
@@ -142,8 +181,13 @@ namespace CBA
                 ItemType.Consumable,
                 ItemRarity.Common,
                 StaminaCost: 15,
-                StatsTrigger: ModifiesStatsTrigger.OnUse,
-                StatAdditions: new() { { "Luck", 5 } }
+                StatsByTrigger: new()
+                {
+                    [(ModifiesStatsTrigger.OnUse, ModificationType.Add)] = new()
+                    {
+                        ["Luck"]  = 5.0f
+                    }
+                }
             ),
             new(
                 EntityCategory.Item,
@@ -152,8 +196,13 @@ namespace CBA
                 ItemType.Consumable,
                 ItemRarity.Common,
                 StaminaCost: 15,
-                StatsTrigger: ModifiesStatsTrigger.OnUse,
-                StatAdditions: new() { { "Peer", 5 } }
+                StatsByTrigger: new()
+                {
+                    [(ModifiesStatsTrigger.OnUse, ModificationType.Add)] = new()
+                    {
+                        ["Peer"]  = 5.0f
+                    }
+                }
             ),
 
             //     ======================================================
@@ -168,8 +217,21 @@ namespace CBA
                 ItemRarity.Uncommon,
                 StaminaCost: 15,
                 StatsTrigger: ModifiesStatsTrigger.OnUse,
-                StatModifiers: new() { { "MaximumHealth", 1.25f } },
-                ResourceModifiers: new() { {"Health", 1.25f} }
+                StatsByTrigger: new()
+                {
+                    [(ModifiesStatsTrigger.OnUse, ModificationType.Multiply)] = new()
+                    {
+                        ["MaximumHealth"]  = 1.25f
+                    }
+                },
+
+                ResourcesByTrigger: new()
+                {
+                    [(ModifiesStatsTrigger.OnUse, ModificationType.Multiply)] = new()
+                    {
+                        ["Health"] = 1.25f
+                    }
+                }
             ),
             new(
                 EntityCategory.Item,
@@ -178,9 +240,21 @@ namespace CBA
                 ItemType.Consumable,
                 ItemRarity.Uncommon,
                 StaminaCost: 15,
-                StatsTrigger: ModifiesStatsTrigger.OnUse,
-                StatModifiers: new() { { "MaximumStamina", 1.25f } },
-                ResourceModifiers: new() { {"Stamina", 1.25f} }
+                StatsByTrigger: new()
+                {
+                    [(ModifiesStatsTrigger.OnUse, ModificationType.Multiply)] = new()
+                    {
+                        ["MaximumStamina"]  = 1.25f
+                    }
+                },
+
+                ResourcesByTrigger: new()
+                {
+                    [(ModifiesStatsTrigger.OnUse, ModificationType.Multiply)] = new()
+                    {
+                        ["Stamina"] = 1.25f
+                    }
+                }
             ),
             new(
                 EntityCategory.Item,
@@ -189,8 +263,63 @@ namespace CBA
                 ItemType.Consumable,
                 ItemRarity.Uncommon,
                 StaminaCost: 15,
-                StatsTrigger: ModifiesStatsTrigger.OnUse,
-                StatModifiers: new() { { "Armor", 1.25f }, {"Shield", 1.25f} }
+                StatsByTrigger: new()
+                {
+                    [(ModifiesStatsTrigger.OnUse, ModificationType.Multiply)] = new()
+                    {
+                        ["Armor"]           = 1.25f,
+                        ["Shield"]          = 1.25f
+                    }
+                }
+            ),
+
+            //     ======================================================
+            //     Rare
+            //     ======================================================
+
+            new(
+                EntityCategory.Item,
+                "chromatic_concoction",
+                "Chromatic Concotion",
+                ItemType.Consumable,
+                ItemRarity.Rare,
+                StaminaCost: 15,
+                StatsByTrigger: new()
+                {
+                    [(ModifiesStatsTrigger.OnUse, ModificationType.Multiply)] = new()
+                    {
+                        ["MaximumHealth"]   = 1.25f,
+                        ["MaximumStamina"]  = 1.25f,
+                        ["Armor"]           = 1.25f,
+                        ["Shield"]          = 1.25f
+                    }
+                },
+
+                ResourcesByTrigger: new()
+                {
+                    [(ModifiesStatsTrigger.OnUse, ModificationType.Multiply)] = new()
+                    {
+                        ["Health"]  = 1.25f,
+                        ["Stamina"] = 1.25f
+                    }
+                }
+            ),
+
+            new(
+                EntityCategory.Item,
+                "homogenous_paste",
+                "Homogenous Paste",
+                ItemType.Consumable,
+                ItemRarity.Rare,
+                StaminaCost: 15,
+                StatsByTrigger: new()
+                {
+                    [(ModifiesStatsTrigger.OnUse, ModificationType.Multiply)] = new()
+                    {
+                        ["Critical"]   = 1.25f,
+                        ["Dodge"]  = 1.25f
+                    }
+                }
             ),
 
             // ==========================================================
@@ -212,7 +341,7 @@ namespace CBA
                 DamageType: DamageType.Physical,
                 CanCrit: true,
                 CanDodge: true,
-                EffectsByTrigger: new() {{EffectTrigger.OnUse, ["inferno"]}}
+                EffectsByTrigger: new() {{(EffectAction.Apply, EffectTrigger.OnUse), ["inferno"]}}
             ),
             // Add more templates as needed
         ];
@@ -230,58 +359,25 @@ namespace CBA
             {
                 new Usable(item, staminaCost);
             }    // Consumables or Weapons get Usable if their StaminaCost is defined.
-            
+
             if (template.Type == ItemType.Weapon)
             {
-                new DealsDamage(item, template.Damage, template.DamageType, template.CanCrit, template.CanDodge);
+                new DealsDamage(item, template.Damage, template.DamageType, template.CanCrit);
+                new Hits(item, template.CanDodge);
             }
             
             if (template.EquipType is EquipType equipType) // Non-null EquipType gets Wearable
                 new Wearable(item, equipType);
 
-            if
-            (
-                template.StatAdditions != null ||
-                template.StatModifiers != null ||
-                template.ResourceAdditions != null ||
-                template.ResourceModifiers != null
-            )
+
+            if (template.StatsByTrigger != null || template.ResourcesByTrigger != null)
             {
-                if (template.StatsTrigger is ModifiesStatsTrigger statsTrigger)
-                {
-                    var modifiesStats = new ModifiesStats(item, statsTrigger);
-
-                    if (template.StatAdditions != null)
-                    {
-                        foreach (var (k, v) in template.StatAdditions)
-                            modifiesStats.StatAdditions[k] = v;
-                    }
-                    if (template.StatModifiers != null)
-                    {
-                        foreach (var (k, v) in template.StatModifiers)
-                            modifiesStats.StatModifiers[k] = v;
-                    }
-                    if (template.ResourceAdditions != null)
-                    {
-                        foreach (var (k, v) in template.ResourceAdditions)
-                            modifiesStats.ResourceAdditions[k] = v;
-                    }
-                    if (template.ResourceModifiers != null)
-                    {
-                        foreach (var (k, v) in template.ResourceModifiers)
-                            modifiesStats.ResourceModifiers[k] = v;
-                    }
-                }
-
+                new ModifiesStats(item, template.StatsByTrigger, template.ResourcesByTrigger);
             }
-        
+
             if (template.EffectsByTrigger != null)
             {
-                var modifiesEffects = new ModifiesEffects(item);
-                foreach(var (k, v) in template.EffectsByTrigger)
-                {
-                    modifiesEffects.TriggeredEffects[k] = v;
-                }
+                new ModifiesEffects(item, template.EffectsByTrigger);
             }
         }
 

@@ -3,117 +3,145 @@ namespace CBA
     [Flags]
     public enum ModifiesStatsTrigger
     {
-        None      = 0,
-        OnUse     = 1 << 0,
-        OnEquip   = 1 << 1,
-        OnUnequip = 1 << 2,
-        OnApply   = 1 << 3, // Effect applied (entity added)
-        OnRemove  = 1 << 4  // Effect removed (entity removed)
+        None        = 0,
+        OnUse       = 1 << 0,
+        OnEquip     = 1 << 1,
+        OnUnequip   = 1 << 2,
+        OnAdded     = 1 << 3, // Effect applied (entity added)
+        OnRemoved   = 1 << 4, // Effect removed (entity removed)
+        OnHit       = 1 << 5,
+        OnCritical  = 1 << 6,
+        OnDamageDealt = 1 << 7
     }
 
-    public class ModifiesStats(Entity owner, ModifiesStatsTrigger triggers) : Component(owner)
+    public enum ModificationType
     {
-        public Dictionary<string, float> StatModifiers { get; } = [];
-        public Dictionary<string, int>   StatAdditions { get; } = [];
-        public Dictionary<string, float> ResourceModifiers { get; } = [];
-        public Dictionary<string, int>   ResourceAdditions { get; } = [];
+        Add,
+        Multiply
+    }
 
-        public ModifiesStatsTrigger Triggers { get; } = triggers;
-
-        public event Action<Entity, Entity>? OnStatsModified;
-
+    public class ModifiesStats(
+        Entity owner,
+        Dictionary<(ModifiesStatsTrigger, ModificationType), Dictionary<string, float>>? StatsByTrigger = null,
+        Dictionary<(ModifiesStatsTrigger, ModificationType), Dictionary<string, float>>? ResourcesByTrigger = null) : Component(owner)
+    {
+        // <(Trigger, ModificationType), Dictionary<StatName, Value>>
+        public Dictionary<(ModifiesStatsTrigger Trigger, ModificationType Type), Dictionary<string, float>>? StatChanges { get; } = StatsByTrigger;
+        public Dictionary<(ModifiesStatsTrigger Trigger, ModificationType Type), Dictionary<string, float>>? ResourceChanges { get; } = ResourcesByTrigger;
+        
         public override void ValidateDependencies()
         {
             if (Owner.Id.Category != EntityCategory.Item && Owner.Id.Category != EntityCategory.Effect)
-                throw new InvalidOperationException($"ModifiesStats was given to an invalid category of entity: {Owner.Id}.");
-            
-            if (Owner.Id.Category == EntityCategory.Item && !Owner.HasComponent<Usable>() && !Owner.HasComponent<Wearable>())
-                throw new InvalidOperationException($"Component Missing a Dependency: (Owner: {Owner.Id}, Component: ModifiesStats, Dependency: Usable or Wearable.");            
+                throw new InvalidOperationException($"{Owner.Id} was given an invalid Component: ModifiesStats.");
+
+            // Fail loud if triggers are declared that don't match owner type.
+            bool requiresUsable = HasTrigger(ModifiesStatsTrigger.OnUse);
+            bool requiresWearable = HasTrigger(ModifiesStatsTrigger.OnEquip) || HasTrigger(ModifiesStatsTrigger.OnUnequip);
+
+            if (requiresUsable && !Owner.HasComponent<Usable>())
+                throw new InvalidOperationException($"{Owner.Id} declares OnUse but lacks Usable.");
+
+            if (requiresWearable && !Owner.HasComponent<Wearable>())
+                throw new InvalidOperationException($"{Owner.Id} declares OnEquip/OnUnequip but lacks Wearable.");
         }
+
         public override void Subscribe()
         {
-
-            if (Owner.Id.Category == EntityCategory.Item)
-
-                if (!Triggers.HasFlag(ModifiesStatsTrigger.OnUse) && !Triggers.HasFlag(ModifiesStatsTrigger.OnEquip))
-                {
-                    throw new InvalidOperationException($"ModifiesStats was given to a valid item {Owner.Id}, but no valid trigger was provided.");
-                }
-
-                if (Triggers.HasFlag(ModifiesStatsTrigger.OnUse))
-                {
-                    if (Owner.HasComponent<Usable>())
-                    {
-                        Owner.GetComponent<Usable>().OnUseSuccess += (_, target) =>
-                        {
-                            if (target.Id.Category != EntityCategory.Player)
-                                throw new InvalidOperationException($"[{Owner.Id}] ModifiesStats was passed a non-player target: {target.Id}.");
-                            Modify(target, true);
-                        };
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException($"ModifiesStats has the OnUse trigger but {Owner.Id} is missing Usable.");
-                    }
-                }
-
-                if (Triggers.HasFlag(ModifiesStatsTrigger.OnEquip))
-                {
-                    if (Owner.HasComponent<Wearable>())
-                    {
-                        Wearable wearable = Owner.GetComponent<Wearable>();
-                        Entity wearer = World.Instance.GetPlayerOf(Owner);
-                        wearable.OnEquipSuccess += _ => Modify(wearer, true);
-                        wearable.OnUnequipSuccess += _ => Modify(wearer, false);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException($"ModifiesStats has the OnEquip trigger but {Owner.Id} is missing Wearable.");
-                    }
-                }
-
-            if (Owner.Id.Category == EntityCategory.Effect)
+            // For each declared trigger, subscribe appropriately.
+            foreach (ModifiesStatsTrigger trigger in Enum.GetValues<ModifiesStatsTrigger>())
             {
-                if (Triggers.HasFlag(ModifiesStatsTrigger.OnApply))
+                if (trigger == ModifiesStatsTrigger.None) continue;
+                if (!HasTrigger(trigger)) continue;
+
+                switch (trigger)
                 {
-                    Entity target = World.Instance.GetPlayerOf(Owner);
-                    World.Instance.OnEntityAdded += entity => { if (entity == Owner) Modify(target, true); };
-                    World.Instance.OnEntityRemoved += entity => { if (entity == Owner) Modify(target, false); };
+                    case ModifiesStatsTrigger.OnEquip:
+                    case ModifiesStatsTrigger.OnUnequip:
+                    {
+                        var wearable = Owner.GetComponent<Wearable>();
+                        var wearer = World.Instance.GetPlayerOf(Owner);
+                        if (trigger == ModifiesStatsTrigger.OnEquip)
+                            wearable.OnEquipSuccess += _ => Modify(wearer, ModifiesStatsTrigger.OnEquip);
+                        else
+                            wearable.OnUnequipSuccess += _ => Modify(wearer, ModifiesStatsTrigger.OnUnequip);
+                        break;
+                    }
+                    case ModifiesStatsTrigger.OnAdded:
+                    case ModifiesStatsTrigger.OnRemoved:
+                    {
+                        var target = World.Instance.GetPlayerOf(Owner);
+
+                        if (trigger == ModifiesStatsTrigger.OnAdded)
+                            World.Instance.OnEntityAdded += e => { if (e == Owner) Modify(target, trigger); };
+                        else
+                            World.Instance.OnEntityRemoved += e => { if (e == Owner) Modify(target, trigger); };
+                        
+                        break;
+                    }
+                    case ModifiesStatsTrigger.OnUse:
+                        Owner.GetComponent<Usable>().OnUseSuccess += (_, target) => Modify(target, trigger);
+                        break;
+                    case ModifiesStatsTrigger.OnHit:
+                        Owner.GetComponent<Hits>().OnHit += (_, target) => Modify(target, trigger);
+                        break;
+                    case ModifiesStatsTrigger.OnCritical:
+                        Owner.GetComponent<DealsDamage>().OnCritical += (_, target) => Modify(target, trigger);
+                        break;
+                    case ModifiesStatsTrigger.OnDamageDealt:
+                        Owner.GetComponent<DealsDamage>().OnDamageDealt += (_, target, _) => Modify(target, trigger);
+                        break;
                 }
             }
         }
-        private void Modify(Entity target, bool isApplying)
+
+        private bool HasTrigger(ModifiesStatsTrigger trigger)
+        {
+            return (StatChanges?.Keys.Any(k => k.Trigger == trigger) ?? false) ||
+                   (ResourceChanges?.Keys.Any(k => k.Trigger == trigger) ?? false);
+        }
+
+        private void Modify(Entity target, ModifiesStatsTrigger trigger)
         {
             if (target.Id.Category != EntityCategory.Player)
                 throw new InvalidOperationException($"[{Owner.Id}] ModifiesStats.Modify was passed a non-player target.");
 
-            StatsComponent stats = target.GetComponent<StatsComponent>();
-            ResourcesComponent resources = target.GetComponent<ResourcesComponent>();
+            var stats = target.GetComponent<StatsComponent>();
+            var resources = target.GetComponent<ResourcesComponent>();
 
             // --- Stats ---
-            foreach ((string key, int value) in StatAdditions)
+            if (StatChanges != null)
             {
-                if (isApplying) stats.IncreaseBase(key, value);
-                else            stats.DecreaseBase(key, value);
-            }
+                foreach (var ((trig, type), changes) in StatChanges)
+                {
+                    if (trig != trigger) continue;
 
-            foreach ((string key, float value) in StatModifiers)
-            {
-                if (isApplying) stats.IncreaseModifier(key, value);
-                else            stats.DecreaseModifier(key, value);
+                    foreach (var (key, value) in changes)
+                    {
+                        switch (type)
+                        {
+                            case ModificationType.Add: stats.IncreaseBase(key, (int)value); break;
+                            case ModificationType.Multiply: stats.IncreaseModifier(key, value); break;
+                        }
+                    }
+                }
             }
-
             // --- Resources ---
-            foreach ((string key, int value) in ResourceAdditions)
-                resources.Change(key, isApplying ? value : -value);
-
-            foreach ((string key, float value) in ResourceModifiers)
+            if (ResourceChanges != null)
             {
-                if (value == 0f) continue;
-                resources.ChangeMultiplier(key, isApplying ? value : 1f / value);
-            }
+                foreach (var ((trig, type), changes) in ResourceChanges)
+                {
+                    if (trig != trigger) continue;
 
-            OnStatsModified?.Invoke(Owner, target);
+                    foreach (var (key, value) in changes)
+                    {
+                        switch (type)
+                        {
+                            case ModificationType.Add: resources.Change(key, (int)value); break;
+                            case ModificationType.Multiply: resources.ChangeMultiplier(key, value); break;
+                        }
+                    }
+                }
+            }
         }
     }
 }

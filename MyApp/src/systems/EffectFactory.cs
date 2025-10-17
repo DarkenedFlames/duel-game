@@ -11,6 +11,7 @@ namespace CBA
         string DisplayName,
         bool IsNegative,
         bool IsHidden,
+        float Chance = 1.0f,
         StackingType StackingType = StackingType.AddStack,
         int MaxStacks = 1,
         ModifiesStatsTrigger? StatsTrigger = null,
@@ -38,6 +39,7 @@ namespace CBA
                 "Inferno",
                 IsNegative: true,
                 IsHidden: false,
+                Chance: .15f,
                 StackingType: StackingType.AddStack,
                 MaxStacks: 5,
                 Damage: 1, // 1% health per turn
