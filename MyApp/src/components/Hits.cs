@@ -18,8 +18,9 @@ namespace CBA
 
             OnHit += (_, _) => TimesHitThisTurn++;
             OnHit += (_, _) => TimesHitThisRound++;
-
             Owner.GetComponent<Usable>().OnUseSuccess += (_, target) => TryHit(Owner, target);
+
+            OnDodge += Printer.PrintDodged;
         }
 
         public void TryHit(Entity item, Entity target)

@@ -1,35 +1,36 @@
 todo:
 - Work on making sure that dynamic messages have a buffer and wait until the appropriate time to print
-- Make sure each item doesn't apply affects or other logic if take damage returns false
 
 
-
-
+==================
 Command Cheatsheet
+==================
 
-Build Executable
+Build Executable:
 dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
 
-Count Lines of Code
+Count Lines of Code:
 (gci -include *.cs,*.xaml -recurse | select-string .).Count
 
-*Git workflow*
+============
+Git Workflow
+============
 
-Start of work
+Start of work:
 git pull origin main     Sync local with GitHub
 git status               Double-check sync status
 
-Each feature/fix
+Each feature/fix:
 git add .                Stage all changes
 git commit -m "message"  Commit changes with a message
 git push origin main     Push changes to GitHub
 
-Time for a new release (1.x.x for major, x.1.x for minor, x.x.1 for patch)
+Time for a new release (1.x.x for major, x.1.x for minor, x.x.1 for patch):
 repeat "Each feature/fix" steps to catch remaining changes
 git tag -a v0.1.0 -m "Alpha milestone: first full duel loop"
 git push origin v0.1.0
 go to GitHub and create a new release with notes
 
-Major changes include new complex systems or breaking changes
-Minor changes include new features or significant improvements
-Patch changes include bug fixes or small tweaks
+- Major changes include new complex systems or breaking changes
+- Minor changes include new features or significant improvements
+- Patch changes include bug fixes or small tweaks

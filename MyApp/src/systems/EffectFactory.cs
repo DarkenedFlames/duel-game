@@ -14,16 +14,14 @@ namespace CBA
         float Chance = 1.0f,
         StackingType StackingType = StackingType.AddStack,
         int MaxStacks = 1,
-        ModifiesStatsTrigger? StatsTrigger = null,
+        Trigger? StatsTrigger = null,
         Dictionary<string, int>? StatAdditions = null,
         Dictionary<string, int>? ResourceAdditions = null,
         Dictionary<string, float>? StatModifiers = null,
         Dictionary<string, float>? ResourceModifiers = null,
-        Dictionary<EffectTrigger, List<string>>? EffectsByTrigger = null,
         int Damage = 0,
         DamageType DamageType = DamageType.Physical,
-        bool CanCrit = true,
-        bool CanDodge = true
+        bool CanCrit = true
 
     );
 
@@ -31,8 +29,8 @@ namespace CBA
     {
         public static event Action<Entity, Entity>? OnEffectApplied;
 
-        public static readonly List<EffectTemplate> Templates = new()
-        {
+        public static readonly List<EffectTemplate> Templates =
+        [
             new(
                 EntityCategory.Effect,
                 "inferno",
@@ -44,8 +42,7 @@ namespace CBA
                 MaxStacks: 5,
                 Damage: 1, // 1% health per turn
                 DamageType: DamageType.Magical,
-                CanCrit: false,
-                CanDodge: false
+                CanCrit: false
             ),
 
             new(
@@ -68,7 +65,7 @@ namespace CBA
                 IsHidden: false,
                 StackingType: StackingType.Ignore
             )
-        };
+        ];
 
         public static EffectTemplate GetTemplate(string typeId)
         {
@@ -80,6 +77,9 @@ namespace CBA
         public static void ApplyEffect(string typeId, Entity target)
         {
             EffectTemplate template = GetTemplate(typeId);
+
+            if (Random.Shared.NextDouble() < template.Chance)
+                return;
 
             // Handle stacking
             EffectData? existing = World.Instance
@@ -149,8 +149,7 @@ namespace CBA
                     effect,
                     getDamage: () => damageValue,
                     damageType: template.DamageType,
-                    canCrit: template.CanCrit,
-                    canDodge: template.CanDodge
+                    canCrit: template.CanCrit
                 );
             }
 

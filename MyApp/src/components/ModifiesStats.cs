@@ -1,7 +1,7 @@
 namespace CBA
 {
     [Flags]
-    public enum ModifiesStatsTrigger
+    public enum Trigger
     {
         None        = 0,
         OnUse       = 1 << 0,
@@ -22,12 +22,12 @@ namespace CBA
 
     public class ModifiesStats(
         Entity owner,
-        Dictionary<(ModifiesStatsTrigger, ModificationType), Dictionary<string, float>>? StatsByTrigger = null,
-        Dictionary<(ModifiesStatsTrigger, ModificationType), Dictionary<string, float>>? ResourcesByTrigger = null) : Component(owner)
+        Dictionary<(Trigger, ModificationType), Dictionary<string, float>>? StatsByTrigger = null,
+        Dictionary<(Trigger, ModificationType), Dictionary<string, float>>? ResourcesByTrigger = null) : Component(owner)
     {
         // <(Trigger, ModificationType), Dictionary<StatName, Value>>
-        public Dictionary<(ModifiesStatsTrigger Trigger, ModificationType Type), Dictionary<string, float>>? StatChanges { get; } = StatsByTrigger;
-        public Dictionary<(ModifiesStatsTrigger Trigger, ModificationType Type), Dictionary<string, float>>? ResourceChanges { get; } = ResourcesByTrigger;
+        public Dictionary<(Trigger Trigger, ModificationType Type), Dictionary<string, float>>? StatChanges { get; } = StatsByTrigger;
+        public Dictionary<(Trigger Trigger, ModificationType Type), Dictionary<string, float>>? ResourceChanges { get; } = ResourcesByTrigger;
         
         public override void ValidateDependencies()
         {
@@ -35,8 +35,8 @@ namespace CBA
                 throw new InvalidOperationException($"{Owner.Id} was given an invalid Component: ModifiesStats.");
 
             // Fail loud if triggers are declared that don't match owner type.
-            bool requiresUsable = HasTrigger(ModifiesStatsTrigger.OnUse);
-            bool requiresWearable = HasTrigger(ModifiesStatsTrigger.OnEquip) || HasTrigger(ModifiesStatsTrigger.OnUnequip);
+            bool requiresUsable = HasTrigger(Trigger.OnUse);
+            bool requiresWearable = HasTrigger(Trigger.OnEquip) || HasTrigger(Trigger.OnUnequip);
 
             if (requiresUsable && !Owner.HasComponent<Usable>())
                 throw new InvalidOperationException($"{Owner.Id} declares OnUse but lacks Usable.");
@@ -48,59 +48,59 @@ namespace CBA
         public override void Subscribe()
         {
             // For each declared trigger, subscribe appropriately.
-            foreach (ModifiesStatsTrigger trigger in Enum.GetValues<ModifiesStatsTrigger>())
+            foreach (Trigger trigger in Enum.GetValues<Trigger>())
             {
-                if (trigger == ModifiesStatsTrigger.None) continue;
+                if (trigger == Trigger.None) continue;
                 if (!HasTrigger(trigger)) continue;
 
                 switch (trigger)
                 {
-                    case ModifiesStatsTrigger.OnEquip:
-                    case ModifiesStatsTrigger.OnUnequip:
+                    case Trigger.OnEquip:
+                    case Trigger.OnUnequip:
                     {
                         var wearable = Owner.GetComponent<Wearable>();
                         var wearer = World.Instance.GetPlayerOf(Owner);
-                        if (trigger == ModifiesStatsTrigger.OnEquip)
-                            wearable.OnEquipSuccess += _ => Modify(wearer, ModifiesStatsTrigger.OnEquip);
+                        if (trigger == Trigger.OnEquip)
+                            wearable.OnEquipSuccess += _ => Modify(wearer, Trigger.OnEquip);
                         else
-                            wearable.OnUnequipSuccess += _ => Modify(wearer, ModifiesStatsTrigger.OnUnequip);
+                            wearable.OnUnequipSuccess += _ => Modify(wearer, Trigger.OnUnequip);
                         break;
                     }
-                    case ModifiesStatsTrigger.OnAdded:
-                    case ModifiesStatsTrigger.OnRemoved:
+                    case Trigger.OnAdded:
+                    case Trigger.OnRemoved:
                     {
                         var target = World.Instance.GetPlayerOf(Owner);
 
-                        if (trigger == ModifiesStatsTrigger.OnAdded)
+                        if (trigger == Trigger.OnAdded)
                             World.Instance.OnEntityAdded += e => { if (e == Owner) Modify(target, trigger); };
                         else
                             World.Instance.OnEntityRemoved += e => { if (e == Owner) Modify(target, trigger); };
                         
                         break;
                     }
-                    case ModifiesStatsTrigger.OnUse:
+                    case Trigger.OnUse:
                         Owner.GetComponent<Usable>().OnUseSuccess += (_, target) => Modify(target, trigger);
                         break;
-                    case ModifiesStatsTrigger.OnHit:
+                    case Trigger.OnHit:
                         Owner.GetComponent<Hits>().OnHit += (_, target) => Modify(target, trigger);
                         break;
-                    case ModifiesStatsTrigger.OnCritical:
+                    case Trigger.OnCritical:
                         Owner.GetComponent<DealsDamage>().OnCritical += (_, target) => Modify(target, trigger);
                         break;
-                    case ModifiesStatsTrigger.OnDamageDealt:
+                    case Trigger.OnDamageDealt:
                         Owner.GetComponent<DealsDamage>().OnDamageDealt += (_, target, _) => Modify(target, trigger);
                         break;
                 }
             }
         }
 
-        private bool HasTrigger(ModifiesStatsTrigger trigger)
+        private bool HasTrigger(Trigger trigger)
         {
             return (StatChanges?.Keys.Any(k => k.Trigger == trigger) ?? false) ||
                    (ResourceChanges?.Keys.Any(k => k.Trigger == trigger) ?? false);
         }
 
-        private void Modify(Entity target, ModifiesStatsTrigger trigger)
+        private void Modify(Entity target, Trigger trigger)
         {
             if (target.Id.Category != EntityCategory.Player)
                 throw new InvalidOperationException($"[{Owner.Id}] ModifiesStats.Modify was passed a non-player target.");

@@ -12,10 +12,10 @@ namespace CBA
         ItemRarity Rarity,
         int? StaminaCost = null,
         EquipType? EquipType = null,
-        ModifiesStatsTrigger? StatsTrigger = null,
-        Dictionary<(ModifiesStatsTrigger, ModificationType), Dictionary<string, float>>? StatsByTrigger = null,
-        Dictionary<(ModifiesStatsTrigger, ModificationType), Dictionary<string, float>>? ResourcesByTrigger = null,
-        Dictionary<(EffectAction, EffectTrigger), List<string>>? EffectsByTrigger = null,
+        Trigger? StatsTrigger = null,
+        Dictionary<(Trigger, ModificationType), Dictionary<string, float>>? StatsByTrigger = null,
+        Dictionary<(Trigger, ModificationType), Dictionary<string, float>>? ResourcesByTrigger = null,
+        Dictionary<(EffectAction, Trigger), List<string>>? EffectsByTrigger = null,
         int Damage = 0,
         DamageType DamageType = DamageType.Physical,
         bool CanCrit = true,
@@ -62,7 +62,7 @@ namespace CBA
                 StaminaCost: 15,
                 ResourcesByTrigger: new()
                 {
-                    [(ModifiesStatsTrigger.OnUse, ModificationType.Add)] = new()
+                    [(Trigger.OnUse, ModificationType.Add)] = new()
                     {
                         ["Health"]  = 25.0f
                     }
@@ -77,7 +77,7 @@ namespace CBA
                 StaminaCost: 0,
                 ResourcesByTrigger: new()
                 {
-                    [(ModifiesStatsTrigger.OnUse, ModificationType.Add)] = new()
+                    [(Trigger.OnUse, ModificationType.Add)] = new()
                     {
                         ["Stamina"]  = 25.0f
                     }
@@ -92,7 +92,7 @@ namespace CBA
                 StaminaCost: 15,
                 StatsByTrigger: new()
                 {
-                    [(ModifiesStatsTrigger.OnUse, ModificationType.Add)] = new()
+                    [(Trigger.OnUse, ModificationType.Add)] = new()
                     {
                         ["MaximumHealth"]  = 5.0f
                     }
@@ -107,7 +107,7 @@ namespace CBA
                 StaminaCost: 15,
                 StatsByTrigger: new()
                 {
-                    [(ModifiesStatsTrigger.OnUse, ModificationType.Add)] = new()
+                    [(Trigger.OnUse, ModificationType.Add)] = new()
                     {
                         ["MaximumStamina"]  = 5.0f
                     }
@@ -122,7 +122,7 @@ namespace CBA
                 StaminaCost: 15,
                 StatsByTrigger: new()
                 {
-                    [(ModifiesStatsTrigger.OnUse, ModificationType.Add)] = new()
+                    [(Trigger.OnUse, ModificationType.Add)] = new()
                     {
                         ["Armor"]  = 5.0f
                     }
@@ -137,7 +137,7 @@ namespace CBA
                 StaminaCost: 15,
                 StatsByTrigger: new()
                 {
-                    [(ModifiesStatsTrigger.OnUse, ModificationType.Add)] = new()
+                    [(Trigger.OnUse, ModificationType.Add)] = new()
                     {
                         ["Shield"]  = 5.0f
                     }
@@ -150,10 +150,10 @@ namespace CBA
                 ItemType.Consumable,
                 ItemRarity.Common,
                 StaminaCost: 15,
-                StatsTrigger: ModifiesStatsTrigger.OnUse,
+                StatsTrigger: Trigger.OnUse,
                 StatsByTrigger: new()
                 {
-                    [(ModifiesStatsTrigger.OnUse, ModificationType.Add)] = new()
+                    [(Trigger.OnUse, ModificationType.Add)] = new()
                     {
                         ["Critical"]  = 5.0f
                     }
@@ -168,7 +168,7 @@ namespace CBA
                 StaminaCost: 15,
                 StatsByTrigger: new()
                 {
-                    [(ModifiesStatsTrigger.OnUse, ModificationType.Add)] = new()
+                    [(Trigger.OnUse, ModificationType.Add)] = new()
                     {
                         ["Dodge"]  = 5.0f
                     }
@@ -183,7 +183,7 @@ namespace CBA
                 StaminaCost: 15,
                 StatsByTrigger: new()
                 {
-                    [(ModifiesStatsTrigger.OnUse, ModificationType.Add)] = new()
+                    [(Trigger.OnUse, ModificationType.Add)] = new()
                     {
                         ["Luck"]  = 5.0f
                     }
@@ -198,7 +198,7 @@ namespace CBA
                 StaminaCost: 15,
                 StatsByTrigger: new()
                 {
-                    [(ModifiesStatsTrigger.OnUse, ModificationType.Add)] = new()
+                    [(Trigger.OnUse, ModificationType.Add)] = new()
                     {
                         ["Peer"]  = 5.0f
                     }
@@ -216,10 +216,10 @@ namespace CBA
                 ItemType.Consumable,
                 ItemRarity.Uncommon,
                 StaminaCost: 15,
-                StatsTrigger: ModifiesStatsTrigger.OnUse,
+                StatsTrigger: Trigger.OnUse,
                 StatsByTrigger: new()
                 {
-                    [(ModifiesStatsTrigger.OnUse, ModificationType.Multiply)] = new()
+                    [(Trigger.OnUse, ModificationType.Multiply)] = new()
                     {
                         ["MaximumHealth"]  = 1.25f
                     }
@@ -227,7 +227,7 @@ namespace CBA
 
                 ResourcesByTrigger: new()
                 {
-                    [(ModifiesStatsTrigger.OnUse, ModificationType.Multiply)] = new()
+                    [(Trigger.OnUse, ModificationType.Multiply)] = new()
                     {
                         ["Health"] = 1.25f
                     }
@@ -242,7 +242,7 @@ namespace CBA
                 StaminaCost: 15,
                 StatsByTrigger: new()
                 {
-                    [(ModifiesStatsTrigger.OnUse, ModificationType.Multiply)] = new()
+                    [(Trigger.OnUse, ModificationType.Multiply)] = new()
                     {
                         ["MaximumStamina"]  = 1.25f
                     }
@@ -250,7 +250,7 @@ namespace CBA
 
                 ResourcesByTrigger: new()
                 {
-                    [(ModifiesStatsTrigger.OnUse, ModificationType.Multiply)] = new()
+                    [(Trigger.OnUse, ModificationType.Multiply)] = new()
                     {
                         ["Stamina"] = 1.25f
                     }
@@ -265,7 +265,7 @@ namespace CBA
                 StaminaCost: 15,
                 StatsByTrigger: new()
                 {
-                    [(ModifiesStatsTrigger.OnUse, ModificationType.Multiply)] = new()
+                    [(Trigger.OnUse, ModificationType.Multiply)] = new()
                     {
                         ["Armor"]           = 1.25f,
                         ["Shield"]          = 1.25f
@@ -286,7 +286,7 @@ namespace CBA
                 StaminaCost: 15,
                 StatsByTrigger: new()
                 {
-                    [(ModifiesStatsTrigger.OnUse, ModificationType.Multiply)] = new()
+                    [(Trigger.OnUse, ModificationType.Multiply)] = new()
                     {
                         ["MaximumHealth"]   = 1.25f,
                         ["MaximumStamina"]  = 1.25f,
@@ -297,7 +297,7 @@ namespace CBA
 
                 ResourcesByTrigger: new()
                 {
-                    [(ModifiesStatsTrigger.OnUse, ModificationType.Multiply)] = new()
+                    [(Trigger.OnUse, ModificationType.Multiply)] = new()
                     {
                         ["Health"]  = 1.25f,
                         ["Stamina"] = 1.25f
@@ -314,7 +314,7 @@ namespace CBA
                 StaminaCost: 15,
                 StatsByTrigger: new()
                 {
-                    [(ModifiesStatsTrigger.OnUse, ModificationType.Multiply)] = new()
+                    [(Trigger.OnUse, ModificationType.Multiply)] = new()
                     {
                         ["Critical"]   = 1.25f,
                         ["Dodge"]  = 1.25f
@@ -341,7 +341,7 @@ namespace CBA
                 DamageType: DamageType.Physical,
                 CanCrit: true,
                 CanDodge: true,
-                EffectsByTrigger: new() {{(EffectAction.Apply, EffectTrigger.OnUse), ["inferno"]}}
+                EffectsByTrigger: new() {{(EffectAction.Apply, Trigger.OnUse), ["inferno"]}}
             ),
             // Add more templates as needed
         ];
