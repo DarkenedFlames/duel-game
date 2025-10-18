@@ -14,7 +14,8 @@ namespace CBA
         }
         public override void Subscribe()
         {
-            // Could subscribe to external triggers if needed
+            OnUseSuccess += Printer.PrintItemUsed;
+            OnUseFailed += (_, _) => Printer.PrintInsufficientStamina(Owner);
         }
 
         public void TryUse(Entity target)

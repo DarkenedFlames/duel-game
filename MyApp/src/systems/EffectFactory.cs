@@ -26,7 +26,6 @@ namespace CBA
     public static class EffectFactory
     {
         public static event Action<Entity, Entity>? OnEffectApplied;
-
         public static readonly List<EffectTemplate> Templates =
         [
             new(
@@ -46,14 +45,22 @@ namespace CBA
 
             new(
                 EntityCategory.Effect,
-                "poison",
-                "Poison",
+                "moonlight",
+                "Moonlight",
                 IsNegative: true,
-                IsHidden: false,
-                StackingType: StackingType.RefreshOnly,
+                IsHidden: true,
+                Duration: 1,
+                Chance: 1f,
+                StackingType: StackingType.Ignore,
                 MaxStacks: 1,
-                Damage: 5,
-                DamageType: DamageType.Physical
+                Damage: 0,
+                StatsByTrigger: new()
+                {
+                    [(Trigger.OnAdded, ModificationType.Add)] = new()
+                    {
+                        ["Critical"] = 100f
+                    }
+                }
             ),
 
             new(
@@ -65,14 +72,12 @@ namespace CBA
                 StackingType: StackingType.Ignore
             )
         ];
-
         public static EffectTemplate GetTemplate(string typeId)
         {
             return Templates.FirstOrDefault(t =>
                 t.TypeId.Equals(typeId, StringComparison.OrdinalIgnoreCase))
                 ?? throw new Exception($"Effect template '{typeId}' not found.");
         }
-
         public static void ApplyEffect(string typeId, Entity target)
         {
             EffectTemplate template = GetTemplate(typeId);
@@ -118,7 +123,6 @@ namespace CBA
             World.Instance.AddEntity(effect);
             OnEffectApplied?.Invoke(target, effect);
         }
-
         private static void AddComponents(Entity effect, EffectTemplate template, Entity player)
         {
             // Core data
@@ -139,9 +143,9 @@ namespace CBA
             // Damage-over-time effects
             if (template.Damage > 0)
             {
-                StatsComponent? playerStats = player.GetComponent<StatsComponent>();
+                StatsComponent playerStats = player.GetComponent<StatsComponent>();
                 int damageValue = template.DisplayName == "Inferno"
-                    ? (int)((playerStats?.Get("MaximumHealth") ?? 0) * 0.01f)
+                    ? (int)(playerStats.Get("MaximumHealth") * 0.01f)
                     : template.Damage;
 
                 new DealsDamage(

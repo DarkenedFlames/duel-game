@@ -131,7 +131,7 @@ namespace CBA
         }
         private static void RemoveEffect(string effectTypeId, Entity target)
         {
-            IEnumerable<Entity> allTargetEffects = World.Instance.GetAllForPlayer<Entity>(target, EntityCategory.Effect, effectTypeId);
+            List<Entity> allTargetEffects = [..World.Instance.GetAllForPlayer<Entity>(target, EntityCategory.Effect, effectTypeId)];
             foreach (Entity effect in allTargetEffects) World.Instance.RemoveEntity(effect);
         }
         private bool HasTrigger(Trigger trigger)

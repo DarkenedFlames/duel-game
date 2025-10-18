@@ -58,9 +58,7 @@ namespace CBA
         public static (Entity? SelectedItem, string? Action) ShowItemMenu(Entity player, bool equipment = false)
         {
             // --- Get items from world ---
-            List<Entity> items = World.Instance
-                .GetAllForPlayer<Entity>(player, EntityCategory.Item, null, equipment) // if equipment true, only equipped
-                .ToList();
+            List<Entity> items = [.. World.Instance.GetAllForPlayer<Entity>(player, EntityCategory.Item, null, equipment)];
 
             // --- If equipment, order by predefined slots ---
             if (equipment)
@@ -100,10 +98,6 @@ namespace CBA
                     Console.WriteLine("(No items found)");
                     return (null, null);
                 }
-
-                // Print numbered list for inventory
-                for (int i = 0; i < items.Count; i++)
-                    Console.WriteLine($"{i + 1}. {items[i].DisplayName}");
             }
 
             // --- Player selects an item ---
@@ -145,17 +139,6 @@ namespace CBA
         }
 
         //================== Event Printers =================//
-        public static void PrintTurnStartHeader(Entity player)
-        {
-            Console.Clear();
-            Console.WriteLine($"-----{player.DisplayName}'s turn has began!-----");
-        }
-        public static void PrintTurnEndHeader(Entity player)
-        {
-            Console.WriteLine($"-----{player.DisplayName}'s turn has ended!-----");
-        }
-
-
         public static void PrintEntityAdded(Entity entity)
         {
             switch (entity.Id.Category)
@@ -182,6 +165,7 @@ namespace CBA
                 default:
                     throw new Exception($"Printer couldn't find type of entity removed.");
             }
+            InputHandler.WaitForKey();
         }
         public static void PrintEntityRemoved(Entity entity)
         {
@@ -209,6 +193,7 @@ namespace CBA
                 default:
                     throw new Exception($"Printer couldn't find type of entity removed.");
             }
+            InputHandler.WaitForKey();
         }
 
         public static void PrintItemEquipped(Entity item)

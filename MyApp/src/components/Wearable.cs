@@ -29,7 +29,7 @@ namespace CBA
 
             // --- Find conflicting equipped item of the same type for this player ---
             Wearable? conflicting = World.Instance
-                .GetAllForPlayer<Entity>(player, EntityCategory.Item, null, true)
+                .GetAllForPlayer<Entity>(player, EntityCategory.Item, null, equipped: true)
                 .Where(e => e != Owner)
                 .Select(e => e.GetComponent<Wearable>())
                 .Where(w => w.EquipType == EquipType)

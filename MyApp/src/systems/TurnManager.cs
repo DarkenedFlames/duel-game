@@ -14,11 +14,11 @@ namespace CBA
         {
             while (true)
             {
-                var alive = World.Instance.GetAllPlayers().Where(p => p.GetComponent<ResourcesComponent>().Get("Health") > 0).ToList();
+                List<Entity> alive = [.. World.Instance.GetAllPlayers()];
                 if (alive.Count <= 1)
                     break;
 
-                foreach (var player in alive)
+                foreach (Entity player in alive)
                 {
                     OnTurnStart?.Invoke(player);
                     bool endGame = HandlePlayerTurn(player);
@@ -27,7 +27,7 @@ namespace CBA
                 }
             }
 
-            var survivors = World.Instance.GetAllPlayers().Where(p => p.GetComponent<ResourcesComponent>().Get("Health") > 0).ToList();
+            List<Entity> survivors = [..World.Instance.GetAllPlayers()];
             if (survivors.Count == 1)
                 Printer.PrintMessage($"\nGame Over! {survivors[0].DisplayName} wins!");
             else
@@ -86,10 +86,7 @@ namespace CBA
                 case "unequip": item.GetComponent<Wearable>()?.TryUnequip(); break;
                 case "use": HandleItemUse(item); break;
             }
-
-            InputHandler.WaitForKey();
         }
-
         private void HandleItemUse(Entity item)
         {
             var players = World.Instance.GetAllPlayers().ToList();

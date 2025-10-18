@@ -85,15 +85,21 @@ namespace CBA
                 _ => throw new ArgumentException($"Unsupported category: {category}")
             };
 
-            // Step 3: Optionally filter for equipped/unequipped items
+            // Step 3: Filter by equipment status if requested
             if (category == EntityCategory.Item && equipped.HasValue)
             {
-                entities = entities.Where(e =>
+                if (equipped.Value)
                 {
-                    if (!e.HasComponent<Wearable>())
-                        return false; // skip non-wearable items when filtering
-                    return e.GetComponent<Wearable>().IsEquipped == equipped.Value;
-                });
+                    // Only equipped items
+                    entities = entities.Where(e =>
+                        e.HasComponent<Wearable>() && e.GetComponent<Wearable>().IsEquipped);
+                }
+                else
+                {
+                    // Non-equipped items or items without wearable component
+                    entities = entities.Where(e =>
+                        !e.HasComponent<Wearable>() || !e.GetComponent<Wearable>().IsEquipped);
+                }
             }
 
             // Step 4: Determine output type

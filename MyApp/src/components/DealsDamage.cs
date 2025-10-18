@@ -90,14 +90,14 @@ namespace CBA
             }
 
             // --- Damage Reduction ---
-            float divisor = DamageType switch
+            float multiplier = DamageType switch
             {
-                DamageType.Physical => targetStats.GetHyperbolic("Armor"),
-                DamageType.Magical  => targetStats.GetHyperbolic("Shield"),
+                DamageType.Physical => 1 - targetStats.GetHyperbolic("Armor"),
+                DamageType.Magical  => 1 - targetStats.GetHyperbolic("Shield"),
                 _                   => 1f
             };
 
-            finalDamage = (int)(finalDamage / divisor);
+            finalDamage = (int)(finalDamage * multiplier);
 
                 // --- Apply Damage ---
             targetResources.Change("Health", -finalDamage);

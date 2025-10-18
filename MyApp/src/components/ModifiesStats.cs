@@ -3,15 +3,17 @@ namespace CBA
     [Flags]
     public enum Trigger
     {
-        None        = 0,
-        OnUse       = 1 << 0,
-        OnEquip     = 1 << 1,
-        OnUnequip   = 1 << 2,
-        OnAdded     = 1 << 3, // Effect applied (entity added)
-        OnRemoved   = 1 << 4, // Effect removed (entity removed)
-        OnHit       = 1 << 5,
-        OnCritical  = 1 << 6,
-        OnDamageDealt = 1 << 7
+        None = 0,
+        OnUse = 1 << 0,
+        OnEquip = 1 << 1,
+        OnUnequip = 1 << 2,
+        OnAdded = 1 << 3,
+        OnRemoved = 1 << 4,
+        OnHit = 1 << 5,
+        OnCritical = 1 << 6,
+        OnDamageDealt = 1 << 7,
+        OnTurnStart = 1 << 8,
+        OnTurnStartWhileEquipped = 1 << 9
     }
 
     public enum ModificationType
@@ -44,7 +46,6 @@ namespace CBA
             if (requiresWearable && !Owner.HasComponent<Wearable>())
                 throw new InvalidOperationException($"{Owner.Id} declares OnEquip/OnUnequip but lacks Wearable.");
         }
-
         public override void Subscribe()
         {
             // For each declared trigger, subscribe appropriately.
@@ -93,13 +94,11 @@ namespace CBA
                 }
             }
         }
-
         private bool HasTrigger(Trigger trigger)
         {
             return (StatChanges?.Keys.Any(k => k.Trigger == trigger) ?? false) ||
                    (ResourceChanges?.Keys.Any(k => k.Trigger == trigger) ?? false);
         }
-
         private void Modify(Entity target, Trigger trigger)
         {
             if (target.Id.Category != EntityCategory.Player)
