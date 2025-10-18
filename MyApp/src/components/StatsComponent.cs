@@ -13,7 +13,13 @@ namespace CBA
             { "Critical", (0, 1.0f) },
             { "Dodge", (0, 1.0f) },
             { "Peer", (0, 1.0f) },
-            { "Luck", (0, 1.0f) }
+            { "Luck", (0, 1.0f) },
+            { "Steal", (0, 1.0f) },
+            { "Damage", (0, 1.0f) },
+            { "Resistance", (0, 1.0f) },
+            { "PotionCost", (0, 1.0f)},
+            { "PotionStrength", (0, 1.0f) }
+
         };
 
         public override void ValidateDependencies()

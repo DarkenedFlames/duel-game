@@ -12,10 +12,9 @@ namespace CBA
         ItemRarity Rarity,
         int? StaminaCost = null,
         EquipType? EquipType = null,
-        Trigger? StatsTrigger = null,
         Dictionary<(Trigger, ModificationType), Dictionary<string, float>>? StatsByTrigger = null,
         Dictionary<(Trigger, ModificationType), Dictionary<string, float>>? ResourcesByTrigger = null,
-        Dictionary<(EffectAction, Trigger), List<string>>? EffectsByTrigger = null,
+        Dictionary<(EffectAction, TargetType, Trigger), List<string>>? EffectsByTrigger = null,
         int Damage = 0,
         DamageType DamageType = DamageType.Physical,
         bool CanCrit = true,
@@ -150,7 +149,6 @@ namespace CBA
                 ItemType.Consumable,
                 ItemRarity.Common,
                 StaminaCost: 15,
-                StatsTrigger: Trigger.OnUse,
                 StatsByTrigger: new()
                 {
                     [(Trigger.OnUse, ModificationType.Add)] = new()
@@ -216,7 +214,6 @@ namespace CBA
                 ItemType.Consumable,
                 ItemRarity.Uncommon,
                 StaminaCost: 15,
-                StatsTrigger: Trigger.OnUse,
                 StatsByTrigger: new()
                 {
                     [(Trigger.OnUse, ModificationType.Multiply)] = new()
@@ -280,7 +277,7 @@ namespace CBA
             new(
                 EntityCategory.Item,
                 "chromatic_concoction",
-                "Chromatic Concotion",
+                "Chromatic Concoction",
                 ItemType.Consumable,
                 ItemRarity.Rare,
                 StaminaCost: 15,
@@ -335,13 +332,32 @@ namespace CBA
                 "Brandish",
                 ItemType.Weapon,
                 ItemRarity.Common,
-                StaminaCost: 25,
                 EquipType: EquipType.Weapon,
+                StaminaCost: 25,
                 Damage: 10,
                 DamageType: DamageType.Physical,
                 CanCrit: true,
                 CanDodge: true,
-                EffectsByTrigger: new() {{(EffectAction.Apply, Trigger.OnUse), ["inferno"]}}
+                EffectsByTrigger: new() {{(EffectAction.Apply, TargetType.Target, Trigger.OnUse), ["inferno"]}}
+            ),
+            new(
+                EntityCategory.Item,
+                "crescent",
+                "Crescent",
+                ItemType.Weapon,
+                ItemRarity.Common,
+                EquipType: EquipType.Weapon,
+                StaminaCost: 25,
+                Damage: 10,
+                DamageType: DamageType.Physical,
+                CanCrit: true,
+                CanDodge: true,
+                EffectsByTrigger: new()
+                {
+                    {(EffectAction.Remove, TargetType.Self, Trigger.OnHit), ["moonlight"] },
+                    {(EffectAction.Remove, TargetType.Self, Trigger.OnUnequip), ["moonlight"] },
+                    {(EffectAction.Apply, TargetType.Self, Trigger.OnTurnStartWhileEquipped), ["moonlight"] },
+                }
             ),
             // Add more templates as needed
         ];

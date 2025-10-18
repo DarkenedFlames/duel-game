@@ -6,11 +6,17 @@ namespace CBA
         Remove
     }
 
+    public enum TargetType
+    {
+        Self,
+        Target
+    }
+
     public class ModifiesEffects(
         Entity owner,
-        Dictionary<(EffectAction, Trigger), List<string>> triggeredEffects) : Component(owner)
+        Dictionary<(EffectAction, TargetType, Trigger), List<string>> triggeredEffects) : Component(owner)
     {
-        public Dictionary<(EffectAction Action, Trigger Trigger), List<string>> TriggeredEffects { get; } = triggeredEffects;
+        public Dictionary<(EffectAction Action, TargetType TargetType, Trigger Trigger), List<string>> TriggeredEffects { get; } = triggeredEffects;
 
         public override void ValidateDependencies()
         {
@@ -35,9 +41,9 @@ namespace CBA
                         var wearable = Owner.GetComponent<Wearable>();
                         var wearer = World.Instance.GetPlayerOf(Owner);
                         if (trigger == Trigger.OnEquip)
-                            wearable.OnEquipSuccess += _ => Modify(wearer, Trigger.OnEquip);
+                            wearable.OnEquipSuccess += _ => Modify(wearer, null, Trigger.OnEquip);
                         else
-                            wearable.OnUnequipSuccess += _ => Modify(wearer, Trigger.OnUnequip);
+                            wearable.OnUnequipSuccess += _ => Modify(wearer, null, Trigger.OnUnequip);
                         break;
                     }
                     case Trigger.OnAdded:
@@ -46,42 +52,80 @@ namespace CBA
                         var target = World.Instance.GetPlayerOf(Owner);
 
                         if (trigger == Trigger.OnAdded)
-                            World.Instance.OnEntityAdded += e => { if (e == Owner) Modify(target, trigger); };
+                            World.Instance.OnEntityAdded += e => { if (e == Owner) Modify(target, null, trigger); };
                         else
-                            World.Instance.OnEntityRemoved += e => { if (e == Owner) Modify(target, trigger); };
+                            World.Instance.OnEntityRemoved += e => { if (e == Owner) Modify(target, null, trigger); };
                         
                         break;
                     }
                     case Trigger.OnUse:
-                        Owner.GetComponent<Usable>().OnUseSuccess += (_, target) => Modify(target, trigger);
+                        Owner.GetComponent<Usable>().OnUseSuccess += (_, target) =>
+                        {
+                            var user = World.Instance.GetPlayerOf(Owner);
+                            Modify(user, target, trigger);
+                        };
                         break;
                     case Trigger.OnHit:
-                        Owner.GetComponent<Hits>().OnHit += (_, target) => Modify(target, trigger);
+                        Owner.GetComponent<Hits>().OnHit += (_, target) =>
+                        {
+                            var hitter = World.Instance.GetPlayerOf(Owner);
+                            Modify(hitter, target, trigger);
+                        };
                         break;
                     case Trigger.OnCritical:
-                        Owner.GetComponent<DealsDamage>().OnCritical += (_, target) => Modify(target, trigger);
+                        Owner.GetComponent<DealsDamage>().OnCritical += (_, target) =>
+                        {
+                            var user = World.Instance.GetPlayerOf(Owner);
+                            Modify(user, target, trigger);
+                        };
                         break;
                     case Trigger.OnDamageDealt:
-                        Owner.GetComponent<DealsDamage>().OnDamageDealt += (_, target, _) => Modify(target, trigger);
+                        Owner.GetComponent<DealsDamage>().OnDamageDealt += (_, target, _) =>
+                        {
+                            var dealer = World.Instance.GetPlayerOf(Owner);
+                            Modify(dealer, target, trigger);
+                        };
+                        break;
+                    case Trigger.OnTurnStart:
+                        World.Instance.TurnManager.OnTurnStart += turnTaker =>
+                        {
+                            var player = World.Instance.GetPlayerOf(Owner);
+                            if (turnTaker == player) Modify(turnTaker, null, trigger);
+                        };
+                        break;
+                    case Trigger.OnTurnStartWhileEquipped:
+                        World.Instance.TurnManager.OnTurnStart += turnTaker =>
+                        {
+                            var player = World.Instance.GetPlayerOf(Owner);
+                            bool isEquipped = Owner.GetComponent<Wearable>().IsEquipped;
+                            if (turnTaker == player && isEquipped) Modify(turnTaker, null, trigger);
+                        };
                         break;
                 }
             }
         }
-        private void Modify(Entity target, Trigger trigger)
+        private void Modify(Entity source, Entity? target, Trigger trigger)
         {
             var matchingEntries = TriggeredEffects
                 .Where(kvp => kvp.Key.Trigger == trigger)
                 .ToList();
 
-            foreach (var ((action, _), effects ) in matchingEntries)
+            foreach (var ((action, targetType, _), effects) in matchingEntries)
             {
+                // Determine who should actually receive the effect
+                Entity receiver = targetType switch
+                {
+                    TargetType.Self => source,
+                    TargetType.Target => target ?? source,
+                    _ => source
+                };
+
                 foreach (var effectTypeId in effects)
                 {
                     if (action == EffectAction.Apply)
-                        EffectFactory.ApplyEffect(effectTypeId, target);
+                        EffectFactory.ApplyEffect(effectTypeId, receiver);
                     else
-                        RemoveEffect(effectTypeId, target);
-
+                        RemoveEffect(effectTypeId, receiver);
                 }
             }
         }

@@ -11,14 +11,12 @@ namespace CBA
         string DisplayName,
         bool IsNegative,
         bool IsHidden,
+        int Duration = 0,
         float Chance = 1.0f,
         StackingType StackingType = StackingType.AddStack,
         int MaxStacks = 1,
-        Trigger? StatsTrigger = null,
-        Dictionary<string, int>? StatAdditions = null,
-        Dictionary<string, int>? ResourceAdditions = null,
-        Dictionary<string, float>? StatModifiers = null,
-        Dictionary<string, float>? ResourceModifiers = null,
+        Dictionary<(Trigger, ModificationType), Dictionary<string, float>>? StatsByTrigger = null,
+        Dictionary<(Trigger, ModificationType), Dictionary<string, float>>? ResourcesByTrigger = null,
         int Damage = 0,
         DamageType DamageType = DamageType.Physical,
         bool CanCrit = true
@@ -37,6 +35,7 @@ namespace CBA
                 "Inferno",
                 IsNegative: true,
                 IsHidden: false,
+                Duration: 3,
                 Chance: .15f,
                 StackingType: StackingType.AddStack,
                 MaxStacks: 5,
@@ -78,7 +77,7 @@ namespace CBA
         {
             EffectTemplate template = GetTemplate(typeId);
 
-            if (Random.Shared.NextDouble() < template.Chance)
+            if (Random.Shared.NextDouble() > template.Chance)
                 return;
 
             // Handle stacking
@@ -133,9 +132,9 @@ namespace CBA
                 template.MaxStacks
             );
 
-            // Duration (e.g., Inferno and Poison)
-            if (template.TypeId is "inferno" or "poison")
-                new EffectDuration(effect, 3);
+            // Duration
+            if (template.Duration > 0)
+                new EffectDuration(effect, template.Duration);
 
             // Damage-over-time effects
             if (template.Damage > 0)
@@ -153,7 +152,8 @@ namespace CBA
                 );
             }
 
-            // Future: apply stat/resource mods, triggers, etc.
+            if (template.StatsByTrigger != null || template.ResourcesByTrigger != null)
+                new ModifiesStats(effect, template.StatsByTrigger, template.ResourcesByTrigger);
         }
     }
 }
