@@ -10,6 +10,7 @@ namespace CBA
         string DisplayName,
         ItemType Type,
         ItemRarity Rarity,
+        string? SetTag = null,
         int? StaminaCost = null,
         EquipType? EquipType = null,
         Dictionary<(Trigger, ModificationType), Dictionary<string, float>>? StatsByTrigger = null,
@@ -360,6 +361,96 @@ namespace CBA
                     {(EffectAction.Apply, TargetType.Self, Trigger.OnEquip), ["moonlight"] },
                 }
             ),
+
+            // ==========================================================
+            // Armor
+            // ==========================================================
+            //     ======================================================
+            //     Common
+            //     ======================================================
+
+            new(
+                EntityCategory.Item,
+                "oculus_helmet",
+                "Oculus Helmet",
+                ItemType.Armor,
+                ItemRarity.Common,
+                EquipType: EquipType.Helmet,
+                SetTag: "oculus",
+                StatsByTrigger: new()
+                {
+                    [(Trigger.OnEquip, ModificationType.Add)] = new()
+                    {
+                        ["Armor"]   = 25f,
+                        ["Shield"]  = 25f
+                    },
+                    [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                    {
+                        ["Armor"]   = -25f,
+                        ["Shield"]  = -25f
+                    }
+                },
+                EffectsByTrigger: new()
+                {
+                    {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["third_eye"] },
+                    {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["third_eye"] }
+                }
+            ),
+            new(
+                EntityCategory.Item,
+                "oculus_chestplate",
+                "Oculus Chestplate",
+                ItemType.Armor,
+                ItemRarity.Common,
+                EquipType: EquipType.Chestplate,
+                SetTag: "oculus",
+                StatsByTrigger: new()
+                {
+                    [(Trigger.OnEquip, ModificationType.Add)] = new()
+                    {
+                        ["Armor"]   = 25f,
+                        ["Shield"]  = 25f
+                    },
+                    [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                    {
+                        ["Armor"]   = -25f,
+                        ["Shield"]  = -25f
+                    }
+                },
+                EffectsByTrigger: new()
+                {
+                    {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["third_eye"] },
+                    {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["third_eye"] }
+                }
+            ),
+            new(
+                EntityCategory.Item,
+                "oculus_leggings",
+                "Oculus Leggings",
+                ItemType.Armor,
+                ItemRarity.Common,
+                EquipType: EquipType.Leggings,
+                SetTag: "oculus",
+                StatsByTrigger: new()
+                {
+                    [(Trigger.OnEquip, ModificationType.Add)] = new()
+                    {
+                        ["Armor"]   = 25f,
+                        ["Shield"]  = 25f
+                    },
+                    [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                    {
+                        ["Armor"]   = -25f,
+                        ["Shield"]  = -25f
+                    }
+                },
+                EffectsByTrigger: new()
+                {
+                    {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["third_eye"] },
+                    {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["third_eye"] }
+                }
+            ),
+
             // Add more templates as needed
         ];
 
@@ -370,6 +461,9 @@ namespace CBA
 
             if (template.Type == ItemType.Consumable) // Only Consumables get Consumable
                 new Consumable(item);
+
+            if (template.SetTag != null)
+                new CompletesItemSet(item, template.SetTag);
 
             if ((template.Type == ItemType.Consumable || template.Type == ItemType.Weapon) &&
                 template.StaminaCost is int staminaCost)

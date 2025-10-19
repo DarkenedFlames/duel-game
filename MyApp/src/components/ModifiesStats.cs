@@ -13,7 +13,9 @@ namespace CBA
         OnCritical = 1 << 6,
         OnDamageDealt = 1 << 7,
         OnTurnStart = 1 << 8,
-        OnTurnStartWhileEquipped = 1 << 9
+        OnTurnStartWhileEquipped = 1 << 9,
+        OnArmorSetCompleted = 1 << 10,
+        OnArmorSetBroken = 1 << 11,
     }
 
     public enum ModificationType
@@ -91,6 +93,17 @@ namespace CBA
                     case Trigger.OnDamageDealt:
                         Owner.GetComponent<DealsDamage>().OnDamageDealt += (_, target, _) => Modify(target, trigger);
                         break;
+
+                    case Trigger.OnArmorSetCompleted:
+                    case Trigger.OnArmorSetBroken:
+                    {
+                        Entity wearer = World.Instance.GetPlayerOf(Owner);
+                        if (trigger == Trigger.OnArmorSetCompleted)
+                            Owner.GetComponent<CompletesItemSet>().OnArmorSetCompleted += _ => Modify(wearer, trigger);
+                        else
+                            Owner.GetComponent<CompletesItemSet>().OnArmorSetBroken += _ => Modify(wearer, trigger);
+                        break;
+                    }
                 }
             }
         }

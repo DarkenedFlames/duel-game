@@ -1,6 +1,11 @@
 namespace CBA
 {
-    public class ItemData(Entity owner, string name, ItemRarity rarity, ItemType type, Entity playerEntity) : Component(owner)
+    public class ItemData(Entity owner,
+                        string name,
+                        ItemRarity rarity,
+                        ItemType type,
+                        Entity playerEntity
+                        ) : Component(owner)
     {
         public string Name { get; init; } = name;
         public ItemRarity Rarity { get; init; } = rarity;

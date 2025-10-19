@@ -1,15 +1,19 @@
+using System.Buffers;
+
 namespace CBA
 {
-    public class Wearable(Entity owner, EquipType equipType) : Component(owner)
+    public class Wearable(Entity owner, EquipType equipType, string? setTag = null) : Component(owner)
     {
         public bool IsEquipped { get; private set; } = false;
         public EquipType EquipType { get; init; } = equipType;
-        public bool EquippedThisTurn { get; private set; } = false;
+        public string? SetTag { get; init; } = setTag;
+        public bool SetActive { get; set; } = false;
 
         public event Action<Entity>? OnEquipSuccess;
         public event Action<Entity>? OnUnequipSuccess;
         public event Action<Entity>? OnUnequipFail;
-        public event Action<Entity>? OnFirstEquipPerTurn;
+        public event Action<Entity>? OnArmorSetCompleted;
+        public event Action<Entity>? OnArmorSetBroken;
 
         public override void ValidateDependencies()
         {
@@ -20,7 +24,6 @@ namespace CBA
         {
             OnEquipSuccess += Printer.PrintItemEquipped;
             OnUnequipSuccess += Printer.PrintItemUnequipped;
-            World.Instance.TurnManager.OnTurnStart += _ => EquippedThisTurn = false;
         }
 
         // Query for all items of the same ItemType and Owner and unequip them. Then, equip this item and fire OnEquipSuccess/Failed.
@@ -40,12 +43,6 @@ namespace CBA
             // Unequip the conflicting item if it exists
             conflicting?.TryUnequip();
 
-            if (!EquippedThisTurn)
-            {
-                EquippedThisTurn = true;
-                OnFirstEquipPerTurn?.Invoke(Owner);      
-            }
-
             // Equip this item
             IsEquipped = true;
             OnEquipSuccess?.Invoke(Owner);
@@ -64,5 +61,42 @@ namespace CBA
                 OnUnequipFail?.Invoke(Owner);
             }
         }
+
+        private void CheckForArmorSetCompleted()
+        {
+            Entity wearer = World.Instance.GetPlayerOf(Owner);
+
+            // Find all equipped items on this player with the same set tag
+            var sameSetEquipped = World.Instance
+                .GetAllForPlayer<Entity>(wearer, EntityCategory.Item, null, equipped: true)
+                .Select(e => e.GetComponent<Wearable>())
+                .Where(w => w.SetTag == SetTag)
+                .ToList();
+
+            // If 3 pieces with this tag are equipped, mark them active and fire event (only on this one)
+            if (sameSetEquipped.Count == 3)
+            {
+                foreach (var w in sameSetEquipped)
+                    w.SetActive = true;
+
+                OnArmorSetCompleted?.Invoke(Owner);
+            }
+        }
+
+        private void HandleArmorSetBroken(Entity player)
+        {
+            var sameSetEquipped = World.Instance
+                .GetAllForPlayer<Entity>(player, EntityCategory.Item, null, equipped: true)
+                .Select(e => e.GetComponent<Wearable>())
+                .Where(w => w.SetTag == SetTag)
+                .ToList();
+
+            foreach (var w in sameSetEquipped)
+                w.SetActive = false;
+
+            SetActive = false;
+            OnArmorSetBroken?.Invoke(player);
+        }
+
     }
 }

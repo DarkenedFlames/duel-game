@@ -101,6 +101,17 @@ namespace CBA
                             if (turnTaker == player && isEquipped) Modify(turnTaker, null, trigger);
                         };
                         break;
+
+                    case Trigger.OnArmorSetCompleted:
+                    case Trigger.OnArmorSetBroken:
+                    {
+                        Entity wearer = World.Instance.GetPlayerOf(Owner);
+                        if (trigger == Trigger.OnArmorSetCompleted)
+                            Owner.GetComponent<CompletesItemSet>().OnArmorSetCompleted += _ => Modify(wearer, null, trigger);
+                        else
+                            Owner.GetComponent<CompletesItemSet>().OnArmorSetBroken += _ => Modify(wearer, null, trigger);
+                        break;
+                    }
                 }
             }
         }

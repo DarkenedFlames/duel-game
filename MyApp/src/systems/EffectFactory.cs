@@ -11,7 +11,7 @@ namespace CBA
         string DisplayName,
         bool IsNegative,
         bool IsHidden,
-        int? MaxPerTurn,
+        int? MaxPerTurn = null,
         int Duration = 0,
         float Chance = 1.0f,
         StackingType StackingType = StackingType.AddStack,
@@ -35,7 +35,6 @@ namespace CBA
                 "Inferno",
                 IsNegative: true,
                 IsHidden: false,
-                MaxPerTurn: null,
                 Duration: 3,
                 Chance: .15f,
                 StackingType: StackingType.AddStack,
@@ -69,16 +68,27 @@ namespace CBA
                     }
                 }
             ),
-
             new(
                 EntityCategory.Effect,
-                "shield",
-                "Shield",
+                "third_eye",
+                "Third Eye",
                 IsNegative: false,
                 IsHidden: false,
-                MaxPerTurn: null,
-                StackingType: StackingType.Ignore
-            )
+                Chance: 1f,
+                StackingType: StackingType.Ignore,
+                MaxStacks: 1,
+                StatsByTrigger: new()
+                {
+                    [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                    {
+                        ["Critical"] = 1.2f
+                    },
+                    [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                    {
+                        ["Critical"] = 1.0f/1.2f
+                    }
+                }
+            ),
         ];
         public static EffectTemplate GetTemplate(string typeId)
         {
@@ -93,8 +103,9 @@ namespace CBA
             if (Random.Shared.NextDouble() > template.Chance)
                 return;
 
-            if (template.MaxPerTurn <= target.GetComponent<TurnMemory>().GetEffectsAppliedThisTurn(template.TypeId))
-                return;
+            if (template.MaxPerTurn != null)
+                if (template.MaxPerTurn <= target.GetComponent<TurnMemory>().GetEffectsAppliedThisTurn(template.TypeId))
+                    return;
 
             // Handle stacking
             EffectData? existing = World.Instance
