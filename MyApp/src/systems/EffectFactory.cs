@@ -11,6 +11,7 @@ namespace CBA
         string DisplayName,
         bool IsNegative,
         bool IsHidden,
+        int? MaxPerTurn,
         int Duration = 0,
         float Chance = 1.0f,
         StackingType StackingType = StackingType.AddStack,
@@ -34,6 +35,7 @@ namespace CBA
                 "Inferno",
                 IsNegative: true,
                 IsHidden: false,
+                MaxPerTurn: null,
                 Duration: 3,
                 Chance: .15f,
                 StackingType: StackingType.AddStack,
@@ -49,6 +51,7 @@ namespace CBA
                 "Moonlight",
                 IsNegative: true,
                 IsHidden: true,
+                MaxPerTurn: 1,
                 Duration: 1,
                 Chance: 1f,
                 StackingType: StackingType.Ignore,
@@ -59,6 +62,10 @@ namespace CBA
                     [(Trigger.OnAdded, ModificationType.Add)] = new()
                     {
                         ["Critical"] = 100f
+                    },
+                    [(Trigger.OnRemoved, ModificationType.Add)] = new()
+                    {
+                        ["Critical"] = -100f
                     }
                 }
             ),
@@ -69,6 +76,7 @@ namespace CBA
                 "Shield",
                 IsNegative: false,
                 IsHidden: false,
+                MaxPerTurn: null,
                 StackingType: StackingType.Ignore
             )
         ];
@@ -83,6 +91,9 @@ namespace CBA
             EffectTemplate template = GetTemplate(typeId);
 
             if (Random.Shared.NextDouble() > template.Chance)
+                return;
+
+            if (template.MaxPerTurn <= target.GetComponent<TurnMemory>().GetEffectsAppliedThisTurn(template.TypeId))
                 return;
 
             // Handle stacking
@@ -133,7 +144,8 @@ namespace CBA
                 template.IsNegative,
                 template.IsHidden,
                 template.StackingType,
-                template.MaxStacks
+                template.MaxStacks,
+                template.MaxPerTurn
             );
 
             // Duration

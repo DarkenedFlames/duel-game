@@ -17,6 +17,7 @@ public class Program
             new GetsRandomItems(player);
             new PeersComponent(player);
             new RefillsStamina(player);
+            new TurnMemory(player);
 
             World.Instance.AddEntity(player);
         }

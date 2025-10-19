@@ -2,13 +2,14 @@ namespace CBA
 {
     public class Wearable(Entity owner, EquipType equipType) : Component(owner)
     {
-        public bool IsEquipped { get; set; } = false;
-        public ItemType Type { get; init; }
+        public bool IsEquipped { get; private set; } = false;
         public EquipType EquipType { get; init; } = equipType;
+        public bool EquippedThisTurn { get; private set; } = false;
 
         public event Action<Entity>? OnEquipSuccess;
         public event Action<Entity>? OnUnequipSuccess;
         public event Action<Entity>? OnUnequipFail;
+        public event Action<Entity>? OnFirstEquipPerTurn;
 
         public override void ValidateDependencies()
         {
@@ -19,6 +20,7 @@ namespace CBA
         {
             OnEquipSuccess += Printer.PrintItemEquipped;
             OnUnequipSuccess += Printer.PrintItemUnequipped;
+            World.Instance.TurnManager.OnTurnStart += _ => EquippedThisTurn = false;
         }
 
         // Query for all items of the same ItemType and Owner and unequip them. Then, equip this item and fire OnEquipSuccess/Failed.
@@ -37,6 +39,12 @@ namespace CBA
 
             // Unequip the conflicting item if it exists
             conflicting?.TryUnequip();
+
+            if (!EquippedThisTurn)
+            {
+                EquippedThisTurn = true;
+                OnFirstEquipPerTurn?.Invoke(Owner);      
+            }
 
             // Equip this item
             IsEquipped = true;

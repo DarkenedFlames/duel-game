@@ -357,6 +357,7 @@ namespace CBA
                     {(EffectAction.Remove, TargetType.Self, Trigger.OnHit), ["moonlight"] },
                     {(EffectAction.Remove, TargetType.Self, Trigger.OnUnequip), ["moonlight"] },
                     {(EffectAction.Apply, TargetType.Self, Trigger.OnTurnStartWhileEquipped), ["moonlight"] },
+                    {(EffectAction.Apply, TargetType.Self, Trigger.OnEquip), ["moonlight"] },
                 }
             ),
             // Add more templates as needed

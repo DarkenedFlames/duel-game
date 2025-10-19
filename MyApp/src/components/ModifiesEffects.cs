@@ -16,7 +16,7 @@ namespace CBA
         Entity owner,
         Dictionary<(EffectAction, TargetType, Trigger), List<string>> triggeredEffects) : Component(owner)
     {
-        public Dictionary<(EffectAction Action, TargetType TargetType, Trigger Trigger), List<string>> TriggeredEffects { get; } = triggeredEffects;
+        public Dictionary<(EffectAction Action, TargetType TargetType, Trigger Trigger), List<string>> TriggeredEffects { get; init; } = triggeredEffects;
 
         public override void ValidateDependencies()
         {

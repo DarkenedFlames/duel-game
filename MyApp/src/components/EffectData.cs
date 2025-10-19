@@ -7,7 +7,9 @@ namespace CBA
                             bool isNegative = false,
                             bool isHidden = false,
                             StackingType stackingType = StackingType.AddStack,
-                            int maxStacks = 1) : Component(owner)
+                            int maxStacks = 1,
+                            int? maxPerTurn = null
+                            ) : Component(owner)
     {
         public string Name { get; set; } = name;
         public Entity PlayerEntity { get; set; } = playerEntity;
@@ -17,6 +19,7 @@ namespace CBA
         public int CurrentStacks { get; set; } = 1;
         public int MaximumStacks { get; set; } = maxStacks;
         public StackingType StackingType { get; set; } = stackingType;
+        public int? MaxPerTurn { get; set; } = maxPerTurn;
 
         public override void ValidateDependencies()
         {
