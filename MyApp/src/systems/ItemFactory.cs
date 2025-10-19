@@ -1,6 +1,3 @@
-using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
-
 namespace CBA
 {
     public record ItemTemplate

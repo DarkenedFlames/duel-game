@@ -1,5 +1,3 @@
-using System.Buffers;
-
 namespace CBA
 {
     public class Wearable(Entity owner, EquipType equipType, string? setTag = null) : Component(owner)

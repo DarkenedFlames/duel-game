@@ -1,5 +1,3 @@
-using System.Buffers;
-
 namespace CBA
 {
     public class CompletesItemSet(Entity owner, string setTag) : Component(owner)

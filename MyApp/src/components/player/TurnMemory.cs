@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 namespace CBA
 {
     public class TurnMemory(Entity owner) : Component(owner)
