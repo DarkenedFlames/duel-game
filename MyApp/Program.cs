@@ -5,22 +5,33 @@ public class Program
     static void Main()
     {
         World world = new();
-        Entity bob = new(EntityCategory.Player, "Bob", "Bob");
-        Entity alice = new(EntityCategory.Player, "Alice", "Alice");
-        List<Entity> players = [bob, alice];
+        
+        List<Entity> players =
+        [
+            new(EntityCategory.Player, "Bob", "Bob"),
+            new(EntityCategory.Player, "Alice", "Alice")
+        ];
 
-        foreach (Entity player in players)
+        foreach (Entity p in players)
         {
-            new PlayerData(player, player.DisplayName);
-            new StatsComponent(player);
-            new ResourcesComponent(player);
-            new GetsRandomItems(player);
-            new PeersComponent(player);
-            new RefillsStamina(player);
-            new TurnMemory(player);
+            List<Component> Components =
+            [
+                new PlayerData(p),
+                new StatsComponent(p),
+                new ResourcesComponent(p),
+                new GetsRandomItems(p),
+                new PeersComponent(p),
+                new RefillsStamina(p),
+                new TurnMemory(p)
+            ];
 
-            World.Instance.AddEntity(player);
+            foreach (Component component in Components)
+                p.AddComponent(component);
+
+            p.SubscribeAll();
+            World.Instance.AddEntity(p);
         }
+
         world.TurnManager.StartGameLoop();
     }
 }

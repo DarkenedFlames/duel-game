@@ -8,11 +8,6 @@ namespace CBA
         private readonly StatsComponent _stats;
         private readonly Dictionary<string, (int Value, float RestoreMult, float SpendMult)> _values = [];
 
-        public override void ValidateDependencies()
-        {
-            if (Owner.Id.Category != EntityCategory.Player)
-                throw new InvalidOperationException($"ResourcesComponent was given to an invalid category of entity: {Owner.Id}.");
-        }
         public ResourcesComponent(Entity owner) : base(owner)
         {
             _stats = Owner.GetComponent<StatsComponent>();
@@ -58,7 +53,6 @@ namespace CBA
             _values[resourceName] = (newValue, RestoreMult, SpendMult);
             OnResourceChanged?.Invoke(resourceName);
         }
-
 
         public int Get(string name)
         {

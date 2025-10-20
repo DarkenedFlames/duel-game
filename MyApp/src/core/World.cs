@@ -42,8 +42,6 @@ namespace CBA
                 throw new InvalidOperationException($"World.AddEntity: Entity of Category EntityCategory.Effect added with no EffectData Component.");
 
             _entities.Add(entity);
-            entity.ValidateAll();
-            entity.SubscribeAll();
             OnEntityAdded?.Invoke(entity);
         }
         public void RemoveEntity(Entity entity)

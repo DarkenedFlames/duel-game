@@ -1,48 +1,16 @@
 namespace CBA
 {
-    public class DealsDamage : Component
+    public class DealsDamage(Entity owner, int damage,
+                       DamageType damageType = DamageType.Physical,
+                       bool canCrit = false) : Component(owner)
     {
-        private readonly Func<int>? _getDamage; // dynamic damage function
-        private readonly int _staticDamage;     // static damage fallback
-
-        public int Damage => _getDamage?.Invoke() ?? _staticDamage;
-
-        public DamageType DamageType { get; init; } = DamageType.Physical;
-        public bool CanCrit { get; init; }
+        public int Damage = damage;
+        public DamageType DamageType { get; init; } = damageType;
+        public bool CanCrit { get; init; } = canCrit;
 
         public event Action<Entity, Entity, int>? OnDamageDealt;
         public event Action<Entity, Entity>? OnCritical;
 
-        // --- Static damage constructor ---
-        public DealsDamage(Entity owner, int damage,
-                           DamageType damageType = DamageType.Physical,
-                           bool canCrit = false) : base(owner)
-        {
-            _staticDamage = damage;
-            DamageType = damageType;
-            CanCrit = canCrit;
-        }
-
-        // --- Dynamic damage constructor ---
-        public DealsDamage(Entity owner, Func<int> getDamage,
-                           DamageType damageType = DamageType.Physical,
-                           bool canCrit = false) : base(owner)
-        {
-            _getDamage = getDamage ?? throw new ArgumentNullException(nameof(getDamage));
-            DamageType = damageType;
-            CanCrit = canCrit;
-        }
-
-        public override void ValidateDependencies()
-        {
-            // Validate Owner Category
-            if (Owner.Id.Category != EntityCategory.Item && Owner.Id.Category != EntityCategory.Effect)
-                throw new InvalidOperationException($"{Owner.Id} was given an incompatible Component: DealsDamage.");
-
-            // Validate Component Dependencies
-            if (Owner.Id.Category == EntityCategory.Item && !Owner.HasComponent<Usable>())
-                throw new InvalidOperationException($"Component Missing a Dependency: (Owner: {Owner.Id}, Component: DealsDamage, Dependency: Usable.");
-        }
         public override void Subscribe()
         {
             OnDamageDealt += Printer.PrintDamageDealt;
@@ -53,10 +21,10 @@ namespace CBA
                     Owner.GetComponent<Hits>().OnHit += ApplyDamage;
                     break;
                 case EntityCategory.Effect:
-                    World.Instance.TurnManager.OnTurnStart += player =>
+                    World.Instance.TurnManager.OnTurnStart += turnTaker =>
                     {
-                        if (player == World.Instance.GetPlayerOf(Owner))
-                            ApplyDamage(Owner, player);
+                        if (turnTaker == World.Instance.GetPlayerOf(Owner))
+                            ApplyDamage(Owner, turnTaker);
                     };
                     break;
                 default:
@@ -65,11 +33,6 @@ namespace CBA
         }
         private void ApplyDamage(Entity itemOrEffect, Entity target)
         {
-            if (target.Id.Category != EntityCategory.Player)
-            {
-                throw new InvalidOperationException($"{Owner.Id} was given an non-player target for DealsDamage.ApplyDamage.");
-            }
-
             int finalDamage = Damage;
 
             StatsComponent targetStats = target.GetComponent<StatsComponent>();

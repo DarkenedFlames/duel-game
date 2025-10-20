@@ -5,25 +5,17 @@ namespace CBA
         public int Remaining { get; set; } = maxDuration;
         public int Maximum { get; set; } = maxDuration;
 
-        public override void ValidateDependencies()
-        {
-            if (Owner.Id.Category != EntityCategory.Effect)
-                throw new InvalidOperationException($"{Owner.Id} was given an invalid Component: EffectDuration.");
-        }
         public override void Subscribe()
         {
-            World.Instance.TurnManager.OnTurnStart += player =>
+            World.Instance.TurnManager.OnTurnStart += turnTaker =>
             {
-                if (player == World.Instance.GetPlayerOf(Owner)) TickDuration();
+                if (turnTaker == World.Instance.GetPlayerOf(Owner)) TickDuration();
             };
-
         }
         public void TickDuration()
         {
-            if (Remaining <= 0)
-                World.Instance.RemoveEntity(Owner);
-            else
-                Remaining--;
+            if (Remaining <= 0) World.Instance.RemoveEntity(Owner);
+            else Remaining--;
         }
     }
 }

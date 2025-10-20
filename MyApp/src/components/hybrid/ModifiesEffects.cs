@@ -18,14 +18,6 @@ namespace CBA
     {
         public Dictionary<(EffectAction Action, TargetType TargetType, Trigger Trigger), List<string>> TriggeredEffects { get; init; } = triggeredEffects;
 
-        public override void ValidateDependencies()
-        {
-            if (Owner.Id.Category != EntityCategory.Item)
-                throw new InvalidOperationException($"{Owner.Id} was given an invalid Component: ModifiesEffects.");
-
-            if (!Owner.HasComponent<Usable>() && !Owner.HasComponent<Wearable>())
-                throw new InvalidOperationException($"Component Missing a Dependency: (Owner: {Owner.Id}, Component: ModifiesEffects, Dependency: Usable or Wearable.");
-        }
         public override void Subscribe()
         {
             foreach (Trigger trigger in Enum.GetValues<Trigger>())
@@ -149,6 +141,5 @@ namespace CBA
         {
             return TriggeredEffects.Keys.Any(k => k.Trigger == trigger);
         }
-    
     }
 }

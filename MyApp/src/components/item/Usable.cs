@@ -7,30 +7,20 @@ namespace CBA
         public event Action<Entity, Entity>? OnUseSuccess;
         public event Action<Entity, Entity>? OnUseFailed;
 
-        public override void ValidateDependencies()
-        {
-            if (Owner.Id.Category != EntityCategory.Item)
-                throw new InvalidOperationException($"Usable was given to an invalid category of entity: {Owner.Id}.");
-        }
-        public override void Subscribe()
-        {
-            OnUseSuccess += Printer.PrintItemUsed;
-            OnUseFailed += (_, _) => Printer.PrintInsufficientStamina(Owner);
-        }
+        public override void Subscribe(){}
 
         public void TryUse(Entity target)
-        {
-            if (target.Id.Category != EntityCategory.Player)
-                throw new InvalidOperationException($"[{Owner.Id}] Usable.TryUse was passed a non-player target.");
-            
+        {            
             ResourcesComponent resources = World.Instance.GetPlayerOf(Owner).GetComponent<ResourcesComponent>();
             if (resources.Get("Stamina") < StaminaCost)
             {
+                Printer.PrintInsufficientStamina(Owner);
                 OnUseFailed?.Invoke(Owner, target);
                 return;
             }
 
             resources.Change("Stamina", -StaminaCost);
+            Printer.PrintItemUsed(Owner, target);
             OnUseSuccess?.Invoke(Owner, target);
         }
     }

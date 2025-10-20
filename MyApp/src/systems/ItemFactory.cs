@@ -1,3 +1,5 @@
+using System.ComponentModel.Design.Serialization;
+
 namespace CBA
 {
     public record ItemTemplate
@@ -7,16 +9,7 @@ namespace CBA
         string DisplayName,
         ItemType Type,
         ItemRarity Rarity,
-        string? SetTag = null,
-        int? StaminaCost = null,
-        EquipType? EquipType = null,
-        Dictionary<(Trigger, ModificationType), Dictionary<string, float>>? StatsByTrigger = null,
-        Dictionary<(Trigger, ModificationType), Dictionary<string, float>>? ResourcesByTrigger = null,
-        Dictionary<(EffectAction, TargetType, Trigger), List<string>>? EffectsByTrigger = null,
-        int Damage = 0,
-        DamageType DamageType = DamageType.Physical,
-        bool CanCrit = true,
-        bool CanDodge = true
+        List<ComponentBuilder>? Components = null
     );
 
     public static class ItemFactory
@@ -56,14 +49,21 @@ namespace CBA
                 "Ruby Red Remedy",
                 ItemType.Consumable,
                 ItemRarity.Common,
-                StaminaCost: 15,
-                ResourcesByTrigger: new()
-                {
-                    [(Trigger.OnUse, ModificationType.Add)] = new()
-                    {
-                        ["Health"]  = 25.0f
-                    }
-                }
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 15),
+                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ModifiesStats(e,
+                    ResourcesByTrigger: new()
+                        {
+                            [(Trigger.OnUse, ModificationType.Add)] = new()
+                            {
+                                ["Health"]  = 25.0f
+                            }
+                        }
+                    )
+                ]
             ),
             new(
                 EntityCategory.Item,
@@ -71,14 +71,21 @@ namespace CBA
                 "Baby Blue Brew",
                 ItemType.Consumable,
                 ItemRarity.Common,
-                StaminaCost: 0,
-                ResourcesByTrigger: new()
-                {
-                    [(Trigger.OnUse, ModificationType.Add)] = new()
-                    {
-                        ["Stamina"]  = 25.0f
-                    }
-                }
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 0),
+                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ModifiesStats(e,
+                    ResourcesByTrigger: new()
+                        {
+                            [(Trigger.OnUse, ModificationType.Add)] = new()
+                            {
+                                ["Stamina"]  = 25.0f
+                            }
+                        }
+                    )
+                ]
             ),
             new(
                 EntityCategory.Item,
@@ -86,14 +93,21 @@ namespace CBA
                 "Oozing Orange Oil",
                 ItemType.Consumable,
                 ItemRarity.Common,
-                StaminaCost: 15,
-                StatsByTrigger: new()
-                {
-                    [(Trigger.OnUse, ModificationType.Add)] = new()
-                    {
-                        ["MaximumHealth"]  = 5.0f
-                    }
-                }
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 15),
+                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ModifiesStats(e,
+                    StatsByTrigger: new()
+                        {
+                            [(Trigger.OnUse, ModificationType.Add)] = new()
+                            {
+                                ["MaximumHealth"]  = 5.0f
+                            }
+                        }
+                    )
+                ]
             ),
             new(
                 EntityCategory.Item,
@@ -101,14 +115,21 @@ namespace CBA
                 "Glowing Green Grog",
                 ItemType.Consumable,
                 ItemRarity.Common,
-                StaminaCost: 15,
-                StatsByTrigger: new()
-                {
-                    [(Trigger.OnUse, ModificationType.Add)] = new()
-                    {
-                        ["MaximumStamina"]  = 5.0f
-                    }
-                }
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 15),
+                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ModifiesStats(e,
+                    StatsByTrigger: new()
+                        {
+                            [(Trigger.OnUse, ModificationType.Add)] = new()
+                            {
+                                ["MaximumStamina"]  = 5.0f
+                            }
+                        }
+                    )
+                ]
             ),
             new(
                 EntityCategory.Item,
@@ -116,14 +137,21 @@ namespace CBA
                 "Yielding Yellow Yarb",
                 ItemType.Consumable,
                 ItemRarity.Common,
-                StaminaCost: 15,
-                StatsByTrigger: new()
-                {
-                    [(Trigger.OnUse, ModificationType.Add)] = new()
-                    {
-                        ["Armor"]  = 5.0f
-                    }
-                }
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 15),
+                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ModifiesStats(e,
+                    StatsByTrigger: new()
+                        {
+                            [(Trigger.OnUse, ModificationType.Add)] = new()
+                            {
+                                ["Armor"]  = 5.0f
+                            }
+                        }
+                    )
+                ]
             ),
             new(
                 EntityCategory.Item,
@@ -131,14 +159,21 @@ namespace CBA
                 "Pale Purple Potion",
                 ItemType.Consumable,
                 ItemRarity.Common,
-                StaminaCost: 15,
-                StatsByTrigger: new()
-                {
-                    [(Trigger.OnUse, ModificationType.Add)] = new()
-                    {
-                        ["Shield"]  = 5.0f
-                    }
-                }
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 15),
+                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ModifiesStats(e,
+                    StatsByTrigger: new()
+                        {
+                            [(Trigger.OnUse, ModificationType.Add)] = new()
+                            {
+                                ["Shield"]  = 5.0f
+                            }
+                        }
+                    )
+                ]
             ),
             new(
                 EntityCategory.Item,
@@ -146,14 +181,21 @@ namespace CBA
                 "Pupil Porridge",
                 ItemType.Consumable,
                 ItemRarity.Common,
-                StaminaCost: 15,
-                StatsByTrigger: new()
-                {
-                    [(Trigger.OnUse, ModificationType.Add)] = new()
-                    {
-                        ["Critical"]  = 5.0f
-                    }
-                }
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 15),
+                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ModifiesStats(e,
+                    StatsByTrigger: new()
+                        {
+                            [(Trigger.OnUse, ModificationType.Add)] = new()
+                            {
+                                ["Critical"]  = 5.0f
+                            }
+                        }
+                    )
+                ]
             ),
             new(
                 EntityCategory.Item,
@@ -161,14 +203,21 @@ namespace CBA
                 "Cartilage Chowder",
                 ItemType.Consumable,
                 ItemRarity.Common,
-                StaminaCost: 15,
-                StatsByTrigger: new()
-                {
-                    [(Trigger.OnUse, ModificationType.Add)] = new()
-                    {
-                        ["Dodge"]  = 5.0f
-                    }
-                }
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 15),
+                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ModifiesStats(e,
+                    StatsByTrigger: new()
+                        {
+                            [(Trigger.OnUse, ModificationType.Add)] = new()
+                            {
+                                ["Dodge"]  = 5.0f
+                            }
+                        }
+                    )
+                ]
             ),
             new(
                 EntityCategory.Item,
@@ -176,14 +225,21 @@ namespace CBA
                 "Magpie Morsel",
                 ItemType.Consumable,
                 ItemRarity.Common,
-                StaminaCost: 15,
-                StatsByTrigger: new()
-                {
-                    [(Trigger.OnUse, ModificationType.Add)] = new()
-                    {
-                        ["Luck"]  = 5.0f
-                    }
-                }
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 15),
+                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ModifiesStats(e,
+                    StatsByTrigger: new()
+                        {
+                            [(Trigger.OnUse, ModificationType.Add)] = new()
+                            {
+                                ["Luck"]  = 5.0f
+                            }
+                        }
+                    )
+                ]
             ),
             new(
                 EntityCategory.Item,
@@ -191,14 +247,21 @@ namespace CBA
                 "Vulture Vittles",
                 ItemType.Consumable,
                 ItemRarity.Common,
-                StaminaCost: 15,
-                StatsByTrigger: new()
-                {
-                    [(Trigger.OnUse, ModificationType.Add)] = new()
-                    {
-                        ["Peer"]  = 5.0f
-                    }
-                }
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 15),
+                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ModifiesStats(e,
+                    StatsByTrigger: new()
+                        {
+                            [(Trigger.OnUse, ModificationType.Add)] = new()
+                            {
+                                ["Peer"]  = 5.0f
+                            }
+                        }
+                    )
+                ]
             ),
 
             //     ======================================================
@@ -211,22 +274,28 @@ namespace CBA
                 "Auburn Amalgam",
                 ItemType.Consumable,
                 ItemRarity.Uncommon,
-                StaminaCost: 15,
-                StatsByTrigger: new()
-                {
-                    [(Trigger.OnUse, ModificationType.Multiply)] = new()
-                    {
-                        ["MaximumHealth"]  = 1.25f
-                    }
-                },
-
-                ResourcesByTrigger: new()
-                {
-                    [(Trigger.OnUse, ModificationType.Multiply)] = new()
-                    {
-                        ["Health"] = 1.25f
-                    }
-                }
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Uncommon, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 15),
+                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnUse, ModificationType.Multiply)] = new()
+                            {
+                                ["MaximumHealth"]  = 1.25f
+                            }
+                        },
+                        ResourcesByTrigger: new()
+                        {
+                            [(Trigger.OnUse, ModificationType.Multiply)] = new()
+                            {
+                                ["Health"] = 1.25f
+                            }
+                        }
+                    )
+                ]
             ),
             new(
                 EntityCategory.Item,
@@ -234,22 +303,28 @@ namespace CBA
                 "Teal Tincture",
                 ItemType.Consumable,
                 ItemRarity.Uncommon,
-                StaminaCost: 15,
-                StatsByTrigger: new()
-                {
-                    [(Trigger.OnUse, ModificationType.Multiply)] = new()
-                    {
-                        ["MaximumStamina"]  = 1.25f
-                    }
-                },
-
-                ResourcesByTrigger: new()
-                {
-                    [(Trigger.OnUse, ModificationType.Multiply)] = new()
-                    {
-                        ["Stamina"] = 1.25f
-                    }
-                }
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Uncommon, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 15),
+                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnUse, ModificationType.Multiply)] = new()
+                            {
+                                ["MaximumStamina"]  = 1.25f
+                            }
+                        },
+                        ResourcesByTrigger: new()
+                        {
+                            [(Trigger.OnUse, ModificationType.Multiply)] = new()
+                            {
+                                ["Stamina"] = 1.25f
+                            }
+                        }
+                    )
+                ]
             ),
             new(
                 EntityCategory.Item,
@@ -257,15 +332,22 @@ namespace CBA
                 "Earthy Elixir",
                 ItemType.Consumable,
                 ItemRarity.Uncommon,
-                StaminaCost: 15,
-                StatsByTrigger: new()
-                {
-                    [(Trigger.OnUse, ModificationType.Multiply)] = new()
-                    {
-                        ["Armor"]           = 1.25f,
-                        ["Shield"]          = 1.25f
-                    }
-                }
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Uncommon, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 15),
+                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnUse, ModificationType.Multiply)] = new()
+                            {
+                                ["Armor"]  = 1.25f,
+                                ["Shield"] = 1.25f
+                            }
+                        }
+                    )
+                ]
             ),
 
             //     ======================================================
@@ -278,26 +360,33 @@ namespace CBA
                 "Chromatic Concoction",
                 ItemType.Consumable,
                 ItemRarity.Rare,
-                StaminaCost: 15,
-                StatsByTrigger: new()
-                {
-                    [(Trigger.OnUse, ModificationType.Multiply)] = new()
-                    {
-                        ["MaximumHealth"]   = 1.25f,
-                        ["MaximumStamina"]  = 1.25f,
-                        ["Armor"]           = 1.25f,
-                        ["Shield"]          = 1.25f
-                    }
-                },
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Rare, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 15),
+                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnUse, ModificationType.Multiply)] = new()
+                            {
+                                ["MaximumHealth"]   = 1.25f,
+                                ["MaximumStamina"]  = 1.25f,
+                                ["Armor"]           = 1.25f,
+                                ["Shield"]          = 1.25f
+                            }
+                        },
 
-                ResourcesByTrigger: new()
-                {
-                    [(Trigger.OnUse, ModificationType.Multiply)] = new()
-                    {
-                        ["Health"]  = 1.25f,
-                        ["Stamina"] = 1.25f
-                    }
-                }
+                        ResourcesByTrigger: new()
+                        {
+                            [(Trigger.OnUse, ModificationType.Multiply)] = new()
+                            {
+                                ["Health"]  = 1.25f,
+                                ["Stamina"] = 1.25f
+                            }
+                        }
+                    )
+                ]
             ),
 
             new(
@@ -306,15 +395,22 @@ namespace CBA
                 "Homogenous Paste",
                 ItemType.Consumable,
                 ItemRarity.Rare,
-                StaminaCost: 15,
-                StatsByTrigger: new()
-                {
-                    [(Trigger.OnUse, ModificationType.Multiply)] = new()
-                    {
-                        ["Critical"]   = 1.25f,
-                        ["Dodge"]  = 1.25f
-                    }
-                }
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Rare, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 15),
+                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnUse, ModificationType.Multiply)] = new()
+                            {
+                                ["Critical"]   = 1.25f,
+                                ["Dodge"]      = 1.25f
+                            }
+                        }
+                    )
+                ]
             ),
 
             // ==========================================================
@@ -330,13 +426,20 @@ namespace CBA
                 "Brandish",
                 ItemType.Weapon,
                 ItemRarity.Common,
-                EquipType: EquipType.Weapon,
-                StaminaCost: 25,
-                Damage: 10,
-                DamageType: DamageType.Physical,
-                CanCrit: true,
-                CanDodge: true,
-                EffectsByTrigger: new() {{(EffectAction.Apply, TargetType.Target, Trigger.OnUse), ["inferno"]}}
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Weapon),
+                    (e, holder) => new Wearable(e, EquipType.Weapon),
+                    (e, holder) => new Usable(e, 25),
+                    (e, holder) => new Hits(e, true),
+                    (e, holder) => new DealsDamage(e, 10, DamageType.Physical, true),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Target, Trigger.OnUse), ["inferno"]}
+                        }
+                    )
+                ]
             ),
             new(
                 EntityCategory.Item,
@@ -344,19 +447,23 @@ namespace CBA
                 "Crescent",
                 ItemType.Weapon,
                 ItemRarity.Common,
-                EquipType: EquipType.Weapon,
-                StaminaCost: 25,
-                Damage: 10,
-                DamageType: DamageType.Physical,
-                CanCrit: true,
-                CanDodge: true,
-                EffectsByTrigger: new()
-                {
-                    {(EffectAction.Remove, TargetType.Self, Trigger.OnHit), ["moonlight"] },
-                    {(EffectAction.Remove, TargetType.Self, Trigger.OnUnequip), ["moonlight"] },
-                    {(EffectAction.Apply, TargetType.Self, Trigger.OnTurnStartWhileEquipped), ["moonlight"] },
-                    {(EffectAction.Apply, TargetType.Self, Trigger.OnEquip), ["moonlight"] },
-                }
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Weapon),
+                    (e, holder) => new Wearable(e, EquipType.Weapon),
+                    (e, holder) => new Usable(e, 25),
+                    (e, holder) => new Hits(e, true),
+                    (e, holder) => new DealsDamage(e, 10, DamageType.Physical, true),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnHit), ["moonlight"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnUnequip), ["moonlight"] },
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnTurnStartWhileEquipped), ["moonlight"] },
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnEquip), ["moonlight"] }
+                        }
+                    )
+                ]
             ),
 
             // ==========================================================
@@ -372,26 +479,34 @@ namespace CBA
                 "Oculus Helmet",
                 ItemType.Armor,
                 ItemRarity.Common,
-                EquipType: EquipType.Helmet,
-                SetTag: "oculus",
-                StatsByTrigger: new()
-                {
-                    [(Trigger.OnEquip, ModificationType.Add)] = new()
-                    {
-                        ["Armor"]   = 25f,
-                        ["Shield"]  = 25f
-                    },
-                    [(Trigger.OnUnequip, ModificationType.Add)] = new()
-                    {
-                        ["Armor"]   = -25f,
-                        ["Shield"]  = -25f
-                    }
-                },
-                EffectsByTrigger: new()
-                {
-                    {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["third_eye"] },
-                    {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["third_eye"] }
-                }
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Helmet),
+                    (e, holder) => new CompletesItemSet(e, "oculus"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Armor"]   = 25f,
+                                ["Shield"]  = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Armor"]   = -25f,
+                                ["Shield"]  = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["third_eye"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["third_eye"] }                            
+                        }
+                    )
+                ]
             ),
             new(
                 EntityCategory.Item,
@@ -399,26 +514,34 @@ namespace CBA
                 "Oculus Chestplate",
                 ItemType.Armor,
                 ItemRarity.Common,
-                EquipType: EquipType.Chestplate,
-                SetTag: "oculus",
-                StatsByTrigger: new()
-                {
-                    [(Trigger.OnEquip, ModificationType.Add)] = new()
-                    {
-                        ["Armor"]   = 25f,
-                        ["Shield"]  = 25f
-                    },
-                    [(Trigger.OnUnequip, ModificationType.Add)] = new()
-                    {
-                        ["Armor"]   = -25f,
-                        ["Shield"]  = -25f
-                    }
-                },
-                EffectsByTrigger: new()
-                {
-                    {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["third_eye"] },
-                    {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["third_eye"] }
-                }
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Chestplate),
+                    (e, holder) => new CompletesItemSet(e, "oculus"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Armor"]   = 25f,
+                                ["Shield"]  = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Armor"]   = -25f,
+                                ["Shield"]  = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["third_eye"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["third_eye"] }                            
+                        }
+                    )
+                ]
             ),
             new(
                 EntityCategory.Item,
@@ -426,68 +549,37 @@ namespace CBA
                 "Oculus Leggings",
                 ItemType.Armor,
                 ItemRarity.Common,
-                EquipType: EquipType.Leggings,
-                SetTag: "oculus",
-                StatsByTrigger: new()
-                {
-                    [(Trigger.OnEquip, ModificationType.Add)] = new()
-                    {
-                        ["Armor"]   = 25f,
-                        ["Shield"]  = 25f
-                    },
-                    [(Trigger.OnUnequip, ModificationType.Add)] = new()
-                    {
-                        ["Armor"]   = -25f,
-                        ["Shield"]  = -25f
-                    }
-                },
-                EffectsByTrigger: new()
-                {
-                    {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["third_eye"] },
-                    {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["third_eye"] }
-                }
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Leggings),
+                    (e, holder) => new CompletesItemSet(e, "oculus"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Armor"]   = 25f,
+                                ["Shield"]  = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Armor"]   = -25f,
+                                ["Shield"]  = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["third_eye"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["third_eye"] }                            
+                        }
+                    )
+                ]
             ),
-
             // Add more templates as needed
         ];
-
-        public static void AddComponents(Entity item, Entity player, ItemTemplate template)
-        {
-            // Change Item Data to not take display name
-            new ItemData(item, template.DisplayName, template.Rarity, template.Type, player);
-
-            if (template.Type == ItemType.Consumable) // Only Consumables get Consumable
-                new Consumable(item);
-
-            if (template.SetTag != null)
-                new CompletesItemSet(item, template.SetTag);
-
-            if ((template.Type == ItemType.Consumable || template.Type == ItemType.Weapon) &&
-                template.StaminaCost is int staminaCost)
-            {
-                new Usable(item, staminaCost);
-            }    // Consumables or Weapons get Usable if their StaminaCost is defined.
-
-            if (template.Type == ItemType.Weapon)
-            {
-                new DealsDamage(item, template.Damage, template.DamageType, template.CanCrit);
-                new Hits(item, template.CanDodge);
-            }
-            
-            if (template.EquipType is EquipType equipType) // Non-null EquipType gets Wearable
-                new Wearable(item, equipType);
-
-
-            if (template.StatsByTrigger != null || template.ResourcesByTrigger != null)
-            {
-                new ModifiesStats(item, template.StatsByTrigger, template.ResourcesByTrigger);
-            }
-
-            if (template.EffectsByTrigger != null)
-            {
-                new ModifiesEffects(item, template.EffectsByTrigger);
-            }
-        }
 
         // Generic method to pick a random key from a dictionary based on chance
         private static T PickRandom<T>(Dictionary<T, double> chances) where T : struct, Enum
@@ -506,8 +598,7 @@ namespace CBA
             // Fallback (should rarely happen)
             return chances.Keys.First();
         }
-
-        public static Entity CreateRandomItem(Entity player)
+        private static ItemTemplate GetRandomTemplate()
         {
             // --- Step 1: Pick type and rarity based on weights ---
             ItemType itemType = PickRandom(TypeChances);
@@ -548,15 +639,24 @@ namespace CBA
                 candidates = [.. ItemTemplates];
 
             // --- Step 6: Pick one randomly from remaining candidates ---
-            ItemTemplate temp = candidates[rng.Next(candidates.Count)];
-
-            // --- Step 7: Instantiate the entity and apply components ---
-            Entity itemEntity = new(temp.Category, temp.TypeId, temp.DisplayName);
-            AddComponents(itemEntity, player, temp);
-            World.Instance.AddEntity(itemEntity);
-
-            return itemEntity;
+            ItemTemplate template = candidates[rng.Next(candidates.Count)];
+            return template;
         }
+        public static void CreateRandomItem(Entity holder)
+        {
+            ItemTemplate template = GetRandomTemplate();
 
+            Entity item = new(template.Category, template.TypeId, template.DisplayName);
+
+            if (template.Components != null)
+                foreach (ComponentBuilder builder in template.Components)
+                {
+                    Component component = builder(item, holder);
+                    item.AddComponent(component);
+                }
+
+            item.SubscribeAll();
+            World.Instance.AddEntity(item);
+        }
     }
 }

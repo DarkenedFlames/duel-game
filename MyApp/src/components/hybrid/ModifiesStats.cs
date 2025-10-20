@@ -33,21 +33,6 @@ namespace CBA
         public Dictionary<(Trigger Trigger, ModificationType Type), Dictionary<string, float>>? StatChanges { get; } = StatsByTrigger;
         public Dictionary<(Trigger Trigger, ModificationType Type), Dictionary<string, float>>? ResourceChanges { get; } = ResourcesByTrigger;
         
-        public override void ValidateDependencies()
-        {
-            if (Owner.Id.Category != EntityCategory.Item && Owner.Id.Category != EntityCategory.Effect)
-                throw new InvalidOperationException($"{Owner.Id} was given an invalid Component: ModifiesStats.");
-
-            // Fail loud if triggers are declared that don't match owner type.
-            bool requiresUsable = HasTrigger(Trigger.OnUse);
-            bool requiresWearable = HasTrigger(Trigger.OnEquip) || HasTrigger(Trigger.OnUnequip);
-
-            if (requiresUsable && !Owner.HasComponent<Usable>())
-                throw new InvalidOperationException($"{Owner.Id} declares OnUse but lacks Usable.");
-
-            if (requiresWearable && !Owner.HasComponent<Wearable>())
-                throw new InvalidOperationException($"{Owner.Id} declares OnEquip/OnUnequip but lacks Wearable.");
-        }
         public override void Subscribe()
         {
             // For each declared trigger, subscribe appropriately.

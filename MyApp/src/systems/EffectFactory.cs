@@ -1,89 +1,87 @@
 namespace CBA
 {
+    public delegate Component ComponentBuilder(Entity newEntity, Entity target);
+
     public record EffectTemplate
     (
         EntityCategory Category,
         string TypeId,
         string DisplayName,
-        bool IsNegative,
-        bool IsHidden,
-        int? MaxPerTurn = null,
-        int Duration = 0,
-        float Chance = 1.0f,
         StackingType StackingType = StackingType.AddStack,
         int MaxStacks = 1,
-        Dictionary<(Trigger, ModificationType), Dictionary<string, float>>? StatsByTrigger = null,
-        Dictionary<(Trigger, ModificationType), Dictionary<string, float>>? ResourcesByTrigger = null,
-        int Damage = 0,
-        DamageType DamageType = DamageType.Physical,
-        bool CanCrit = true
-
+        int? MaxPerTurn = null,
+        float Chance = 1.0f,
+        List<ComponentBuilder>? Components = null
     );
 
     public static class EffectFactory
     {
-        public static event Action<Entity, Entity>? OnEffectApplied;
         public static readonly List<EffectTemplate> Templates =
         [
             new(
                 EntityCategory.Effect,
                 "inferno",
                 "Inferno",
-                IsNegative: true,
-                IsHidden: false,
-                Duration: 3,
-                Chance: .15f,
-                StackingType: StackingType.AddStack,
                 MaxStacks: 5,
-                Damage: 1, // 1% health per turn
-                DamageType: DamageType.Magical,
-                CanCrit: false
+                Chance: .15f,
+                Components:
+                [
+                    (e, target) => new EffectData(e, target, true, false, maxStacks: 5),
+                    (e, target) => new EffectDuration(e, 3),
+                    (e, target) => new DealsDamage(e, 5, DamageType.Magical, false)
+                ]
+
             ),
 
             new(
                 EntityCategory.Effect,
                 "moonlight",
                 "Moonlight",
-                IsNegative: true,
-                IsHidden: true,
-                MaxPerTurn: 1,
-                Duration: 1,
-                Chance: 1f,
                 StackingType: StackingType.Ignore,
-                MaxStacks: 1,
-                Damage: 0,
-                StatsByTrigger: new()
-                {
-                    [(Trigger.OnAdded, ModificationType.Add)] = new()
-                    {
-                        ["Critical"] = 100f
-                    },
-                    [(Trigger.OnRemoved, ModificationType.Add)] = new()
-                    {
-                        ["Critical"] = -100f
-                    }
-                }
+                MaxPerTurn: 1,
+                Chance: 1f,
+                Components:
+                [
+                    (e, target) => new EffectData(e, target, true, false, StackingType.Ignore, maxStacks: 1),
+                    (e, target) => new ModifiesStats(e,
+                    StatsByTrigger: new()
+                        {
+                            [(Trigger.OnAdded, ModificationType.Add)] = new()
+                            {
+                                ["Critical"] = 100f
+                            },
+                            [(Trigger.OnRemoved, ModificationType.Add)] = new()
+                            {
+                                ["Critical"] = -100f
+                            }
+                        }
+                    )
+                ]
             ),
             new(
                 EntityCategory.Effect,
                 "third_eye",
                 "Third Eye",
-                IsNegative: false,
-                IsHidden: false,
-                Chance: 1f,
                 StackingType: StackingType.Ignore,
                 MaxStacks: 1,
-                StatsByTrigger: new()
-                {
-                    [(Trigger.OnAdded, ModificationType.Multiply)] = new()
-                    {
-                        ["Critical"] = 1.2f
-                    },
-                    [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
-                    {
-                        ["Critical"] = 1.0f/1.2f
-                    }
-                }
+                Chance: 1f,
+                Components:
+                [
+                    (e, target) => new EffectData(e, target, false, false, StackingType.Ignore, maxStacks: 1),
+                    (e, target) => new ModifiesStats(e,
+                    StatsByTrigger: new()
+                        {
+                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            {
+                                ["Critical"] = 1.2f
+                            },
+                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            {
+                                ["Critical"] = 1.0f/1.2f
+                            }
+                        }
+                    )
+                ]
             ),
         ];
         public static EffectTemplate GetTemplate(string typeId)
@@ -92,16 +90,16 @@ namespace CBA
                 t.TypeId.Equals(typeId, StringComparison.OrdinalIgnoreCase))
                 ?? throw new Exception($"Effect template '{typeId}' not found.");
         }
-        public static void ApplyEffect(string typeId, Entity target)
+        private static EffectTemplate? GateEffect(string typeId, Entity target)
         {
             EffectTemplate template = GetTemplate(typeId);
 
             if (Random.Shared.NextDouble() > template.Chance)
-                return;
+                return null;
 
             if (template.MaxPerTurn != null)
                 if (template.MaxPerTurn <= target.GetComponent<TurnMemory>().GetEffectsAppliedThisTurn(template.TypeId))
-                    return;
+                    return null;
 
             // Handle stacking
             EffectData? existing = World.Instance
@@ -112,7 +110,7 @@ namespace CBA
             {
                 Entity existingEffect = existing.Owner;
 
-                switch (existing?.StackingType)
+                switch (existing.StackingType)
                 {
                     case StackingType.RefreshOnly:
                         if (existingEffect.HasComponent<EffectDuration>())
@@ -120,7 +118,7 @@ namespace CBA
                             EffectDuration effectDuration = existingEffect.GetComponent<EffectDuration>();
                             effectDuration.Remaining = effectDuration.Maximum;
                         }
-                        return;
+                        return null;
 
                     case StackingType.AddStack:
                         if (existing.CurrentStacks < existing.MaximumStacks && existingEffect.HasComponent<EffectDuration>())
@@ -129,54 +127,32 @@ namespace CBA
                             EffectDuration effectDuration = existingEffect.GetComponent<EffectDuration>();
                             effectDuration.Remaining = effectDuration.Maximum;
                         }
-                        return;
+                        return null;
 
                     case StackingType.Ignore:
-                        return;
+                        return null;
                 }
             }
+
+            return template;
+        }
+        public static void ApplyEffect(string typeId, Entity target)
+        {
+            EffectTemplate? template = GateEffect(typeId, target);
+            if (template == null) return;
+
             // Create new effect entity
             Entity effect = new(EntityCategory.Effect, template.TypeId, template.DisplayName);
-            AddComponents(effect, template, target);
+
+            if (template.Components != null)
+                foreach (ComponentBuilder builder in template.Components)
+                {
+                    Component component = builder(effect, target);
+                    effect.AddComponent(component);
+                }
+
+            effect.SubscribeAll();
             World.Instance.AddEntity(effect);
-            OnEffectApplied?.Invoke(target, effect);
-        }
-        private static void AddComponents(Entity effect, EffectTemplate template, Entity player)
-        {
-            // Core data
-            new EffectData(
-                effect,
-                player,
-                template.DisplayName,
-                template.IsNegative,
-                template.IsHidden,
-                template.StackingType,
-                template.MaxStacks,
-                template.MaxPerTurn
-            );
-
-            // Duration
-            if (template.Duration > 0)
-                new EffectDuration(effect, template.Duration);
-
-            // Damage-over-time effects
-            if (template.Damage > 0)
-            {
-                StatsComponent playerStats = player.GetComponent<StatsComponent>();
-                int damageValue = template.DisplayName == "Inferno"
-                    ? (int)(playerStats.Get("MaximumHealth") * 0.01f)
-                    : template.Damage;
-
-                new DealsDamage(
-                    effect,
-                    getDamage: () => damageValue,
-                    damageType: template.DamageType,
-                    canCrit: template.CanCrit
-                );
-            }
-
-            if (template.StatsByTrigger != null || template.ResourcesByTrigger != null)
-                new ModifiesStats(effect, template.StatsByTrigger, template.ResourcesByTrigger);
         }
     }
 }

@@ -1,15 +1,8 @@
 namespace CBA
 {
-    public abstract class Component
+    public abstract class Component(Entity owner)
     {
-        public Entity Owner { get; }
-        protected Component(Entity owner)
-        {
-            Owner = owner;
-            Owner.AddComponent(this);
-        }
+        public Entity Owner { get; } = owner;
         public abstract void Subscribe();
-        public abstract void ValidateDependencies();
     }
-
 }
