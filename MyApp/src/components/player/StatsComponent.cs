@@ -6,19 +6,30 @@ namespace CBA
 
         private Dictionary<string, (int Base, float Modifier)> _values = new()
         {
+            // Resource Stats
             { "MaximumHealth", (100, 1.0f) },
             { "MaximumStamina", (100, 1.0f) },
-            { "Armor", (50, 1.0f) },
-            { "Shield", (50, 1.0f) },
-            { "Critical", (0, 1.0f) },
-            { "Dodge", (0, 1.0f) },
+
+            // Receiving Items
             { "Peer", (0, 1.0f) },
             { "Luck", (0, 1.0f) },
             { "Steal", (0, 1.0f) },
-            { "Damage", (0, 1.0f) },
-            { "Resistance", (0, 1.0f) },
-            { "PotionCost", (0, 1.0f)},
-            { "PotionStrength", (0, 1.0f) }
+
+            // Using Items
+            { "ConsumableCost", (0, 1.0f) },
+            { "WeaponCost", (0, 1.0f) },
+
+            // Dealing Damage
+            { "Attack", (0, 1.0f) },
+            { "Critical", (0, 1.0f) },
+            { "Accuracy", (100, 1.0f) },
+            { "Precision", (0, 1.0f) },
+
+            // Receiving Damage
+            { "Armor", (50, 1.0f) },
+            { "Shield", (50, 1.0f) },
+            { "Dodge", (0, 1.0f) },
+            { "Defense", (50, 1.0f) },
 
         };
 

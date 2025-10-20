@@ -29,16 +29,30 @@ namespace CBA
             ResourcesComponent resources = player.GetComponent<ResourcesComponent>();
             StatsComponent stats = player.GetComponent<StatsComponent>();
 
+            Console.WriteLine("\n==== Resources ====");
             Console.WriteLine($"Health: {resources.Get("Health")} / {stats.Get("MaximumHealth")}");
             Console.WriteLine($"Stamina: {resources.Get("Stamina")} / {stats.Get("MaximumStamina")}");
-            Console.WriteLine($"Armor: {stats.Get("Armor")}");
-            Console.WriteLine($"Shield: {stats.Get("Shield")}");
-            Console.WriteLine($"Critical: {stats.Get("Critical")}");
-            Console.WriteLine($"Dodge: {stats.Get("Dodge")}");
+
+            Console.WriteLine("\n==== Item Use ====");
+            Console.WriteLine($"Consumable Cost Score: {stats.Get("ConsumableCost")}");
+            Console.WriteLine($"Weapon Cost Score: {stats.Get("WeaponCost")}");
+
+            Console.WriteLine("\n==== Obtaining Items ====");
             Console.WriteLine($"Peer: {stats.Get("Peer")}");
             Console.WriteLine($"Luck: {stats.Get("Luck")}");
-            Console.WriteLine($"Healing Modifier: {resources.GetRestoreMultiplier("Health"):P}");
-            Console.WriteLine($"Stimming Modifier: {resources.GetRestoreMultiplier("Stamina"):P}");
+            Console.WriteLine($"Steal: {stats.Get("Steal")}");
+
+            Console.WriteLine("\n==== Offensive ====");
+            Console.WriteLine($"Attack: {stats.Get("Attack")}");
+            Console.WriteLine($"Critical: {stats.Get("Critical")}");
+            Console.WriteLine($"Precision: {stats.Get("Precision")}");
+            Console.WriteLine($"Accuracy: {stats.Get("Accuracy")}");
+
+            Console.WriteLine("\n==== Defensive ====");
+            Console.WriteLine($"Defense: {stats.Get("Defense")}");
+            Console.WriteLine($"Armor: {stats.Get("Armor")}");
+            Console.WriteLine($"Shield: {stats.Get("Shield")}");
+            Console.WriteLine($"Dodge: {stats.Get("Dodge")}");
         }
         public static void PrintEffects(Entity player)
         {
@@ -297,6 +311,14 @@ namespace CBA
             {
                 throw new NullReferenceException($"{itemOrEffect} was null when it should have been an <Entity>.");
             }
+        }
+
+        public static void PrintMissed(Entity item, Entity target)
+        {
+            string targetName = target.DisplayName;
+            string itemName = item.DisplayName;
+            string userName = World.Instance.GetPlayerOf(item).DisplayName;
+            Console.WriteLine($"\n{userName}'s attack with {itemName} missed {targetName}!");
         }
 
         public static void PrintCritical(Entity itemOrEffect, Entity target)

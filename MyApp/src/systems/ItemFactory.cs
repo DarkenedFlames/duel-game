@@ -42,7 +42,7 @@ namespace CBA
             //     ======================================================
             //     Common
             //     ======================================================
-
+            #region
             new(
                 EntityCategory.Item,
                 "ruby_red_remedy",
@@ -263,11 +263,11 @@ namespace CBA
                     )
                 ]
             ),
-
+            #endregion
             //     ======================================================
             //     Uncommon
             //     ======================================================
-
+            #region
             new(
                 EntityCategory.Item,
                 "auburn_amalgam",
@@ -349,11 +349,11 @@ namespace CBA
                     )
                 ]
             ),
-
+            #endregion
             //     ======================================================
             //     Rare
             //     ======================================================
-
+            #region
             new(
                 EntityCategory.Item,
                 "chromatic_concoction",
@@ -412,14 +412,14 @@ namespace CBA
                     )
                 ]
             ),
-
+            #endregion
             // ==========================================================
             // Weapons
             // ==========================================================
             //     ======================================================
             //     Common
             //     ======================================================
-
+            #region
             new(
                 EntityCategory.Item,
                 "brandish",
@@ -465,14 +465,100 @@ namespace CBA
                     )
                 ]
             ),
-
+            new(
+                EntityCategory.Item,
+                "terrain",
+                "Terrain",
+                ItemType.Weapon,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Weapon),
+                    (e, holder) => new Wearable(e, EquipType.Weapon),
+                    (e, holder) => new Usable(e, 25),
+                    (e, holder) => new Hits(e, true),
+                    (e, holder) => new DealsDamage(e, 10, DamageType.Physical, true),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Target, Trigger.OnHit), ["crushed"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "eclipse",
+                "Eclipse",
+                ItemType.Weapon,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Weapon),
+                    (e, holder) => new Wearable(e, EquipType.Weapon),
+                    (e, holder) => new Usable(e, 25),
+                    (e, holder) => new Hits(e, true),
+                    (e, holder) => new DealsDamage(e, 10, DamageType.Physical, true),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Target, Trigger.OnHit), ["blinded"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "solstice",
+                "Solstice",
+                ItemType.Weapon,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Weapon),
+                    (e, holder) => new Wearable(e, EquipType.Weapon),
+                    (e, holder) => new Usable(e, 25),
+                    (e, holder) => new Hits(e, true),
+                    (e, holder) => new DealsDamage(e, 10, DamageType.Physical, true),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnTurnStartWhileEquipped), ["noons_visibility"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "hibernal",
+                "Hibernal",
+                ItemType.Weapon,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Weapon),
+                    (e, holder) => new Wearable(e, EquipType.Weapon),
+                    (e, holder) => new Usable(e, 25),
+                    (e, holder) => new Hits(e, true),
+                    (e, holder) => new DealsDamage(e, 10, DamageType.Physical, true),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Target, Trigger.OnHit), ["frozen"] }
+                        }
+                    )
+                ]
+            ),
+            #endregion
             // ==========================================================
             // Armor
             // ==========================================================
             //     ======================================================
             //     Common
             //     ======================================================
-
+            #region
+            // Oculus Set
+            #region
             new(
                 EntityCategory.Item,
                 "oculus_helmet",
@@ -489,13 +575,11 @@ namespace CBA
                         {
                             [(Trigger.OnEquip, ModificationType.Add)] = new()
                             {
-                                ["Armor"]   = 25f,
-                                ["Shield"]  = 25f
+                                ["Defense"]   = 25f
                             },
                             [(Trigger.OnUnequip, ModificationType.Add)] = new()
                             {
-                                ["Armor"]   = -25f,
-                                ["Shield"]  = -25f
+                                ["Defense"]   = -25f
                             }
                         }
                     ),
@@ -503,7 +587,7 @@ namespace CBA
                         triggeredEffects: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["third_eye"] },
-                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["third_eye"] }                            
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["third_eye"] }
                         }
                     )
                 ]
@@ -524,13 +608,11 @@ namespace CBA
                         {
                             [(Trigger.OnEquip, ModificationType.Add)] = new()
                             {
-                                ["Armor"]   = 25f,
-                                ["Shield"]  = 25f
+                                ["Defense"]   = 25f
                             },
                             [(Trigger.OnUnequip, ModificationType.Add)] = new()
                             {
-                                ["Armor"]   = -25f,
-                                ["Shield"]  = -25f
+                                ["Defense"]   = -25f
                             }
                         }
                     ),
@@ -538,7 +620,7 @@ namespace CBA
                         triggeredEffects: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["third_eye"] },
-                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["third_eye"] }                            
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["third_eye"] }
                         }
                     )
                 ]
@@ -559,13 +641,11 @@ namespace CBA
                         {
                             [(Trigger.OnEquip, ModificationType.Add)] = new()
                             {
-                                ["Armor"]   = 25f,
-                                ["Shield"]  = 25f
+                                ["Defense"]   = 25f
                             },
                             [(Trigger.OnUnequip, ModificationType.Add)] = new()
                             {
-                                ["Armor"]   = -25f,
-                                ["Shield"]  = -25f
+                                ["Defense"]   = -25f
                             }
                         }
                     ),
@@ -573,11 +653,729 @@ namespace CBA
                         triggeredEffects: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["third_eye"] },
-                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["third_eye"] }                            
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["third_eye"] }
                         }
                     )
                 ]
             ),
+            #endregion
+            // Sonic Set
+            #region
+            new(
+                EntityCategory.Item,
+                "sonic_helmet",
+                "Sonic Helmet",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Helmet),
+                    (e, holder) => new CompletesItemSet(e, "sonic"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["vibrata"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["vibrata"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "sonic_chestplate",
+                "Sonic Chestplate",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Chestplate),
+                    (e, holder) => new CompletesItemSet(e, "sonic"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["vibrata"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["vibrata"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "sonic_leggings",
+                "Sonic Leggings",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Leggings),
+                    (e, holder) => new CompletesItemSet(e, "sonic"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["vibrata"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["vibrata"] }
+                        }
+                    )
+                ]
+            ),
+            #endregion
+            // Olfactory Set
+            #region
+            new(
+                EntityCategory.Item,
+                "olfactory_helmet",
+                "Olfactory Helmet",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Helmet),
+                    (e, holder) => new CompletesItemSet(e, "olfactory"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["pungence"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["pungence"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "olfactory_chestplate",
+                "Olfactory Chestplate",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Chestplate),
+                    (e, holder) => new CompletesItemSet(e, "olfactory"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["pungence"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["pungence"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "olfactory_leggings",
+                "Olfactory Leggings",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Leggings),
+                    (e, holder) => new CompletesItemSet(e, "olfactory"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["pungence"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["pungence"] }
+                        }
+                    )
+                ]
+            ),
+            #endregion
+            // Tact Set
+            #region
+            new(
+                EntityCategory.Item,
+                "tact_helmet",
+                "Tact Helmet",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Helmet),
+                    (e, holder) => new CompletesItemSet(e, "tact"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["substance"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["substance"] }
+                        }
+                    )
+                ]
+            ),
+
+            new(
+                EntityCategory.Item,
+                "tact_chestplate",
+                "Tact Chestplate",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Chestplate),
+                    (e, holder) => new CompletesItemSet(e, "tact"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["substance"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["substance"] }
+                        }
+                    )
+                ]
+            ),
+
+            new(
+                EntityCategory.Item,
+                "tact_leggings",
+                "Tact Leggings",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Leggings),
+                    (e, holder) => new CompletesItemSet(e, "tact"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["substance"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["substance"] }
+                        }
+                    )
+                ]
+            ),
+            #endregion
+            // Relish Set
+            #region
+            new(
+                EntityCategory.Item,
+                "relish_helmet",
+                "Relish Helmet",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Helmet),
+                    (e, holder) => new CompletesItemSet(e, "relish"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["delight"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["delight"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "relish_chestplate",
+                "Relish Chestplate",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Chestplate),
+                    (e, holder) => new CompletesItemSet(e, "relish"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["delight"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["delight"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "relish_leggings",
+                "Relish Leggings",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Leggings),
+                    (e, holder) => new CompletesItemSet(e, "relish"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["delight"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["delight"] }
+                        }
+                    )
+                ]
+            ),
+            #endregion
+            // Vanity Set
+            #region
+            new(
+                EntityCategory.Item,
+                "vanity_helmet",
+                "Vanity Helmet",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Helmet),
+                    (e, holder) => new CompletesItemSet(e, "vanity"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["reflection"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["relection"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "vanity_chestplate",
+                "Vanity Chestplate",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Chestplate),
+                    (e, holder) => new CompletesItemSet(e, "vanity"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["reflection"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["relection"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "vanity_leggings",
+                "Vanity Leggings",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Leggings),
+                    (e, holder) => new CompletesItemSet(e, "vanity"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["reflection"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["relection"] }
+                        }
+                    )
+                ]
+            ),
+            #endregion
+            // Avarice Set
+            #region
+            new(
+                EntityCategory.Item,
+                "avarice_helmet",
+                "Avarice Helmet",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Helmet),
+                    (e, holder) => new CompletesItemSet(e, "avarice"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["pleonexia"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["pleonexia"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "avarice_chestplate",
+                "Avarice Chestplate",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Chestplate),
+                    (e, holder) => new CompletesItemSet(e, "avarice"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["pleonexia"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["pleonexia"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "avarice_leggings",
+                "Avarice Leggings",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Leggings),
+                    (e, holder) => new CompletesItemSet(e, "avarice"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["pleonexia"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["pleonexia"] }
+                        }
+                    )
+                ]
+            ),
+            #endregion
+            // Temper Set
+            #region
+            new(
+                EntityCategory.Item,
+                "temper_helmet",
+                "Temper Helmet",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Helmet),
+                    (e, holder) => new CompletesItemSet(e, "temper"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["rage"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["rage"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "temper_chestplate",
+                "Temper Chestplate",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Chestplate),
+                    (e, holder) => new CompletesItemSet(e, "temper"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["rage"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["rage"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "temper_leggings",
+                "Temper Leggings",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Leggings),
+                    (e, holder) => new CompletesItemSet(e, "temper"),
+                    (e, holder) => new ModifiesStats(e,
+                        StatsByTrigger: new()
+                        {
+                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = 25f
+                            },
+                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            {
+                                ["Defense"]   = -25f
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        triggeredEffects: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["rage"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["rage"] }
+                        }
+                    )
+                ]
+            ),
+            #endregion
+            #endregion
             // Add more templates as needed
         ];
 

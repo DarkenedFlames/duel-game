@@ -39,10 +39,9 @@ namespace CBA
                 "Moonlight",
                 StackingType: StackingType.Ignore,
                 MaxPerTurn: 1,
-                Chance: 1f,
                 Components:
                 [
-                    (e, target) => new EffectData(e, target, true, false, StackingType.Ignore, maxStacks: 1),
+                    (e, target) => new EffectData(e, target, true, false, StackingType.Ignore),
                     (e, target) => new ModifiesStats(e,
                     StatsByTrigger: new()
                         {
@@ -63,11 +62,9 @@ namespace CBA
                 "third_eye",
                 "Third Eye",
                 StackingType: StackingType.Ignore,
-                MaxStacks: 1,
-                Chance: 1f,
                 Components:
                 [
-                    (e, target) => new EffectData(e, target, false, false, StackingType.Ignore, maxStacks: 1),
+                    (e, target) => new EffectData(e, target, false, false, StackingType.Ignore),
                     (e, target) => new ModifiesStats(e,
                     StatsByTrigger: new()
                         {
@@ -83,6 +80,269 @@ namespace CBA
                     )
                 ]
             ),
+            new(
+                EntityCategory.Effect,
+                "vibrata",
+                "Vibrata",
+                StackingType: StackingType.Ignore,
+                Components:
+                [
+                    (e, target) => new EffectData(e, target, false, false, StackingType.Ignore),
+                    (e, target) => new ModifiesStats(e,
+                    StatsByTrigger: new()
+                        {
+                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            {
+                                ["Dodge"] = 1.2f
+                            },
+                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            {
+                                ["Dodge"] = 1.0f/1.2f
+                            }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Effect,
+                "pungence",
+                "Pungence",
+                StackingType: StackingType.Ignore,
+                Components:
+                [
+                    (e, target) => new EffectData(e, target, false, false, StackingType.Ignore),
+                    (e, target) => new ModifiesStats(e,
+                    StatsByTrigger: new()
+                        {
+                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            {
+                                ["Peer"] = 1.2f
+                            },
+                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            {
+                                ["Peer"] = 1.0f/1.2f
+                            }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Effect,
+                "substance",
+                "Substance",
+                StackingType: StackingType.Ignore,
+                Components:
+                [
+                    (e, target) => new EffectData(e, target, false, false, StackingType.Ignore),
+                    (e, target) => new ModifiesStats(e,
+                    StatsByTrigger: new()
+                        {
+                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            {
+                                ["Armor"] = 1.2f
+                            },
+                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            {
+                                ["Armor"] = 1.0f/1.2f
+                            }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Effect,
+                "delight",
+                "Delight",
+                StackingType: StackingType.Ignore,
+                Components:
+                [
+                    (e, target) => new EffectData(e, target, false, false, StackingType.Ignore),
+                    (e, target) => new ModifiesStats(e,
+                    StatsByTrigger: new()
+                        {
+                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            {
+                                ["MaximumHealth"] = 1.2f
+                            },
+                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            {
+                                ["MaximumHealth"] = 1.0f/1.2f
+                            }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Effect,
+                "reflection",
+                "Reflection",
+                StackingType: StackingType.Ignore,
+                Components:
+                [
+                    (e, target) => new EffectData(e, target, false, false, StackingType.Ignore),
+                    (e, target) => new ModifiesStats(e,
+                    StatsByTrigger: new()
+                        {
+                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            {
+                                ["Shield"] = 1.2f
+                            },
+                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            {
+                                ["Shield"] = 1.0f/1.2f
+                            }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Effect,
+                "pleonexia",
+                "Pleonexia",
+                StackingType: StackingType.Ignore,
+                Components:
+                [
+                    (e, target) => new EffectData(e, target, false, false, StackingType.Ignore),
+                    (e, target) => new ModifiesStats(e,
+                    StatsByTrigger: new()
+                        {
+                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            {
+                                ["Luck"] = 1.2f
+                            },
+                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            {
+                                ["Luck"] = 1.0f/1.2f
+                            }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Effect,
+                "rage",
+                "Rage",
+                StackingType: StackingType.Ignore,
+                Components:
+                [
+                    (e, target) => new EffectData(e, target, false, false, StackingType.Ignore),
+                    (e, target) => new ModifiesStats(e,
+                    StatsByTrigger: new()
+                        {
+                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            {
+                                ["Attack"] = 1.2f
+                            },
+                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            {
+                                ["Attack"] = 1.0f/1.2f
+                            }
+                        }
+                    )
+                ]
+            ),
+
+            new(
+                EntityCategory.Effect,
+                "crushed",
+                "Crushed",
+                StackingType: StackingType.Ignore,
+                Chance: .15f,
+                Components:
+                [
+                    (e, target) => new EffectData(e, target, true, false, StackingType.Ignore),
+                    (e, target) => new EffectDuration(e, 1),
+                    (e, target) => new ModifiesStats(e,
+                    StatsByTrigger: new()
+                        {
+                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            {
+                                ["Attack"] = .8f
+                            },
+                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            {
+                                ["Attack"] = 1.0f/.8f
+                            }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Effect,
+                "blinded",
+                "Blinded",
+                StackingType: StackingType.Ignore,
+                Chance: .15f,
+                Components:
+                [
+                    (e, target) => new EffectData(e, target, true, false, StackingType.Ignore),
+                    (e, target) => new EffectDuration(e, 1),
+                    (e, target) => new ModifiesStats(e,
+                    StatsByTrigger: new()
+                        {
+                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            {
+                                ["Accuracy"] = .8f
+                            },
+                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            {
+                                ["Accuracy"] = 1.0f/.8f
+                            }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Effect,
+                "frozen",
+                "Frozen",
+                StackingType: StackingType.Ignore,
+                Chance: .15f,
+                Components:
+                [
+                    (e, target) => new EffectData(e, target, true, false, StackingType.Ignore),
+                    (e, target) => new EffectDuration(e, 2),
+                    (e, target) => new ModifiesStats(e,
+                    StatsByTrigger: new()
+                        {
+                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            {
+                                ["MaximumStamina"] = .8f
+                            },
+                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            {
+                                ["MaximumStamina"] = 1.0f/.8f
+                            }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Effect,
+                "noons_visibility",
+                "Noon's Visibility",
+                StackingType: StackingType.Ignore,
+                Chance: .15f,
+                Components:
+                [
+                    (e, target) => new EffectData(e, target, false, false, StackingType.Ignore),
+                    (e, target) => new EffectDuration(e, 2),
+                    (e, target) => new ModifiesStats(e,
+                    StatsByTrigger: new()
+                        {
+                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            {
+                                ["Precision"] = 1.2f
+                            },
+                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            {
+                                ["Precision"] = 1.0f/1.2f
+                            }
+                        }
+                    )
+                ]
+            ),
+
         ];
         public static EffectTemplate GetTemplate(string typeId)
         {

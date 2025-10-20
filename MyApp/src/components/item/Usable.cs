@@ -10,9 +10,19 @@ namespace CBA
         public override void Subscribe(){}
 
         public void TryUse(Entity target)
-        {            
-            ResourcesComponent resources = World.Instance.GetPlayerOf(Owner).GetComponent<ResourcesComponent>();
-            if (resources.Get("Stamina") < StaminaCost)
+        {
+            Entity user = World.Instance.GetPlayerOf(Owner);
+            ResourcesComponent resources = user.GetComponent<ResourcesComponent>();
+            StatsComponent stats = user.GetComponent<StatsComponent>();
+            ItemType type = Owner.GetComponent<ItemData>().Type;
+
+            float multiplier;
+            if (type == ItemType.Consumable)
+                multiplier = 1 - stats.GetHyperbolic("ConsumableCost");
+            else
+                multiplier = 1 - stats.GetHyperbolic("WeaponCost");
+
+            if (resources.Get("Stamina") < StaminaCost * multiplier)
             {
                 Printer.PrintInsufficientStamina(Owner);
                 OnUseFailed?.Invoke(Owner, target);

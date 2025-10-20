@@ -38,7 +38,7 @@ namespace CBA
             if (IsEquipped)
             {
                 IsEquipped = false;
-                Printer.PrintItemEquipped(Owner);
+                Printer.PrintItemUnequipped(Owner);
                 OnUnequipSuccess?.Invoke(Owner);
             }
             else

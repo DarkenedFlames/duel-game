@@ -38,31 +38,47 @@ namespace CBA
             StatsComponent targetStats = target.GetComponent<StatsComponent>();
             ResourcesComponent targetResources = target.GetComponent<ResourcesComponent>();
 
-            // --- Crit (items only) ---
             if (Owner.Id.Category == EntityCategory.Item && CanCrit)
             {
                 StatsComponent userStats = World.Instance.GetPlayerOf(itemOrEffect).GetComponent<StatsComponent>();
-                if (Random.Shared.NextDouble() < userStats.GetHyperbolic("Critical"))
+
+                // --- Attack ---
+                float attackMultiplier = 1 + userStats.GetHyperbolic("Attack");
+                finalDamage = (int)(finalDamage * attackMultiplier);
+
+                // --- Crit ---
+                float critChance = userStats.GetHyperbolic("Critical");
+                float critMultiplier = 2 + userStats.GetHyperbolic("Precision");
+                if (Random.Shared.NextDouble() < critChance)
                 {
-                    finalDamage = (int)(finalDamage * 2.0f);
+                    finalDamage = (int)(finalDamage * critMultiplier);
                     Printer.PrintCritical(Owner, target);
                     OnCritical?.Invoke(Owner, target);
                 }
             }
 
             // --- Damage Reduction ---
-            float multiplier = DamageType switch
+            float resistanceMultiplier = DamageType switch
             {
                 DamageType.Physical => 1 - targetStats.GetHyperbolic("Armor"),
                 DamageType.Magical  => 1 - targetStats.GetHyperbolic("Shield"),
                 _                   => 1f
             };
 
-            finalDamage = (int)(finalDamage * multiplier);
+            finalDamage = (int)(finalDamage * resistanceMultiplier);
 
-                // --- Apply Damage ---
+            // --- Defense ---
+            if (DamageType == DamageType.Physical || DamageType == DamageType.Magical)
+            {
+                float defenseDivisor = 1 + targetStats.GetHyperbolic("Defense");
+                finalDamage = (int)(finalDamage / defenseDivisor);
+            }
+
+
+            // --- Apply Damage ---
             targetResources.Change("Health", -finalDamage);
             OnDamageDealt?.Invoke(itemOrEffect, target, finalDamage);
         }
+
     }
 }
