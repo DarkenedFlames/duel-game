@@ -1,20 +1,15 @@
+using System.Runtime.CompilerServices;
+
 namespace CBA
 {
-    public class ResourcesComponent : Component
+    public class ResourcesComponent(Entity owner) : Component(owner)
     {
         public event Action<string>? OnResourceChanged;
         public event Action<string>? OnResourceDepleted;
 
-        private readonly StatsComponent _stats;
         private readonly Dictionary<string, (int Value, float RestoreMult, float SpendMult)> _values = [];
 
-        public ResourcesComponent(Entity owner) : base(owner)
-        {
-            _stats = Owner.GetComponent<StatsComponent>();
-
-            _values["Health"] = (_stats.Get("MaximumHealth"), 1f, 1f);
-            _values["Stamina"] = (_stats.Get("MaximumStamina"), 1f, 1f);
-        }
+        private StatsComponent Stats() => Owner.GetComponent<StatsComponent>();
 
         private (int Value, float RestoreMult, float SpendMult) ValidateResource(string name)
         {
@@ -28,10 +23,10 @@ namespace CBA
             switch (statName)
             {
                 case "MaximumHealth":
-                    AdjustResourceForNewMax("Health", _stats.Get(statName));
+                    AdjustResourceForNewMax("Health", Stats().Get(statName));
                     break;
                 case "MaximumStamina":
-                    AdjustResourceForNewMax("Stamina", _stats.Get(statName));
+                    AdjustResourceForNewMax("Stamina", Stats().Get(statName));
                     break;
             }
         }
@@ -42,8 +37,8 @@ namespace CBA
 
             int oldMax = resourceName switch
             {
-                "Health" => _stats!.Get("MaximumHealth") - (newMax - Get("Health")),
-                "Stamina" => _stats!.Get("MaximumStamina") - (newMax - Get("Stamina")),
+                "Health" => Stats().Get("MaximumHealth") - (newMax - Get("Health")),
+                "Stamina" => Stats().Get("MaximumStamina") - (newMax - Get("Stamina")),
                 _ => newMax
             };
 
@@ -76,8 +71,8 @@ namespace CBA
 
             int max = name switch
             {
-                "Health" => _stats.Get("MaximumHealth"),
-                "Stamina" => _stats.Get("MaximumStamina"),
+                "Health" => Stats().Get("MaximumHealth"),
+                "Stamina" => Stats().Get("MaximumStamina"),
                 _ => int.MaxValue
             };
 
@@ -107,8 +102,8 @@ namespace CBA
 
             int max = name switch
             {
-                "Health" => _stats.Get("MaximumHealth"),
-                "Stamina" => _stats.Get("MaximumStamina"),
+                "Health" => Stats().Get("MaximumHealth"),
+                "Stamina" => Stats().Get("MaximumStamina"),
                 _ => int.MaxValue
             };
 
@@ -118,7 +113,12 @@ namespace CBA
 
         public override void Subscribe()
         {
-            _stats.OnStatChanged += OnStatChange;
+            // Not actual subscription logic... might mean stats and resources need to be merged
+            _values["Health"] = (Stats().Get("MaximumHealth"), 1f, 1f);
+            _values["Stamina"] = (Stats().Get("MaximumStamina"), 1f, 1f);
+
+            // Subscribe Logic
+            Stats().OnStatChanged += OnStatChange;
             OnResourceChanged += name => Printer.PrintResourceChanged(this, name);
             OnResourceDepleted += name => Printer.PrintResourceDepleted(this, name);
         }
