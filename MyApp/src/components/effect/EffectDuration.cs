@@ -7,15 +7,22 @@ namespace CBA
 
         public override void Subscribe()
         {
-            World.Instance.TurnManager.OnTurnStart += turnTaker =>
-            {
-                if (turnTaker == World.Instance.GetPlayerOf(Owner)) TickDuration();
-            };
+            TrackSubscription<Action<Entity>>(
+                h => World.Instance.TurnManager.OnTurnStart += h,
+                h => World.Instance.TurnManager.OnTurnStart -= h,
+                OnTurnStart
+            );
         }
-        public void TickDuration()
+
+        private void OnTurnStart(Entity turnTaker)
         {
-            if (Remaining <= 0) World.Instance.RemoveEntity(Owner);
-            else Remaining--;
+            if (turnTaker == World.Instance.GetPlayerOf(Owner))
+            {
+                if (Remaining <= 0)
+                    World.Instance.RemoveEntity(Owner);
+                else
+                    Remaining--;
+            }
         }
     }
 }

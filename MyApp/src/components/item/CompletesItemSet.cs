@@ -9,8 +9,16 @@ namespace CBA
         
         public override void Subscribe()
         {
-            Owner.GetComponent<Wearable>().OnEquipSuccess += _ => CheckForArmorSetCompleted();
-            Owner.GetComponent<Wearable>().OnUnequipSuccess += _ => CheckForArmorSetBroken();
+            TrackSubscription<Action<Entity>>(
+                h => Owner.GetComponent<Wearable>().OnEquipSuccess += h,
+                h => Owner.GetComponent<Wearable>().OnEquipSuccess -= h,
+                _ => CheckForArmorSetCompleted()
+            );
+            TrackSubscription<Action<Entity>>(
+                h => Owner.GetComponent<Wearable>().OnUnequipSuccess += h,
+                h => Owner.GetComponent<Wearable>().OnUnequipSuccess -= h,
+                _ => CheckForArmorSetBroken()
+            );
         }
         private List<CompletesItemSet> GetSameSetEquipped()
         {

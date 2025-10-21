@@ -6,17 +6,27 @@ namespace CBA
 
         public override void Subscribe()
         {
-            World.Instance.TurnManager.OnTurnStart += turnTaker =>
-            {
-                if (turnTaker == Owner) Clear();
-            };
-            
+            TrackSubscription<Action<Entity>>(
+                h => World.Instance.TurnManager.OnTurnStart += h,
+                h => World.Instance.TurnManager.OnTurnStart -= h,
+                turnTaker => { if (turnTaker == Owner) Clear(); }
+            );
+
             World.Instance.OnEntityAdded += entity =>
             {
                 if (entity.Id.Category == EntityCategory.Effect
                     && World.Instance.GetPlayerOf(entity) == Owner)
                     RecordEffectApplied(entity.Id.TypeId);
             };
+            TrackSubscription<Action<Entity>>(
+                h => World.Instance.OnEntityAdded += h,
+                h => World.Instance.OnEntityAdded -= h,
+                entity =>
+                {
+                    if (entity.Id.Category == EntityCategory.Effect && World.Instance.GetPlayerOf(entity) == Owner)
+                        RecordEffectApplied(entity.Id.TypeId);
+                }
+            );
         }
         public void RecordEffectApplied(string effectTypeId)
         {

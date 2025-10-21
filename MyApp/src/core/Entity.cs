@@ -28,5 +28,14 @@ namespace CBA
         {
             foreach (Component component in _components) component.Subscribe();
         }
+        public void UnsubscribeAll()
+        {
+            foreach (Component component in _components) component.Unsubscribe();
+        }
+        public void ClearComponents()
+        {
+            foreach (Component component in _components) component.DetachOwner();
+            _components.Clear();
+        }
     }
 }

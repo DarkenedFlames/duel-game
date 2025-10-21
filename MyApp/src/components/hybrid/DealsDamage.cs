@@ -10,29 +10,36 @@ namespace CBA
 
         public event Action<Entity, Entity, int>? OnDamageDealt;
         public event Action<Entity, Entity>? OnCritical;
+        private Action<Entity, Entity>? _onHitHandler;
 
         public override void Subscribe()
         {
-            OnDamageDealt += Printer.PrintDamageDealt;
-
             switch (Owner.Id.Category)
             {
                 case EntityCategory.Item:
-                    Owner.GetComponent<Hits>().OnHit += ApplyDamage;
+                    TrackSubscription<Action<Entity, Entity>>(
+                        h => Owner.GetComponent<Hits>().OnHit += h,
+                        h => Owner.GetComponent<Hits>().OnHit -= h,
+                        (_, target) => ApplyDamage(target)
+                    );
                     break;
                 case EntityCategory.Effect:
-                    World.Instance.TurnManager.OnTurnStart += turnTaker =>
-                    {
-                        if (turnTaker == World.Instance.GetPlayerOf(Owner))
-                            ApplyDamage(Owner, turnTaker);
-                    };
+                    TrackSubscription<Action<Entity>>(
+                        h => World.Instance.TurnManager.OnTurnStart += h,
+                        h => World.Instance.TurnManager.OnTurnStart -= h,
+                        ApplyDamage
+                    );
                     break;
                 default:
                     break;
             }
         }
-        private void ApplyDamage(Entity itemOrEffect, Entity target)
+        private void ApplyDamage(Entity target)
         {
+            if (Owner.Id.Category == EntityCategory.Effect)
+                if (target != World.Instance.GetPlayerOf(Owner))
+                    return;
+
             int finalDamage = Damage;
 
             StatsComponent targetStats = target.GetComponent<StatsComponent>();
@@ -40,7 +47,7 @@ namespace CBA
 
             if (Owner.Id.Category == EntityCategory.Item && CanCrit)
             {
-                StatsComponent userStats = World.Instance.GetPlayerOf(itemOrEffect).GetComponent<StatsComponent>();
+                StatsComponent userStats = World.Instance.GetPlayerOf(Owner).GetComponent<StatsComponent>();
 
                 // --- Attack ---
                 float attackMultiplier = 1 + userStats.GetHyperbolic("Attack");
@@ -77,8 +84,8 @@ namespace CBA
 
             // --- Apply Damage ---
             targetResources.Change("Health", -finalDamage);
-            OnDamageDealt?.Invoke(itemOrEffect, target, finalDamage);
+            Printer.PrintDamageDealt(Owner, target, finalDamage);
+            OnDamageDealt?.Invoke(Owner, target, finalDamage);
         }
-
     }
 }

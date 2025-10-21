@@ -27,76 +27,120 @@ namespace CBA
     public class ModifiesStats(
         Entity owner,
         Dictionary<(Trigger, ModificationType), Dictionary<string, float>>? StatsByTrigger = null,
-        Dictionary<(Trigger, ModificationType), Dictionary<string, float>>? ResourcesByTrigger = null) : Component(owner)
+        Dictionary<(Trigger, ModificationType), Dictionary<string, float>>? ResourcesByTrigger = null
+    ) : Component(owner)
     {
-        // <(Trigger, ModificationType), Dictionary<StatName, Value>>
         public Dictionary<(Trigger Trigger, ModificationType Type), Dictionary<string, float>>? StatChanges { get; } = StatsByTrigger;
         public Dictionary<(Trigger Trigger, ModificationType Type), Dictionary<string, float>>? ResourceChanges { get; } = ResourcesByTrigger;
-        
+
         public override void Subscribe()
         {
-            // For each declared trigger, subscribe appropriately.
+            Entity wearer = World.Instance.GetPlayerOf(Owner);
+
             foreach (Trigger trigger in Enum.GetValues<Trigger>())
             {
-                if (trigger == Trigger.None) continue;
-                if (!HasTrigger(trigger)) continue;
+                if (trigger == Trigger.None || !HasTrigger(trigger))
+                    continue;
 
                 switch (trigger)
                 {
                     case Trigger.OnEquip:
-                    case Trigger.OnUnequip:
-                    {
                         var wearable = Owner.GetComponent<Wearable>();
-                        var wearer = World.Instance.GetPlayerOf(Owner);
-                        if (trigger == Trigger.OnEquip)
-                            wearable.OnEquipSuccess += _ => Modify(wearer, Trigger.OnEquip);
-                        else
-                            wearable.OnUnequipSuccess += _ => Modify(wearer, Trigger.OnUnequip);
+                        TrackSubscription<Action<Entity>>(
+                            h => wearable.OnEquipSuccess += h,
+                            h => wearable.OnEquipSuccess -= h,
+                            _ => Modify(wearer, Trigger.OnEquip)
+                        );
                         break;
-                    }
-                    case Trigger.OnAdded:
-                    case Trigger.OnRemoved:
-                    {
-                        var target = World.Instance.GetPlayerOf(Owner);
 
-                        if (trigger == Trigger.OnAdded)
-                            World.Instance.OnEntityAdded += e => { if (e == Owner) Modify(target, trigger); };
-                        else
-                            World.Instance.OnEntityRemoved += e => { if (e == Owner) Modify(target, trigger); };
-                        
+                    case Trigger.OnUnequip:
+                        wearable = Owner.GetComponent<Wearable>();
+                        TrackSubscription<Action<Entity>>(
+                            h => wearable.OnUnequipSuccess += h,
+                            h => wearable.OnUnequipSuccess -= h,
+                            _ => Modify(wearer, Trigger.OnUnequip)
+                        );
                         break;
-                    }
+
+                    case Trigger.OnAdded:
+                        TrackSubscription<Action<Entity>>(
+                            h => World.Instance.OnEntityAdded += h,
+                            h => World.Instance.OnEntityAdded -= h,
+                            e => { if (e == Owner) Modify(wearer, Trigger.OnAdded); }
+                        );
+                        break;
+
+                    case Trigger.OnRemoved:
+                        TrackSubscription<Action<Entity>>(
+                            h => World.Instance.OnEntityRemoved += h,
+                            h => World.Instance.OnEntityRemoved -= h,
+                            e => { if (e == Owner) Modify(wearer, Trigger.OnRemoved); }
+                        );
+                        break;
+
                     case Trigger.OnUse:
-                        Owner.GetComponent<Usable>().OnUseSuccess += (_, target) => Modify(target, trigger);
+                        var usable = Owner.GetComponent<Usable>();
+                        TrackSubscription<Action<Entity, Entity>>(
+                            h => usable.OnUseSuccess += h,
+                            h => usable.OnUseSuccess -= h,
+                            (_, target) => Modify(target, Trigger.OnUse)
+                        );
                         break;
+
                     case Trigger.OnHit:
-                        Owner.GetComponent<Hits>().OnHit += (_, target) => Modify(target, trigger);
+                        var hits = Owner.GetComponent<Hits>();
+                        TrackSubscription<Action<Entity, Entity>>(
+                            h => hits.OnHit += h,
+                            h => hits.OnHit -= h,
+                            (_, target) => Modify(target, Trigger.OnHit)
+                        );
                         break;
+
                     case Trigger.OnCritical:
-                        Owner.GetComponent<DealsDamage>().OnCritical += (_, target) => Modify(target, trigger);
+                        var deals = Owner.GetComponent<DealsDamage>();
+                        TrackSubscription<Action<Entity, Entity>>(
+                            h => deals.OnCritical += h,
+                            h => deals.OnCritical -= h,
+                            (_, target) => Modify(target, Trigger.OnCritical)
+                        );
                         break;
+
                     case Trigger.OnDamageDealt:
-                        Owner.GetComponent<DealsDamage>().OnDamageDealt += (_, target, _) => Modify(target, trigger);
+                        deals = Owner.GetComponent<DealsDamage>();
+                        TrackSubscription<Action<Entity, Entity, int>>(
+                            h => deals.OnDamageDealt += h,
+                            h => deals.OnDamageDealt -= h,
+                            (_, target, _) => Modify(target, Trigger.OnDamageDealt)
+                        );
                         break;
 
                     case Trigger.OnArmorSetCompleted:
-                    case Trigger.OnArmorSetBroken:
-                    {
-                        Entity wearer = World.Instance.GetPlayerOf(Owner);
-                        if (trigger == Trigger.OnArmorSetCompleted)
-                            Owner.GetComponent<CompletesItemSet>().OnArmorSetCompleted += _ => Modify(wearer, trigger);
-                        else
-                            Owner.GetComponent<CompletesItemSet>().OnArmorSetBroken += _ => Modify(wearer, trigger);
+                        var completes = Owner.GetComponent<CompletesItemSet>();
+                        TrackSubscription<Action<Entity>>(
+                            h => completes.OnArmorSetCompleted += h,
+                            h => completes.OnArmorSetCompleted -= h,
+                            _ => Modify(wearer, Trigger.OnArmorSetCompleted)
+                        );
                         break;
-                    }
+
+                    case Trigger.OnArmorSetBroken:
+                        completes = Owner.GetComponent<CompletesItemSet>();
+                        TrackSubscription<Action<Entity>>(
+                            h => completes.OnArmorSetBroken += h,
+                            h => completes.OnArmorSetBroken -= h,
+                            _ => Modify(wearer, Trigger.OnArmorSetBroken)
+                        );
+                        break;
                 }
             }
         }
+
         private bool HasTrigger(Trigger trigger)
         {
             return (StatChanges?.Keys.Any(k => k.Trigger == trigger) ?? false) ||
                    (ResourceChanges?.Keys.Any(k => k.Trigger == trigger) ?? false);
         }
+
         private void Modify(Entity target, Trigger trigger)
         {
             if (target.Id.Category != EntityCategory.Player)
@@ -116,12 +160,17 @@ namespace CBA
                     {
                         switch (type)
                         {
-                            case ModificationType.Add: stats.IncreaseBase(key, (int)value); break;
-                            case ModificationType.Multiply: stats.IncreaseModifier(key, value); break;
+                            case ModificationType.Add:
+                                stats.IncreaseBase(key, (int)value);
+                                break;
+                            case ModificationType.Multiply:
+                                stats.IncreaseModifier(key, value);
+                                break;
                         }
                     }
                 }
             }
+
             // --- Resources ---
             if (ResourceChanges != null)
             {
@@ -133,8 +182,12 @@ namespace CBA
                     {
                         switch (type)
                         {
-                            case ModificationType.Add: resources.Change(key, (int)value); break;
-                            case ModificationType.Multiply: resources.ChangeMultiplier(key, value); break;
+                            case ModificationType.Add:
+                                resources.Change(key, (int)value);
+                                break;
+                            case ModificationType.Multiply:
+                                resources.ChangeMultiplier(key, value);
+                                break;
                         }
                     }
                 }

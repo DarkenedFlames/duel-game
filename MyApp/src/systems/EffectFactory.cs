@@ -411,7 +411,6 @@ namespace CBA
                     effect.AddComponent(component);
                 }
 
-            effect.SubscribeAll();
             World.Instance.AddEntity(effect);
         }
     }

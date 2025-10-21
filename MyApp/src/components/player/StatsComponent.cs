@@ -73,7 +73,11 @@ namespace CBA
 
         public override void Subscribe()
         {
-            OnStatChanged += name => Printer.PrintStatChanged(this, name);
+            TrackSubscription<Action<string>>(
+                h => OnStatChanged += h,
+                h => OnStatChanged -= h,
+                name => Printer.PrintStatChanged(this, name)
+            );
         }
     }
 }

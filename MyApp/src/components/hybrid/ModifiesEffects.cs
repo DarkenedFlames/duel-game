@@ -1,112 +1,137 @@
 namespace CBA
 {
-    public enum EffectAction
-    {
-        Apply,
-        Remove
-    }
-
-    public enum TargetType
-    {
-        Self,
-        Target
-    }
+    public enum EffectAction {Apply, Remove}
+    public enum TargetType {Self, Target}
 
     public class ModifiesEffects(
         Entity owner,
-        Dictionary<(EffectAction, TargetType, Trigger), List<string>> triggeredEffects) : Component(owner)
+        Dictionary<(EffectAction, TargetType, Trigger), List<string>> triggeredEffects
+    ) : Component(owner)
     {
         public Dictionary<(EffectAction Action, TargetType TargetType, Trigger Trigger), List<string>> TriggeredEffects { get; init; } = triggeredEffects;
 
         public override void Subscribe()
         {
+            Entity wearer = World.Instance.GetPlayerOf(Owner);
+
             foreach (Trigger trigger in Enum.GetValues<Trigger>())
             {
-                if (trigger == Trigger.None) continue;
-                if (!HasTrigger(trigger)) continue;
+                if (trigger == Trigger.None || !HasTrigger(trigger))
+                    continue;
 
                 switch (trigger)
                 {
                     case Trigger.OnEquip:
-                    case Trigger.OnUnequip:
-                    {
                         var wearable = Owner.GetComponent<Wearable>();
-                        var wearer = World.Instance.GetPlayerOf(Owner);
-                        if (trigger == Trigger.OnEquip)
-                            wearable.OnEquipSuccess += _ => Modify(wearer, null, Trigger.OnEquip);
-                        else
-                            wearable.OnUnequipSuccess += _ => Modify(wearer, null, Trigger.OnUnequip);
+                        TrackSubscription<Action<Entity>>(
+                            h => wearable.OnEquipSuccess += h,
+                            h => wearable.OnEquipSuccess -= h,
+                            _ => Modify(wearer, null, trigger)
+                        );
                         break;
-                    }
-                    case Trigger.OnAdded:
-                    case Trigger.OnRemoved:
-                    {
-                        var target = World.Instance.GetPlayerOf(Owner);
 
-                        if (trigger == Trigger.OnAdded)
-                            World.Instance.OnEntityAdded += e => { if (e == Owner) Modify(target, null, trigger); };
-                        else
-                            World.Instance.OnEntityRemoved += e => { if (e == Owner) Modify(target, null, trigger); };
-                        
+                    case Trigger.OnUnequip:
+                        wearable = Owner.GetComponent<Wearable>();
+                        TrackSubscription<Action<Entity>>(
+                            h => wearable.OnUnequipSuccess += h,
+                            h => wearable.OnUnequipSuccess -= h,
+                            _ => Modify(wearer, null, trigger)
+                        );
                         break;
-                    }
+
+                    case Trigger.OnAdded:
+                        TrackSubscription<Action<Entity>>(
+                            h => World.Instance.OnEntityAdded += h,
+                            h => World.Instance.OnEntityAdded -= h,
+                            e => { if (e == Owner) Modify(wearer, null, trigger); }
+                        );
+                        break;
+
+                    case Trigger.OnRemoved:
+                        TrackSubscription<Action<Entity>>(
+                            h => World.Instance.OnEntityRemoved += h,
+                            h => World.Instance.OnEntityRemoved -= h,
+                            e => { if (e == Owner) Modify(wearer, null, trigger); }
+                        );
+                        break;
+
                     case Trigger.OnUse:
-                        Owner.GetComponent<Usable>().OnUseSuccess += (_, target) =>
-                        {
-                            var user = World.Instance.GetPlayerOf(Owner);
-                            Modify(user, target, trigger);
-                        };
+                        var usable = Owner.GetComponent<Usable>();
+                        TrackSubscription<Action<Entity, Entity>>(
+                            h => usable.OnUseSuccess += h,
+                            h => usable.OnUseSuccess -= h,
+                            (_, target) => Modify(wearer, target, trigger)
+                        );
                         break;
+
                     case Trigger.OnHit:
-                        Owner.GetComponent<Hits>().OnHit += (_, target) =>
-                        {
-                            var hitter = World.Instance.GetPlayerOf(Owner);
-                            Modify(hitter, target, trigger);
-                        };
+                        var hits = Owner.GetComponent<Hits>();
+                        TrackSubscription<Action<Entity, Entity>>(
+                            h => hits.OnHit += h,
+                            h => hits.OnHit -= h,
+                            (_, target) => Modify(wearer, target, trigger)
+                        );
                         break;
+
                     case Trigger.OnCritical:
-                        Owner.GetComponent<DealsDamage>().OnCritical += (_, target) =>
-                        {
-                            var user = World.Instance.GetPlayerOf(Owner);
-                            Modify(user, target, trigger);
-                        };
+                        var deals = Owner.GetComponent<DealsDamage>();
+                        TrackSubscription<Action<Entity, Entity>>(
+                            h => deals.OnCritical += h,
+                            h => deals.OnCritical -= h,
+                            (_, target) => Modify(wearer, target, trigger)
+                        );
                         break;
+
                     case Trigger.OnDamageDealt:
-                        Owner.GetComponent<DealsDamage>().OnDamageDealt += (_, target, _) =>
-                        {
-                            var dealer = World.Instance.GetPlayerOf(Owner);
-                            Modify(dealer, target, trigger);
-                        };
+                        deals = Owner.GetComponent<DealsDamage>();
+                        TrackSubscription<Action<Entity, Entity, int>>(
+                            h => deals.OnDamageDealt += h,
+                            h => deals.OnDamageDealt -= h,
+                            (_, target, _) => Modify(wearer, target, trigger)
+                        );
                         break;
+
                     case Trigger.OnTurnStart:
-                        World.Instance.TurnManager.OnTurnStart += turnTaker =>
-                        {
-                            var player = World.Instance.GetPlayerOf(Owner);
-                            if (turnTaker == player) Modify(turnTaker, null, trigger);
-                        };
+                        TrackSubscription<Action<Entity>>(
+                            h => World.Instance.TurnManager.OnTurnStart += h,
+                            h => World.Instance.TurnManager.OnTurnStart -= h,
+                            player => { if (player == wearer) Modify(player, null, trigger); }
+                        );
                         break;
+
                     case Trigger.OnTurnStartWhileEquipped:
-                        World.Instance.TurnManager.OnTurnStart += turnTaker =>
-                        {
-                            var player = World.Instance.GetPlayerOf(Owner);
-                            bool isEquipped = Owner.GetComponent<Wearable>().IsEquipped;
-                            if (turnTaker == player && isEquipped) Modify(turnTaker, null, trigger);
-                        };
+                        TrackSubscription<Action<Entity>>(
+                            h => World.Instance.TurnManager.OnTurnStart += h,
+                            h => World.Instance.TurnManager.OnTurnStart -= h,
+                            player =>
+                            {
+                                bool isEquipped = Owner.GetComponent<Wearable>().IsEquipped;
+                                if (player == wearer && isEquipped) Modify(player, null, trigger);
+                            }
+                        );
                         break;
 
                     case Trigger.OnArmorSetCompleted:
-                    case Trigger.OnArmorSetBroken:
-                    {
-                        Entity wearer = World.Instance.GetPlayerOf(Owner);
-                        if (trigger == Trigger.OnArmorSetCompleted)
-                            Owner.GetComponent<CompletesItemSet>().OnArmorSetCompleted += _ => Modify(wearer, null, trigger);
-                        else
-                            Owner.GetComponent<CompletesItemSet>().OnArmorSetBroken += _ => Modify(wearer, null, trigger);
+                        var completes = Owner.GetComponent<CompletesItemSet>();
+                        TrackSubscription<Action<Entity>>(
+                            h => completes.OnArmorSetCompleted += h,
+                            h => completes.OnArmorSetCompleted -= h,
+                            _ => Modify(wearer, null, trigger)
+                        );
                         break;
-                    }
+
+                    case Trigger.OnArmorSetBroken:
+                        completes = Owner.GetComponent<CompletesItemSet>();
+                        TrackSubscription<Action<Entity>>(
+                            h => completes.OnArmorSetBroken += h,
+                            h => completes.OnArmorSetBroken -= h,
+                            _ => Modify(wearer, null, trigger)
+                        );
+                        break;
                 }
             }
         }
+
         private void Modify(Entity source, Entity? target, Trigger trigger)
         {
             var matchingEntries = TriggeredEffects
@@ -115,7 +140,6 @@ namespace CBA
 
             foreach (var ((action, targetType, _), effects) in matchingEntries)
             {
-                // Determine who should actually receive the effect
                 Entity receiver = targetType switch
                 {
                     TargetType.Self => source,
@@ -132,14 +156,14 @@ namespace CBA
                 }
             }
         }
+
         private static void RemoveEffect(string effectTypeId, Entity target)
         {
             List<Entity> allTargetEffects = [..World.Instance.GetAllForPlayer<Entity>(target, EntityCategory.Effect, effectTypeId)];
-            foreach (Entity effect in allTargetEffects) World.Instance.RemoveEntity(effect);
+            foreach (Entity effect in allTargetEffects)
+                World.Instance.RemoveEntity(effect);
         }
-        private bool HasTrigger(Trigger trigger)
-        {
-            return TriggeredEffects.Keys.Any(k => k.Trigger == trigger);
-        }
+
+        private bool HasTrigger(Trigger trigger) => TriggeredEffects.Keys.Any(k => k.Trigger == trigger);
     }
 }

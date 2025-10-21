@@ -4,12 +4,11 @@ namespace CBA
     {
         public override void Subscribe()
         {
-            Owner.GetComponent<Usable>().OnUseSuccess += (_, _) => OnUseSuccess();
-        }
-        private void OnUseSuccess()
-        {
-            Printer.PrintItemConsumed(Owner);
-            World.Instance.RemoveEntity(Owner);        
+            TrackSubscription<Action<Entity, Entity>>(
+                h => Owner.GetComponent<Usable>().OnUseSuccess += h,
+                h => Owner.GetComponent<Usable>().OnUseSuccess -= h,
+                (_, _) => World.Instance.RemoveEntity(Owner)
+            );
         }
     }
 }

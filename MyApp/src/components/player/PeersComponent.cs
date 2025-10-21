@@ -4,10 +4,11 @@ namespace CBA
     {
         public override void Subscribe()
         {
-            World.Instance.TurnManager.OnTurnStart += turnTaker =>
-            {
-                if (turnTaker == Owner) RevealInventory();
-            };
+            TrackSubscription<Action<Entity>>(
+                h => World.Instance.TurnManager.OnTurnStart += h,
+                h => World.Instance.TurnManager.OnTurnStart -= h,
+                turnTaker => { if (turnTaker == Owner) RevealInventory(); }
+            );
         }
         private void RevealInventory()
         {

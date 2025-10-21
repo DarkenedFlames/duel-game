@@ -1,11 +1,5 @@
 namespace CBA
 {
-    public enum QueryReturnType
-    {
-        Object,
-        Data,
-        Name
-    }
     public class World
     {
         public static World Instance { get; private set; } = null!;
@@ -34,19 +28,15 @@ namespace CBA
         {
             if (_entities.Contains(entity))
                 throw new InvalidOperationException($"World.AddEntity: Entity, {entity}, already exists in the world.");
-            if (entity.Id.Category == EntityCategory.Player && !entity.HasComponent<PlayerData>())
-                throw new InvalidOperationException($"World.AddEntity: Entity of Category EntityCategory.Player added with no PlayerData Component.");
-            if (entity.Id.Category == EntityCategory.Item && !entity.HasComponent<ItemData>())
-                throw new InvalidOperationException($"World.AddEntity: Entity of Category EntityCategory.Item added with no ItemData Component.");
-            if (entity.Id.Category == EntityCategory.Effect && !entity.HasComponent<EffectData>())
-                throw new InvalidOperationException($"World.AddEntity: Entity of Category EntityCategory.Effect added with no EffectData Component.");
-
+            entity.SubscribeAll();
             _entities.Add(entity);
             OnEntityAdded?.Invoke(entity);
         }
         public void RemoveEntity(Entity entity)
         {
-            _entities.Remove(entity);
+            if (!_entities.Remove(entity)) return;
+            entity.UnsubscribeAll();
+            entity.ClearComponents();
             OnEntityRemoved?.Invoke(entity);
         }
         public IEnumerable<Entity> GetById(EntityCategory? category = null, string? typeId = null, int? instanceId = null)

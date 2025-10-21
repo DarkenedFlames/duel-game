@@ -28,7 +28,7 @@ public class Program
             foreach (Component component in Components)
                 p.AddComponent(component);
 
-            p.SubscribeAll();
+
             World.Instance.AddEntity(p);
         }
 

@@ -118,9 +118,21 @@ namespace CBA
             _values["Stamina"] = (Stats().Get("MaximumStamina"), 1f, 1f);
 
             // Subscribe Logic
-            Stats().OnStatChanged += OnStatChange;
-            OnResourceChanged += name => Printer.PrintResourceChanged(this, name);
-            OnResourceDepleted += name => Printer.PrintResourceDepleted(this, name);
+            TrackSubscription<Action<string>>(
+                h => Stats().OnStatChanged += h,
+                h => Stats().OnStatChanged -= h,
+                OnStatChange
+            );
+            TrackSubscription<Action<string>>(
+                h => OnResourceChanged += h,
+                h => OnResourceChanged -= h,
+                name => Printer.PrintResourceChanged(this, name)
+            );
+            TrackSubscription<Action<string>>(
+                h => OnResourceDepleted += h,
+                h => OnResourceDepleted -= h,
+                name => Printer.PrintResourceDepleted(this, name)
+            );
         }
     }
 }

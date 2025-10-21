@@ -9,7 +9,11 @@ namespace CBA
 
         public override void Subscribe()
         {
-            Owner.GetComponent<Usable>().OnUseSuccess += (_, target) => TryHit(target);
+            TrackSubscription<Action<Entity, Entity>>(
+                h => Owner.GetComponent<Usable>().OnUseSuccess += h,
+                h => Owner.GetComponent<Usable>().OnUseSuccess -= h,
+                (_, target) => TryHit(target)
+            );
         }
         public void TryHit(Entity target)
         {

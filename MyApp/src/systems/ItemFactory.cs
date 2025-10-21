@@ -1453,7 +1453,6 @@ namespace CBA
                     item.AddComponent(component);
                 }
 
-            item.SubscribeAll();
             World.Instance.AddEntity(item);
         }
     }
