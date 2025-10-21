@@ -1,5 +1,6 @@
 namespace CBA
 {
+    public enum DamageType{ Physical, Magical, True}
     public class DealsDamage(
                             Entity owner,
                             int damage,

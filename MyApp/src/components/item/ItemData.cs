@@ -1,5 +1,7 @@
 namespace CBA
 {
+    public enum ItemRarity { Common, Uncommon, Rare, Mythical }
+    public enum ItemType { Consumable, Weapon, Armor, Accessory }
     public class ItemData(
                         Entity owner,
                         Entity playerEntity,

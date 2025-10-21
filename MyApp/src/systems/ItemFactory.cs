@@ -1,5 +1,3 @@
-using System.ComponentModel.Design.Serialization;
-
 namespace CBA
 {
     public record ItemTemplate
@@ -15,8 +13,6 @@ namespace CBA
     public static class ItemFactory
     {
         private static readonly Random rng = new();
-
-        // Type and rarity chances
         private static readonly Dictionary<ItemType, double> TypeChances = new()
         {
             { ItemType.Consumable, 0.25 },
@@ -24,7 +20,6 @@ namespace CBA
             { ItemType.Armor, 0.25 },
             { ItemType.Accessory, 0.25 }
         };
-
         private static readonly Dictionary<ItemRarity, double> RarityChances = new()
         {
             { ItemRarity.Common, 0.90 },
@@ -33,7 +28,89 @@ namespace CBA
             { ItemRarity.Mythical, 0.001 }
         };
 
+        private static T PickRandom<T>(Dictionary<T, double> chances) where T : struct, Enum
+        {
+            double total = chances.Values.Sum();
+            double roll = rng.NextDouble() * total;
+            double cumulative = 0;
 
+            foreach (KeyValuePair<T, double> kvp in chances)
+            {
+                cumulative += kvp.Value;
+                if (roll <= cumulative)
+                    return kvp.Key;
+            }
+
+            // Fallback (should rarely happen)
+            return chances.Keys.First();
+        }
+        private static ItemTemplate GetRandomTemplate()
+        {
+            // --- Step 1: Pick type and rarity based on weights ---
+            ItemType itemType = PickRandom(TypeChances);
+            ItemRarity rarity = PickRandom(RarityChances);
+
+            // --- Step 2: Find exact matches ---
+            List<ItemTemplate>? candidates = [.. ItemTemplates.Where(t => t.Type == itemType && t.Rarity == rarity)];
+
+            // --- Step 3: Fallback: same type, lower rarities ---
+            if (candidates.Count == 0)
+            {
+                IOrderedEnumerable<ItemRarity>? lowerRarities = RarityChances.Keys
+                    .Where(r => r < rarity)
+                    .OrderByDescending(r => r); // closest lower rarity first
+
+                foreach (ItemRarity r in lowerRarities)
+                {
+                    candidates = [.. ItemTemplates.Where(t => t.Type == itemType && t.Rarity == r)];
+                    if (candidates.Count > 0) break;
+                }
+            }
+
+            // --- Step 4: Fallback: any type, closest rarity ---
+            if (candidates.Count == 0)
+            {
+                IOrderedEnumerable<ItemRarity>? raritiesByDistance = RarityChances.Keys
+                    .OrderBy(r => Math.Abs((int)r - (int)rarity));
+
+                foreach (ItemRarity r in raritiesByDistance)
+                {
+                    candidates = [.. ItemTemplates.Where(t => t.Rarity == r)];
+                    if (candidates.Count > 0) break;
+                }
+            }
+
+            // --- Step 5: Ultimate fallback: pick anything ---
+            if (candidates.Count == 0)
+                candidates = [.. ItemTemplates];
+
+            // --- Step 6: Pick one randomly from remaining candidates ---
+            ItemTemplate template = candidates[rng.Next(candidates.Count)];
+            return template;
+        }
+        private static ItemTemplate GetTemplate(string typeId)
+        {
+            ItemTemplate template = ItemTemplates.FirstOrDefault(t =>
+                 t.TypeId.Equals(typeId, StringComparison.OrdinalIgnoreCase)) ?? throw new Exception($"Item template '{typeId}' not found.");
+            return template;
+        }
+        public static void CreateRandomItem(Entity holder) =>
+            GiveItemFromTemplate(holder, GetRandomTemplate());
+        public static void CreateSpecificItem(Entity holder, string typeId) =>
+            GiveItemFromTemplate(holder, GetTemplate(typeId));
+        public static void GiveItemFromTemplate(Entity holder, ItemTemplate template)
+        {
+            Entity item = new(template.Category, template.TypeId, template.DisplayName);
+            if (template.Components != null)
+            {
+                foreach (ComponentBuilder builder in template.Components)
+                {
+                    Component component = builder(item, holder);
+                    item.AddComponent(component);
+                }
+            }
+            World.Instance.AddEntity(item);
+        }
         public static readonly List<ItemTemplate> ItemTemplates =
         [
             // ==========================================================
@@ -1378,82 +1455,5 @@ namespace CBA
             #endregion
             // Add more templates as needed
         ];
-
-        // Generic method to pick a random key from a dictionary based on chance
-        private static T PickRandom<T>(Dictionary<T, double> chances) where T : struct, Enum
-        {
-            double total = chances.Values.Sum();
-            double roll = rng.NextDouble() * total;
-            double cumulative = 0;
-
-            foreach (KeyValuePair<T, double> kvp in chances)
-            {
-                cumulative += kvp.Value;
-                if (roll <= cumulative)
-                    return kvp.Key;
-            }
-
-            // Fallback (should rarely happen)
-            return chances.Keys.First();
-        }
-        private static ItemTemplate GetRandomTemplate()
-        {
-            // --- Step 1: Pick type and rarity based on weights ---
-            ItemType itemType = PickRandom(TypeChances);
-            ItemRarity rarity = PickRandom(RarityChances);
-
-            // --- Step 2: Find exact matches ---
-            List<ItemTemplate>? candidates = [.. ItemTemplates.Where(t => t.Type == itemType && t.Rarity == rarity)];
-
-            // --- Step 3: Fallback: same type, lower rarities ---
-            if (candidates.Count == 0)
-            {
-                IOrderedEnumerable<ItemRarity>? lowerRarities = RarityChances.Keys
-                    .Where(r => r < rarity)
-                    .OrderByDescending(r => r); // closest lower rarity first
-
-                foreach (ItemRarity r in lowerRarities)
-                {
-                    candidates = [.. ItemTemplates.Where(t => t.Type == itemType && t.Rarity == r)];
-                    if (candidates.Count > 0) break;
-                }
-            }
-
-            // --- Step 4: Fallback: any type, closest rarity ---
-            if (candidates.Count == 0)
-            {
-                IOrderedEnumerable<ItemRarity>? raritiesByDistance = RarityChances.Keys
-                    .OrderBy(r => Math.Abs((int)r - (int)rarity));
-
-                foreach (ItemRarity r in raritiesByDistance)
-                {
-                    candidates = [.. ItemTemplates.Where(t => t.Rarity == r)];
-                    if (candidates.Count > 0) break;
-                }
-            }
-
-            // --- Step 5: Ultimate fallback: pick anything ---
-            if (candidates.Count == 0)
-                candidates = [.. ItemTemplates];
-
-            // --- Step 6: Pick one randomly from remaining candidates ---
-            ItemTemplate template = candidates[rng.Next(candidates.Count)];
-            return template;
-        }
-        public static void CreateRandomItem(Entity holder)
-        {
-            ItemTemplate template = GetRandomTemplate();
-
-            Entity item = new(template.Category, template.TypeId, template.DisplayName);
-
-            if (template.Components != null)
-                foreach (ComponentBuilder builder in template.Components)
-                {
-                    Component component = builder(item, holder);
-                    item.AddComponent(component);
-                }
-
-            World.Instance.AddEntity(item);
-        }
     }
 }

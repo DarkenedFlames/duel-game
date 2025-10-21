@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 namespace CBA
 {
     public class ResourcesComponent(Entity owner) : Component(owner)

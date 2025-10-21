@@ -1,5 +1,6 @@
 namespace CBA
 {
+    public enum EquipType { Weapon, Helmet, Chestplate, Leggings, Accessory}
     public class Wearable(Entity owner, EquipType equipType) : Component(owner)
     {
         public bool IsEquipped { get; private set; } = false;
