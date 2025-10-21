@@ -2,9 +2,9 @@ namespace CBA
 {
     public class Consumable(Entity owner) : Component(owner)
     {
-        public override void Subscribe()
+        protected override void RegisterSubscriptions()
         {
-            TrackSubscription<Action<Entity, Entity>>(
+            RegisterSubscription<Action<Entity, Entity>>(
                 h => Owner.GetComponent<Usable>().OnUseSuccess += h,
                 h => Owner.GetComponent<Usable>().OnUseSuccess -= h,
                 (_, _) => World.Instance.RemoveEntity(Owner)

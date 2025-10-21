@@ -71,9 +71,9 @@ namespace CBA
         }
         public void DecreaseModifier(string name, float factor) => IncreaseModifier(name, 1f / factor);
 
-        public override void Subscribe()
+        protected override void RegisterSubscriptions()
         {
-            TrackSubscription<Action<string>>(
+            RegisterSubscription<Action<string>>(
                 h => OnStatChanged += h,
                 h => OnStatChanged -= h,
                 name => Printer.PrintStatChanged(this, name)

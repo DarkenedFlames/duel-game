@@ -2,9 +2,9 @@ namespace CBA
 {
     public class PeersComponent(Entity owner) : Component(owner)
     {
-        public override void Subscribe()
+        protected override void RegisterSubscriptions()
         {
-            TrackSubscription<Action<Entity>>(
+            RegisterSubscription<Action<Entity>>(
                 h => World.Instance.TurnManager.OnTurnStart += h,
                 h => World.Instance.TurnManager.OnTurnStart -= h,
                 turnTaker => { if (turnTaker == Owner) RevealInventory(); }

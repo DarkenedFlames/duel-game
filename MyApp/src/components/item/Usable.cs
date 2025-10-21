@@ -2,16 +2,15 @@ namespace CBA
 {
     public class Usable(Entity owner, int staminaCost) : Component(owner)
     {
-        public int StaminaCost { get; init; } = staminaCost;
+        private int StaminaCost { get; init; } = staminaCost;
 
         public event Action<Entity, Entity>? OnUseSuccess;
         public event Action<Entity, Entity>? OnUseFailed;
 
-        public override void Subscribe(){}
-
+        protected override void RegisterSubscriptions(){}
         public void TryUse(Entity target)
         {
-            Entity user = World.Instance.GetPlayerOf(Owner);
+            Entity user = World.GetPlayerOf(Owner);
             ResourcesComponent resources = user.GetComponent<ResourcesComponent>();
             StatsComponent stats = user.GetComponent<StatsComponent>();
             ItemType type = Owner.GetComponent<ItemData>().Type;

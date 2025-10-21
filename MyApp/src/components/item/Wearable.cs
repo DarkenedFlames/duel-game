@@ -8,12 +8,12 @@ namespace CBA
         public event Action<Entity>? OnUnequipSuccess;
         public event Action<Entity>? OnUnequipFail;
 
-        public override void Subscribe(){}
+        protected override void RegisterSubscriptions(){}
         // Query for all items of the same ItemType and Owner and unequip them. Then, equip this item and fire OnEquipSuccess/Failed.
         public void TryEquip()
         {
             // Ensure we have ItemData for this item
-            Entity player = World.Instance.GetPlayerOf(Owner);
+            Entity player = World.GetPlayerOf(Owner);
 
             // --- Find conflicting equipped item of the same type for this player ---
             Wearable? conflicting = World.Instance

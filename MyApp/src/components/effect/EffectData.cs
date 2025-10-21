@@ -19,7 +19,6 @@ namespace CBA
         public int MaximumStacks { get; set; } = maxStacks;
         public StackingType StackingType { get; set; } = stackingType;
         public int? MaxPerTurn { get; set; } = maxPerTurn;
-
-        public override void Subscribe() { }
+        protected override void RegisterSubscriptions(){}
     }
 }

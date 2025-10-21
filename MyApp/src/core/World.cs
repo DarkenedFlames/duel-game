@@ -113,7 +113,7 @@ namespace CBA
 
             return players;
         }
-        public Entity GetPlayerOf(Entity entity)
+        public static Entity GetPlayerOf(Entity entity)
         {
             switch (entity.Id.Category)
             {

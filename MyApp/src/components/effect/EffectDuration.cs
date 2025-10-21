@@ -5,18 +5,17 @@ namespace CBA
         public int Remaining { get; set; } = maxDuration;
         public int Maximum { get; set; } = maxDuration;
 
-        public override void Subscribe()
+        protected override void RegisterSubscriptions()
         {
-            TrackSubscription<Action<Entity>>(
+            RegisterSubscription<Action<Entity>>(
                 h => World.Instance.TurnManager.OnTurnStart += h,
                 h => World.Instance.TurnManager.OnTurnStart -= h,
                 OnTurnStart
             );
         }
-
         private void OnTurnStart(Entity turnTaker)
         {
-            if (turnTaker == World.Instance.GetPlayerOf(Owner))
+            if (turnTaker == World.GetPlayerOf(Owner))
             {
                 if (Remaining <= 0)
                     World.Instance.RemoveEntity(Owner);

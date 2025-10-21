@@ -25,17 +25,17 @@ namespace CBA
     }
 
     public class ModifiesStats(
-        Entity owner,
-        Dictionary<(Trigger, ModificationType), Dictionary<string, float>>? StatsByTrigger = null,
-        Dictionary<(Trigger, ModificationType), Dictionary<string, float>>? ResourcesByTrigger = null
-    ) : Component(owner)
+                            Entity owner,
+                            Dictionary<(Trigger, ModificationType), Dictionary<string, float>>? StatsByTrigger = null,
+                            Dictionary<(Trigger, ModificationType), Dictionary<string, float>>? ResourcesByTrigger = null
+                            ) : Component(owner)
     {
-        public Dictionary<(Trigger Trigger, ModificationType Type), Dictionary<string, float>>? StatChanges { get; } = StatsByTrigger;
-        public Dictionary<(Trigger Trigger, ModificationType Type), Dictionary<string, float>>? ResourceChanges { get; } = ResourcesByTrigger;
+        private Dictionary<(Trigger Trigger, ModificationType Type), Dictionary<string, float>>? StatChanges { get; } = StatsByTrigger;
+        private Dictionary<(Trigger Trigger, ModificationType Type), Dictionary<string, float>>? ResourceChanges { get; } = ResourcesByTrigger;
 
-        public override void Subscribe()
+        protected override void RegisterSubscriptions()
         {
-            Entity wearer = World.Instance.GetPlayerOf(Owner);
+            Entity wearer = World.GetPlayerOf(Owner);
 
             foreach (Trigger trigger in Enum.GetValues<Trigger>())
             {
@@ -46,7 +46,7 @@ namespace CBA
                 {
                     case Trigger.OnEquip:
                         var wearable = Owner.GetComponent<Wearable>();
-                        TrackSubscription<Action<Entity>>(
+                        RegisterSubscription<Action<Entity>>(
                             h => wearable.OnEquipSuccess += h,
                             h => wearable.OnEquipSuccess -= h,
                             _ => Modify(wearer, Trigger.OnEquip)
@@ -55,7 +55,7 @@ namespace CBA
 
                     case Trigger.OnUnequip:
                         wearable = Owner.GetComponent<Wearable>();
-                        TrackSubscription<Action<Entity>>(
+                        RegisterSubscription<Action<Entity>>(
                             h => wearable.OnUnequipSuccess += h,
                             h => wearable.OnUnequipSuccess -= h,
                             _ => Modify(wearer, Trigger.OnUnequip)
@@ -63,7 +63,7 @@ namespace CBA
                         break;
 
                     case Trigger.OnAdded:
-                        TrackSubscription<Action<Entity>>(
+                        RegisterSubscription<Action<Entity>>(
                             h => World.Instance.OnEntityAdded += h,
                             h => World.Instance.OnEntityAdded -= h,
                             e => { if (e == Owner) Modify(wearer, Trigger.OnAdded); }
@@ -71,7 +71,7 @@ namespace CBA
                         break;
 
                     case Trigger.OnRemoved:
-                        TrackSubscription<Action<Entity>>(
+                        RegisterSubscription<Action<Entity>>(
                             h => World.Instance.OnEntityRemoved += h,
                             h => World.Instance.OnEntityRemoved -= h,
                             e => { if (e == Owner) Modify(wearer, Trigger.OnRemoved); }
@@ -80,7 +80,7 @@ namespace CBA
 
                     case Trigger.OnUse:
                         var usable = Owner.GetComponent<Usable>();
-                        TrackSubscription<Action<Entity, Entity>>(
+                        RegisterSubscription<Action<Entity, Entity>>(
                             h => usable.OnUseSuccess += h,
                             h => usable.OnUseSuccess -= h,
                             (_, target) => Modify(target, Trigger.OnUse)
@@ -89,7 +89,7 @@ namespace CBA
 
                     case Trigger.OnHit:
                         var hits = Owner.GetComponent<Hits>();
-                        TrackSubscription<Action<Entity, Entity>>(
+                        RegisterSubscription<Action<Entity, Entity>>(
                             h => hits.OnHit += h,
                             h => hits.OnHit -= h,
                             (_, target) => Modify(target, Trigger.OnHit)
@@ -98,7 +98,7 @@ namespace CBA
 
                     case Trigger.OnCritical:
                         var deals = Owner.GetComponent<DealsDamage>();
-                        TrackSubscription<Action<Entity, Entity>>(
+                        RegisterSubscription<Action<Entity, Entity>>(
                             h => deals.OnCritical += h,
                             h => deals.OnCritical -= h,
                             (_, target) => Modify(target, Trigger.OnCritical)
@@ -107,7 +107,7 @@ namespace CBA
 
                     case Trigger.OnDamageDealt:
                         deals = Owner.GetComponent<DealsDamage>();
-                        TrackSubscription<Action<Entity, Entity, int>>(
+                        RegisterSubscription<Action<Entity, Entity, int>>(
                             h => deals.OnDamageDealt += h,
                             h => deals.OnDamageDealt -= h,
                             (_, target, _) => Modify(target, Trigger.OnDamageDealt)
@@ -116,7 +116,7 @@ namespace CBA
 
                     case Trigger.OnArmorSetCompleted:
                         var completes = Owner.GetComponent<CompletesItemSet>();
-                        TrackSubscription<Action<Entity>>(
+                        RegisterSubscription<Action<Entity>>(
                             h => completes.OnArmorSetCompleted += h,
                             h => completes.OnArmorSetCompleted -= h,
                             _ => Modify(wearer, Trigger.OnArmorSetCompleted)
@@ -125,7 +125,7 @@ namespace CBA
 
                     case Trigger.OnArmorSetBroken:
                         completes = Owner.GetComponent<CompletesItemSet>();
-                        TrackSubscription<Action<Entity>>(
+                        RegisterSubscription<Action<Entity>>(
                             h => completes.OnArmorSetBroken += h,
                             h => completes.OnArmorSetBroken -= h,
                             _ => Modify(wearer, Trigger.OnArmorSetBroken)
@@ -134,7 +134,6 @@ namespace CBA
                 }
             }
         }
-
         private bool HasTrigger(Trigger trigger)
         {
             return (StatChanges?.Keys.Any(k => k.Trigger == trigger) ?? false) ||

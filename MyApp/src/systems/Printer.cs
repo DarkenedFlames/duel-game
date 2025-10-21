@@ -317,7 +317,7 @@ namespace CBA
         {
             string targetName = target.DisplayName;
             string itemName = item.DisplayName;
-            string userName = World.Instance.GetPlayerOf(item).DisplayName;
+            string userName = World.GetPlayerOf(item).DisplayName;
             Console.WriteLine($"\n{userName}'s attack with {itemName} missed {targetName}!");
         }
 

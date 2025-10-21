@@ -4,9 +4,9 @@ namespace CBA
     {
         private readonly Dictionary<string, int> _effectsApplied = [];
 
-        public override void Subscribe()
+        protected override void RegisterSubscriptions()
         {
-            TrackSubscription<Action<Entity>>(
+            RegisterSubscription<Action<Entity>>(
                 h => World.Instance.TurnManager.OnTurnStart += h,
                 h => World.Instance.TurnManager.OnTurnStart -= h,
                 turnTaker => { if (turnTaker == Owner) Clear(); }
@@ -15,15 +15,15 @@ namespace CBA
             World.Instance.OnEntityAdded += entity =>
             {
                 if (entity.Id.Category == EntityCategory.Effect
-                    && World.Instance.GetPlayerOf(entity) == Owner)
+                    && World.GetPlayerOf(entity) == Owner)
                     RecordEffectApplied(entity.Id.TypeId);
             };
-            TrackSubscription<Action<Entity>>(
+            RegisterSubscription<Action<Entity>>(
                 h => World.Instance.OnEntityAdded += h,
                 h => World.Instance.OnEntityAdded -= h,
                 entity =>
                 {
-                    if (entity.Id.Category == EntityCategory.Effect && World.Instance.GetPlayerOf(entity) == Owner)
+                    if (entity.Id.Category == EntityCategory.Effect && World.GetPlayerOf(entity) == Owner)
                         RecordEffectApplied(entity.Id.TypeId);
                 }
             );

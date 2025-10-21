@@ -2,23 +2,23 @@ namespace CBA
 {
     public class Hits(Entity owner, bool dodgeable) : Component(owner)
     {
-        public bool Dodgeable = dodgeable;
+        private readonly bool Dodgeable = dodgeable;
         public event Action<Entity, Entity>? OnHit;
         public event Action<Entity, Entity>? OnDodge;
         public event Action<Entity, Entity>? OnMiss;
 
-        public override void Subscribe()
+        protected override void RegisterSubscriptions()
         {
-            TrackSubscription<Action<Entity, Entity>>(
+            RegisterSubscription<Action<Entity, Entity>>(
                 h => Owner.GetComponent<Usable>().OnUseSuccess += h,
                 h => Owner.GetComponent<Usable>().OnUseSuccess -= h,
                 (_, target) => TryHit(target)
             );
         }
-        public void TryHit(Entity target)
+        private void TryHit(Entity target)
         {
             StatsComponent targetStats = target.GetComponent<StatsComponent>();
-            Entity hitter = World.Instance.GetPlayerOf(Owner);
+            Entity hitter = World.GetPlayerOf(Owner);
             StatsComponent hitterStats = hitter.GetComponent<StatsComponent>();
 
             if (Dodgeable && Random.Shared.NextDouble() < targetStats.GetHyperbolic("Dodge"))

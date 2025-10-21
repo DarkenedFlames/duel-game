@@ -111,24 +111,24 @@ namespace CBA
             OnResourceChanged?.Invoke(name);
         }
 
-        public override void Subscribe()
+        protected override void RegisterSubscriptions()
         {
             // Not actual subscription logic... might mean stats and resources need to be merged
             _values["Health"] = (Stats().Get("MaximumHealth"), 1f, 1f);
             _values["Stamina"] = (Stats().Get("MaximumStamina"), 1f, 1f);
 
             // Subscribe Logic
-            TrackSubscription<Action<string>>(
+            RegisterSubscription<Action<string>>(
                 h => Stats().OnStatChanged += h,
                 h => Stats().OnStatChanged -= h,
                 OnStatChange
             );
-            TrackSubscription<Action<string>>(
+            RegisterSubscription<Action<string>>(
                 h => OnResourceChanged += h,
                 h => OnResourceChanged -= h,
                 name => Printer.PrintResourceChanged(this, name)
             );
-            TrackSubscription<Action<string>>(
+            RegisterSubscription<Action<string>>(
                 h => OnResourceDepleted += h,
                 h => OnResourceDepleted -= h,
                 name => Printer.PrintResourceDepleted(this, name)

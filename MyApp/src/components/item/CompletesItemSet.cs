@@ -7,14 +7,14 @@ namespace CBA
         public event Action<Entity>? OnArmorSetCompleted;
         public event Action<Entity>? OnArmorSetBroken;
         
-        public override void Subscribe()
+        protected override void RegisterSubscriptions()
         {
-            TrackSubscription<Action<Entity>>(
+            RegisterSubscription<Action<Entity>>(
                 h => Owner.GetComponent<Wearable>().OnEquipSuccess += h,
                 h => Owner.GetComponent<Wearable>().OnEquipSuccess -= h,
                 _ => CheckForArmorSetCompleted()
             );
-            TrackSubscription<Action<Entity>>(
+            RegisterSubscription<Action<Entity>>(
                 h => Owner.GetComponent<Wearable>().OnUnequipSuccess += h,
                 h => Owner.GetComponent<Wearable>().OnUnequipSuccess -= h,
                 _ => CheckForArmorSetBroken()
@@ -22,7 +22,7 @@ namespace CBA
         }
         private List<CompletesItemSet> GetSameSetEquipped()
         {
-            Entity wearer = World.Instance.GetPlayerOf(Owner);
+            Entity wearer = World.GetPlayerOf(Owner);
 
             // Find all equipped items on this player with the same set tag
             List<CompletesItemSet> sameSetEquipped = [.. World.Instance
