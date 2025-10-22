@@ -49,7 +49,7 @@ namespace CBA
         {
             List<CompletesItemSet> sameSetEquipped = GetSameSetEquipped();
 
-            if (sameSetEquipped.Count >= 3 && SetActive)
+            if (sameSetEquipped.Count < 3 && SetActive)
             {
                 foreach (var c in sameSetEquipped)
                     c.SetActive = false;

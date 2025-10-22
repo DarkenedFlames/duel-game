@@ -35,9 +35,9 @@ namespace CBA
         public void RemoveEntity(Entity entity)
         {
             if (!_entities.Remove(entity)) return;
+            OnEntityRemoved?.Invoke(entity);
             entity.UnsubscribeAll();
             entity.ClearComponents();
-            OnEntityRemoved?.Invoke(entity);
         }
         public IEnumerable<Entity> GetById(EntityCategory? category = null, string? typeId = null, int? instanceId = null)
         {

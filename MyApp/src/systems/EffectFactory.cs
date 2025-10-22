@@ -16,6 +16,75 @@ namespace CBA
 
     public static class EffectFactory
     {
+        public static EffectTemplate GetTemplate(string typeId)
+        {
+            return Templates.FirstOrDefault(t =>
+                t.TypeId.Equals(typeId, StringComparison.OrdinalIgnoreCase))
+                ?? throw new Exception($"Effect template '{typeId}' not found.");
+        }
+        private static EffectTemplate? GateEffect(string typeId, Entity target)
+        {
+            EffectTemplate template = GetTemplate(typeId);
+
+            if (Random.Shared.NextDouble() > template.Chance)
+                return null;
+
+            if (template.MaxPerTurn != null)
+                if (template.MaxPerTurn <= target.GetComponent<TurnMemory>().GetEffectsAppliedThisTurn(template.TypeId))
+                    return null;
+
+            // Handle stacking
+            EffectData? existing = World.Instance
+                .GetAllForPlayer<EffectData>(target, EntityCategory.Effect, template.TypeId)
+                .FirstOrDefault();
+
+            if (existing != null)
+            {
+                Entity existingEffect = existing.Owner;
+
+                switch (existing.StackingType)
+                {
+                    case StackingType.RefreshOnly:
+                        if (existingEffect.HasComponent<EffectDuration>())
+                        {
+                            EffectDuration effectDuration = existingEffect.GetComponent<EffectDuration>();
+                            effectDuration.Remaining = effectDuration.Maximum;
+                        }
+                        return null;
+
+                    case StackingType.AddStack:
+                        if (existing.CurrentStacks < existing.MaximumStacks && existingEffect.HasComponent<EffectDuration>())
+                        {
+                            existing.CurrentStacks++;
+                            EffectDuration effectDuration = existingEffect.GetComponent<EffectDuration>();
+                            effectDuration.Remaining = effectDuration.Maximum;
+                        }
+                        return null;
+
+                    case StackingType.Ignore:
+                        return null;
+                }
+            }
+
+            return template;
+        }
+        public static void ApplyEffect(string typeId, Entity target)
+        {
+            EffectTemplate? template = GateEffect(typeId, target);
+            if (template == null) return;
+
+            // Create new effect entity
+            Entity effect = new(EntityCategory.Effect, template.TypeId, template.DisplayName);
+
+            if (template.Components != null)
+                foreach (ComponentBuilder builder in template.Components)
+                {
+                    Component component = builder(effect, target);
+                    effect.AddComponent(component);
+                }
+
+            World.Instance.AddEntity(effect);
+        }
         public static readonly List<EffectTemplate> Templates =
         [
             new(
@@ -344,74 +413,5 @@ namespace CBA
             ),
 
         ];
-        public static EffectTemplate GetTemplate(string typeId)
-        {
-            return Templates.FirstOrDefault(t =>
-                t.TypeId.Equals(typeId, StringComparison.OrdinalIgnoreCase))
-                ?? throw new Exception($"Effect template '{typeId}' not found.");
-        }
-        private static EffectTemplate? GateEffect(string typeId, Entity target)
-        {
-            EffectTemplate template = GetTemplate(typeId);
-
-            if (Random.Shared.NextDouble() > template.Chance)
-                return null;
-
-            if (template.MaxPerTurn != null)
-                if (template.MaxPerTurn <= target.GetComponent<TurnMemory>().GetEffectsAppliedThisTurn(template.TypeId))
-                    return null;
-
-            // Handle stacking
-            EffectData? existing = World.Instance
-                .GetAllForPlayer<EffectData>(target, EntityCategory.Effect, template.TypeId)
-                .FirstOrDefault();
-
-            if (existing != null)
-            {
-                Entity existingEffect = existing.Owner;
-
-                switch (existing.StackingType)
-                {
-                    case StackingType.RefreshOnly:
-                        if (existingEffect.HasComponent<EffectDuration>())
-                        {
-                            EffectDuration effectDuration = existingEffect.GetComponent<EffectDuration>();
-                            effectDuration.Remaining = effectDuration.Maximum;
-                        }
-                        return null;
-
-                    case StackingType.AddStack:
-                        if (existing.CurrentStacks < existing.MaximumStacks && existingEffect.HasComponent<EffectDuration>())
-                        {
-                            existing.CurrentStacks++;
-                            EffectDuration effectDuration = existingEffect.GetComponent<EffectDuration>();
-                            effectDuration.Remaining = effectDuration.Maximum;
-                        }
-                        return null;
-
-                    case StackingType.Ignore:
-                        return null;
-                }
-            }
-
-            return template;
-        }
-        public static void ApplyEffect(string typeId, Entity target)
-        {
-            EffectTemplate? template = GateEffect(typeId, target);
-            if (template == null) return;
-
-            // Create new effect entity
-            Entity effect = new(EntityCategory.Effect, template.TypeId, template.DisplayName);
-
-            if (template.Components != null)
-                foreach (ComponentBuilder builder in template.Components)
-                {
-                    Component component = builder(effect, target);
-                    effect.AddComponent(component);
-                }
-
-            World.Instance.AddEntity(effect);
-        }
     }
 }
