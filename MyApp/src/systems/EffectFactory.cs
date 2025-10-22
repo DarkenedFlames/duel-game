@@ -112,7 +112,7 @@ namespace CBA
                 [
                     (e, target) => new EffectData(e, target, true, false, StackingType.Ignore),
                     (e, target) => new ModifiesStats(e,
-                    StatsByTrigger: new()
+                    statsByTrigger: new()
                         {
                             [(Trigger.OnAdded, ModificationType.Add)] = new()
                             {
@@ -135,7 +135,7 @@ namespace CBA
                 [
                     (e, target) => new EffectData(e, target, false, false, StackingType.Ignore),
                     (e, target) => new ModifiesStats(e,
-                    StatsByTrigger: new()
+                    statsByTrigger: new()
                         {
                             [(Trigger.OnAdded, ModificationType.Multiply)] = new()
                             {
@@ -158,7 +158,7 @@ namespace CBA
                 [
                     (e, target) => new EffectData(e, target, false, false, StackingType.Ignore),
                     (e, target) => new ModifiesStats(e,
-                    StatsByTrigger: new()
+                    statsByTrigger: new()
                         {
                             [(Trigger.OnAdded, ModificationType.Multiply)] = new()
                             {
@@ -181,7 +181,7 @@ namespace CBA
                 [
                     (e, target) => new EffectData(e, target, false, false, StackingType.Ignore),
                     (e, target) => new ModifiesStats(e,
-                    StatsByTrigger: new()
+                    statsByTrigger: new()
                         {
                             [(Trigger.OnAdded, ModificationType.Multiply)] = new()
                             {
@@ -204,7 +204,7 @@ namespace CBA
                 [
                     (e, target) => new EffectData(e, target, false, false, StackingType.Ignore),
                     (e, target) => new ModifiesStats(e,
-                    StatsByTrigger: new()
+                    statsByTrigger: new()
                         {
                             [(Trigger.OnAdded, ModificationType.Multiply)] = new()
                             {
@@ -227,7 +227,7 @@ namespace CBA
                 [
                     (e, target) => new EffectData(e, target, false, false, StackingType.Ignore),
                     (e, target) => new ModifiesStats(e,
-                    StatsByTrigger: new()
+                    statsByTrigger: new()
                         {
                             [(Trigger.OnAdded, ModificationType.Multiply)] = new()
                             {
@@ -250,7 +250,7 @@ namespace CBA
                 [
                     (e, target) => new EffectData(e, target, false, false, StackingType.Ignore),
                     (e, target) => new ModifiesStats(e,
-                    StatsByTrigger: new()
+                    statsByTrigger: new()
                         {
                             [(Trigger.OnAdded, ModificationType.Multiply)] = new()
                             {
@@ -273,7 +273,7 @@ namespace CBA
                 [
                     (e, target) => new EffectData(e, target, false, false, StackingType.Ignore),
                     (e, target) => new ModifiesStats(e,
-                    StatsByTrigger: new()
+                    statsByTrigger: new()
                         {
                             [(Trigger.OnAdded, ModificationType.Multiply)] = new()
                             {
@@ -296,7 +296,7 @@ namespace CBA
                 [
                     (e, target) => new EffectData(e, target, false, false, StackingType.Ignore),
                     (e, target) => new ModifiesStats(e,
-                    StatsByTrigger: new()
+                    statsByTrigger: new()
                         {
                             [(Trigger.OnAdded, ModificationType.Multiply)] = new()
                             {
@@ -322,7 +322,7 @@ namespace CBA
                     (e, target) => new EffectData(e, target, true, false, StackingType.Ignore),
                     (e, target) => new EffectDuration(e, 1),
                     (e, target) => new ModifiesStats(e,
-                    StatsByTrigger: new()
+                    statsByTrigger: new()
                         {
                             [(Trigger.OnAdded, ModificationType.Multiply)] = new()
                             {
@@ -347,7 +347,7 @@ namespace CBA
                     (e, target) => new EffectData(e, target, true, false, StackingType.Ignore),
                     (e, target) => new EffectDuration(e, 1),
                     (e, target) => new ModifiesStats(e,
-                    StatsByTrigger: new()
+                    statsByTrigger: new()
                         {
                             [(Trigger.OnAdded, ModificationType.Multiply)] = new()
                             {
@@ -372,7 +372,7 @@ namespace CBA
                     (e, target) => new EffectData(e, target, true, false, StackingType.Ignore),
                     (e, target) => new EffectDuration(e, 2),
                     (e, target) => new ModifiesStats(e,
-                    StatsByTrigger: new()
+                    statsByTrigger: new()
                         {
                             [(Trigger.OnAdded, ModificationType.Multiply)] = new()
                             {
@@ -397,7 +397,7 @@ namespace CBA
                     (e, target) => new EffectData(e, target, false, false, StackingType.Ignore),
                     (e, target) => new EffectDuration(e, 2),
                     (e, target) => new ModifiesStats(e,
-                    StatsByTrigger: new()
+                    statsByTrigger: new()
                         {
                             [(Trigger.OnAdded, ModificationType.Multiply)] = new()
                             {
@@ -411,7 +411,7 @@ namespace CBA
                     )
                 ]
             ),
-
+            // Add more templates as needed
         ];
     }
 }

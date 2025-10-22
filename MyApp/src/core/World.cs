@@ -48,11 +48,11 @@ namespace CBA
             );
         }
         public int GenerateInstanceId(EntityCategory category, string typeId)
-                {
-                    (EntityCategory, string) key = (category, typeId);
-                    if (!_instanceCounters.ContainsKey(key)) _instanceCounters[key] = 0;
-                    return ++_instanceCounters[key];
-                }
+        {
+            (EntityCategory, string) key = (category, typeId);
+            if (!_instanceCounters.ContainsKey(key)) _instanceCounters[key] = 0;
+            return ++_instanceCounters[key];
+        }
         public IEnumerable<Entity> GetEntitiesWith<T>() where T : Component =>
             _entities.Where(e => e.HasComponent<T>());
         public IEnumerable<T> GetAllForPlayer<T>(Entity player, EntityCategory category, string? typeId = null, bool? equipped = null)
@@ -122,5 +122,12 @@ namespace CBA
                 default: throw new InvalidOperationException($"Invalid category for GetPlayerOf: {entity.Id.Category}");
             }
         }
+
+        public IEnumerable<Entity> GetNegativeEffectsForPlayer(Entity player)
+        {
+            return GetAllForPlayer<Entity>(player, EntityCategory.Effect)
+                .Where(e => e.GetComponent<EffectData>().IsNegative);
+        }
+
     }
 }

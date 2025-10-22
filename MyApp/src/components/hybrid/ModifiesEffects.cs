@@ -5,10 +5,10 @@ namespace CBA
 
     public class ModifiesEffects(
                                 Entity owner,
-                                Dictionary<(EffectAction, TargetType, Trigger), List<string>> triggeredEffects
+                                Dictionary<(EffectAction, TargetType, Trigger), List<string>> effectsByTrigger
                                 ) : Component(owner)
     {
-        private Dictionary<(EffectAction Action, TargetType TargetType, Trigger Trigger), List<string>> TriggeredEffects { get; init; } = triggeredEffects;
+        private Dictionary<(EffectAction Action, TargetType TargetType, Trigger Trigger), List<string>> TriggeredEffects { get; init; } = effectsByTrigger;
 
         protected override void RegisterSubscriptions()
         {

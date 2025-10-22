@@ -4,16 +4,18 @@ namespace CBA
     {
         public event Action<string>? OnStatChanged;
 
-        private Dictionary<string, (int Base, float Modifier)> _values = new()
+        private readonly Dictionary<string, (int Base, float Modifier)> _values = new()
         {
             // Resource Stats
-            { "MaximumHealth", (100, 1.0f) },
-            { "MaximumStamina", (100, 1.0f) },
+            {"MaximumHealth",  (100, 1.0f)},
+            {"MaximumStamina", (100, 1.0f)},
+            {"Healing",        (100, 1.0f)},
+            {"Stimming",       (100, 1.0f)},
 
             // Receiving Items
-            { "Peer", (0, 1.0f) },
-            { "Luck", (0, 1.0f) },
-            { "Steal", (0, 1.0f) },
+            {"Peer",  (0, 1.0f)},
+            {"Luck",  (0, 1.0f)},
+            {"Steal", (0, 1.0f)},
 
             // Using Items
             { "ConsumableCost", (0, 1.0f) },
@@ -60,7 +62,6 @@ namespace CBA
             _values[name] = (Base + delta, Modifier);
             OnStatChanged?.Invoke(name);
         }
-        public void DecreaseBase(string name, int delta) => IncreaseBase(name, -delta);
 
         public void IncreaseModifier(string name, float factor)
         {
@@ -69,7 +70,6 @@ namespace CBA
             _values[name] = (Base, Modifier * factor);
             OnStatChanged?.Invoke(name);
         }
-        public void DecreaseModifier(string name, float factor) => IncreaseModifier(name, 1f / factor);
 
         protected override void RegisterSubscriptions()
         {

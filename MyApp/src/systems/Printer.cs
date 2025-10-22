@@ -32,6 +32,8 @@ namespace CBA
             Console.WriteLine("\n==== Resources ====");
             Console.WriteLine($"Health: {resources.Get("Health")} / {stats.Get("MaximumHealth")}");
             Console.WriteLine($"Stamina: {resources.Get("Stamina")} / {stats.Get("MaximumStamina")}");
+            Console.WriteLine($"Healing Multiplier: {resources.Get("Healing") / 100}");
+            Console.WriteLine($"Stimming Multiplier: {resources.Get("Stimming") / 100}");
 
             Console.WriteLine("\n==== Item Use ====");
             Console.WriteLine($"Consumable Cost Score: {stats.Get("ConsumableCost")}");

@@ -33,8 +33,6 @@ namespace CBA
                         ApplyDamage
                     );
                     break;
-                default:
-                    break;
             }
         }
         private void ApplyDamage(Entity target)

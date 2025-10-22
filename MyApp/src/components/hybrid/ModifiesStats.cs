@@ -18,20 +18,14 @@ namespace CBA
         OnArmorSetBroken = 1 << 11,
     }
 
-    public enum ModificationType
-    {
-        Add,
-        Multiply
-    }
+    public enum ModificationType { Add, Multiply }
 
     public class ModifiesStats(
-                            Entity owner,
-                            Dictionary<(Trigger, ModificationType), Dictionary<string, float>>? StatsByTrigger = null,
-                            Dictionary<(Trigger, ModificationType), Dictionary<string, float>>? ResourcesByTrigger = null
-                            ) : Component(owner)
+        Entity owner,
+        Dictionary<(ModificationType, TargetType, Trigger), Dictionary<string, float>> statsByTrigger
+        ) : Component(owner)
     {
-        private Dictionary<(Trigger Trigger, ModificationType Type), Dictionary<string, float>>? StatChanges { get; } = StatsByTrigger;
-        private Dictionary<(Trigger Trigger, ModificationType Type), Dictionary<string, float>>? ResourceChanges { get; } = ResourcesByTrigger;
+        private readonly Dictionary<(ModificationType Type, TargetType TargetType, Trigger Trigger), Dictionary<string, float>> StatChanges = statsByTrigger;
 
         protected override void RegisterSubscriptions()
         {
@@ -42,152 +36,134 @@ namespace CBA
                 if (trigger == Trigger.None || !HasTrigger(trigger))
                     continue;
 
-                switch (trigger)
-                {
-                    case Trigger.OnEquip:
-                        var wearable = Owner.GetComponent<Wearable>();
-                        RegisterSubscription<Action<Entity>>(
-                            h => wearable.OnEquipSuccess += h,
-                            h => wearable.OnEquipSuccess -= h,
-                            _ => Modify(wearer, Trigger.OnEquip)
-                        );
-                        break;
-
-                    case Trigger.OnUnequip:
-                        wearable = Owner.GetComponent<Wearable>();
-                        RegisterSubscription<Action<Entity>>(
-                            h => wearable.OnUnequipSuccess += h,
-                            h => wearable.OnUnequipSuccess -= h,
-                            _ => Modify(wearer, Trigger.OnUnequip)
-                        );
-                        break;
-
-                    case Trigger.OnAdded:
-                        RegisterSubscription<Action<Entity>>(
-                            h => World.Instance.OnEntityAdded += h,
-                            h => World.Instance.OnEntityAdded -= h,
-                            e => { if (e == Owner) Modify(wearer, Trigger.OnAdded); }
-                        );
-                        break;
-
-                    case Trigger.OnRemoved:
-                        RegisterSubscription<Action<Entity>>(
-                            h => World.Instance.OnEntityRemoved += h,
-                            h => World.Instance.OnEntityRemoved -= h,
-                            e => { if (e == Owner) Modify(wearer, Trigger.OnRemoved); }
-                        );
-                        break;
-
-                    case Trigger.OnUse:
-                        var usable = Owner.GetComponent<Usable>();
-                        RegisterSubscription<Action<Entity, Entity>>(
-                            h => usable.OnUseSuccess += h,
-                            h => usable.OnUseSuccess -= h,
-                            (_, target) => Modify(target, Trigger.OnUse)
-                        );
-                        break;
-
-                    case Trigger.OnHit:
-                        var hits = Owner.GetComponent<Hits>();
-                        RegisterSubscription<Action<Entity, Entity>>(
-                            h => hits.OnHit += h,
-                            h => hits.OnHit -= h,
-                            (_, target) => Modify(target, Trigger.OnHit)
-                        );
-                        break;
-
-                    case Trigger.OnCritical:
-                        var deals = Owner.GetComponent<DealsDamage>();
-                        RegisterSubscription<Action<Entity, Entity>>(
-                            h => deals.OnCritical += h,
-                            h => deals.OnCritical -= h,
-                            (_, target) => Modify(target, Trigger.OnCritical)
-                        );
-                        break;
-
-                    case Trigger.OnDamageDealt:
-                        deals = Owner.GetComponent<DealsDamage>();
-                        RegisterSubscription<Action<Entity, Entity, int>>(
-                            h => deals.OnDamageDealt += h,
-                            h => deals.OnDamageDealt -= h,
-                            (_, target, _) => Modify(target, Trigger.OnDamageDealt)
-                        );
-                        break;
-
-                    case Trigger.OnArmorSetCompleted:
-                        var completes = Owner.GetComponent<CompletesItemSet>();
-                        RegisterSubscription<Action<Entity>>(
-                            h => completes.OnArmorSetCompleted += h,
-                            h => completes.OnArmorSetCompleted -= h,
-                            _ => Modify(wearer, Trigger.OnArmorSetCompleted)
-                        );
-                        break;
-
-                    case Trigger.OnArmorSetBroken:
-                        completes = Owner.GetComponent<CompletesItemSet>();
-                        RegisterSubscription<Action<Entity>>(
-                            h => completes.OnArmorSetBroken += h,
-                            h => completes.OnArmorSetBroken -= h,
-                            _ => Modify(wearer, Trigger.OnArmorSetBroken)
-                        );
-                        break;
-                }
+                RegisterTrigger(trigger, wearer);
             }
         }
-        private bool HasTrigger(Trigger trigger)
+
+        private void RegisterTrigger(Trigger trigger, Entity wearer)
         {
-            return (StatChanges?.Keys.Any(k => k.Trigger == trigger) ?? false) ||
-                   (ResourceChanges?.Keys.Any(k => k.Trigger == trigger) ?? false);
+            switch (trigger)
+            {
+                case Trigger.OnEquip:
+                    var wearable = Owner.GetComponent<Wearable>();
+                    RegisterSubscription<Action<Entity>>(
+                        h => wearable.OnEquipSuccess += h,
+                        h => wearable.OnEquipSuccess -= h,
+                        _ => Modify(wearer, null, Trigger.OnEquip)
+                    );
+                    break;
+
+                case Trigger.OnUnequip:
+                    wearable = Owner.GetComponent<Wearable>();
+                    RegisterSubscription<Action<Entity>>(
+                        h => wearable.OnUnequipSuccess += h,
+                        h => wearable.OnUnequipSuccess -= h,
+                        _ => Modify(wearer, null, Trigger.OnUnequip)
+                    );
+                    break;
+
+                case Trigger.OnAdded:
+                    RegisterSubscription<Action<Entity>>(
+                        h => World.Instance.OnEntityAdded += h,
+                        h => World.Instance.OnEntityAdded -= h,
+                        e => { if (e == Owner) Modify(wearer, null, Trigger.OnAdded); }
+                    );
+                    break;
+
+                case Trigger.OnRemoved:
+                    RegisterSubscription<Action<Entity>>(
+                        h => World.Instance.OnEntityRemoved += h,
+                        h => World.Instance.OnEntityRemoved -= h,
+                        e => { if (e == Owner) Modify(wearer, null, Trigger.OnRemoved); }
+                    );
+                    break;
+
+                case Trigger.OnUse:
+                    var usable = Owner.GetComponent<Usable>();
+                    RegisterSubscription<Action<Entity, Entity>>(
+                        h => usable.OnUseSuccess += h,
+                        h => usable.OnUseSuccess -= h,
+                        (_, target) => Modify(wearer, target, Trigger.OnUse)
+                    );
+                    break;
+
+                case Trigger.OnHit:
+                    var hits = Owner.GetComponent<Hits>();
+                    RegisterSubscription<Action<Entity, Entity>>(
+                        h => hits.OnHit += h,
+                        h => hits.OnHit -= h,
+                        (_, target) => Modify(wearer, target, Trigger.OnHit)
+                    );
+                    break;
+
+                case Trigger.OnCritical:
+                    var deals = Owner.GetComponent<DealsDamage>();
+                    RegisterSubscription<Action<Entity, Entity>>(
+                        h => deals.OnCritical += h,
+                        h => deals.OnCritical -= h,
+                        (_, target) => Modify(wearer, target, Trigger.OnCritical)
+                    );
+                    break;
+
+                case Trigger.OnDamageDealt:
+                    deals = Owner.GetComponent<DealsDamage>();
+                    RegisterSubscription<Action<Entity, Entity, int>>(
+                        h => deals.OnDamageDealt += h,
+                        h => deals.OnDamageDealt -= h,
+                        (_, target, _) => Modify(wearer, target, Trigger.OnDamageDealt)
+                    );
+                    break;
+
+                case Trigger.OnArmorSetCompleted:
+                    var completes = Owner.GetComponent<CompletesItemSet>();
+                    RegisterSubscription<Action<Entity>>(
+                        h => completes.OnArmorSetCompleted += h,
+                        h => completes.OnArmorSetCompleted -= h,
+                        _ => Modify(wearer, null, Trigger.OnArmorSetCompleted)
+                    );
+                    break;
+
+                case Trigger.OnArmorSetBroken:
+                    completes = Owner.GetComponent<CompletesItemSet>();
+                    RegisterSubscription<Action<Entity>>(
+                        h => completes.OnArmorSetBroken += h,
+                        h => completes.OnArmorSetBroken -= h,
+                        _ => Modify(wearer, null, Trigger.OnArmorSetBroken)
+                    );
+                    break;
+            }
         }
 
-        private void Modify(Entity target, Trigger trigger)
+        private bool HasTrigger(Trigger trigger) =>
+            StatChanges.Keys.Any(k => k.Trigger == trigger);
+
+        private void Modify(Entity source, Entity? target, Trigger trigger)
         {
-            if (target.Id.Category != EntityCategory.Player)
-                throw new InvalidOperationException($"[{Owner.Id}] ModifiesStats.Modify was passed a non-player target.");
+            // Filter changes matching this trigger
+            var matchingEntries = StatChanges
+                .Where(kvp => kvp.Key.Trigger == trigger)
+                .ToList();
 
-            var stats = target.GetComponent<StatsComponent>();
-            var resources = target.GetComponent<ResourcesComponent>();
-
-            // --- Stats ---
-            if (StatChanges != null)
+            foreach (var ((type, targetType, _), changes) in matchingEntries)
             {
-                foreach (var ((trig, type), changes) in StatChanges)
+                Entity receiver = targetType switch
                 {
-                    if (trig != trigger) continue;
+                    TargetType.Self => source,
+                    TargetType.Target => target ?? source,
+                    _ => throw new InvalidOperationException($"Unsupported TargetType: {targetType}")
+                };
 
-                    foreach (var (key, value) in changes)
-                    {
-                        switch (type)
-                        {
-                            case ModificationType.Add:
-                                stats.IncreaseBase(key, (int)value);
-                                break;
-                            case ModificationType.Multiply:
-                                stats.IncreaseModifier(key, value);
-                                break;
-                        }
-                    }
-                }
-            }
-
-            // --- Resources ---
-            if (ResourceChanges != null)
-            {
-                foreach (var ((trig, type), changes) in ResourceChanges)
+                var stats = receiver.GetComponent<StatsComponent>();
+                foreach (var (key, value) in changes)
                 {
-                    if (trig != trigger) continue;
-
-                    foreach (var (key, value) in changes)
+                    switch (type)
                     {
-                        switch (type)
-                        {
-                            case ModificationType.Add:
-                                resources.Change(key, (int)value);
-                                break;
-                            case ModificationType.Multiply:
-                                resources.ChangeMultiplier(key, value);
-                                break;
-                        }
+                        case ModificationType.Add:
+                            stats.IncreaseBase(key, (int)value);
+                            break;
+                        case ModificationType.Multiply:
+                            stats.IncreaseModifier(key, value);
+                            break;
                     }
                 }
             }

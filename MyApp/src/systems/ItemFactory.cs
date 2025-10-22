@@ -131,15 +131,7 @@ namespace CBA
                     (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
                     (e, holder) => new Usable(e, 15),
                     (e, holder) => new Consumable(e),
-                    (e, holder) => new ModifiesStats(e,
-                    ResourcesByTrigger: new()
-                        {
-                            [(Trigger.OnUse, ModificationType.Add)] = new()
-                            {
-                                ["Health"]  = 25.0f
-                            }
-                        }
-                    )
+                    (e, holder) => new DealsHealing(e, 25)
                 ]
             ),
             new(
@@ -153,15 +145,7 @@ namespace CBA
                     (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
                     (e, holder) => new Usable(e, 0),
                     (e, holder) => new Consumable(e),
-                    (e, holder) => new ModifiesStats(e,
-                    ResourcesByTrigger: new()
-                        {
-                            [(Trigger.OnUse, ModificationType.Add)] = new()
-                            {
-                                ["Stamina"]  = 25.0f
-                            }
-                        }
-                    )
+                    (e, holder) => new DealsStimming(e, 25)
                 ]
             ),
             new(
@@ -176,9 +160,9 @@ namespace CBA
                     (e, holder) => new Usable(e, 15),
                     (e, holder) => new Consumable(e),
                     (e, holder) => new ModifiesStats(e,
-                    StatsByTrigger: new()
+                    statsByTrigger: new()
                         {
-                            [(Trigger.OnUse, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new()
                             {
                                 ["MaximumHealth"]  = 5.0f
                             }
@@ -198,12 +182,9 @@ namespace CBA
                     (e, holder) => new Usable(e, 15),
                     (e, holder) => new Consumable(e),
                     (e, holder) => new ModifiesStats(e,
-                    StatsByTrigger: new()
+                    statsByTrigger: new()
                         {
-                            [(Trigger.OnUse, ModificationType.Add)] = new()
-                            {
-                                ["MaximumStamina"]  = 5.0f
-                            }
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["MaximumStamina"]  = 5.0f}
                         }
                     )
                 ]
@@ -220,12 +201,9 @@ namespace CBA
                     (e, holder) => new Usable(e, 15),
                     (e, holder) => new Consumable(e),
                     (e, holder) => new ModifiesStats(e,
-                    StatsByTrigger: new()
+                    statsByTrigger: new()
                         {
-                            [(Trigger.OnUse, ModificationType.Add)] = new()
-                            {
-                                ["Armor"]  = 5.0f
-                            }
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["Armor"]  = 5.0f}
                         }
                     )
                 ]
@@ -242,12 +220,9 @@ namespace CBA
                     (e, holder) => new Usable(e, 15),
                     (e, holder) => new Consumable(e),
                     (e, holder) => new ModifiesStats(e,
-                    StatsByTrigger: new()
+                    statsByTrigger: new()
                         {
-                            [(Trigger.OnUse, ModificationType.Add)] = new()
-                            {
-                                ["Shield"]  = 5.0f
-                            }
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["Shield"]  = 5.0f}
                         }
                     )
                 ]
@@ -264,12 +239,9 @@ namespace CBA
                     (e, holder) => new Usable(e, 15),
                     (e, holder) => new Consumable(e),
                     (e, holder) => new ModifiesStats(e,
-                    StatsByTrigger: new()
+                    statsByTrigger: new()
                         {
-                            [(Trigger.OnUse, ModificationType.Add)] = new()
-                            {
-                                ["Critical"]  = 5.0f
-                            }
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["Critical"]  = 5.0f}
                         }
                     )
                 ]
@@ -286,12 +258,9 @@ namespace CBA
                     (e, holder) => new Usable(e, 15),
                     (e, holder) => new Consumable(e),
                     (e, holder) => new ModifiesStats(e,
-                    StatsByTrigger: new()
+                    statsByTrigger: new()
                         {
-                            [(Trigger.OnUse, ModificationType.Add)] = new()
-                            {
-                                ["Dodge"]  = 5.0f
-                            }
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["Dodge"]  = 5.0f}
                         }
                     )
                 ]
@@ -308,12 +277,9 @@ namespace CBA
                     (e, holder) => new Usable(e, 15),
                     (e, holder) => new Consumable(e),
                     (e, holder) => new ModifiesStats(e,
-                    StatsByTrigger: new()
+                    statsByTrigger: new()
                         {
-                            [(Trigger.OnUse, ModificationType.Add)] = new()
-                            {
-                                ["Luck"]  = 5.0f
-                            }
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["Luck"]  = 5.0f}
                         }
                     )
                 ]
@@ -330,12 +296,9 @@ namespace CBA
                     (e, holder) => new Usable(e, 15),
                     (e, holder) => new Consumable(e),
                     (e, holder) => new ModifiesStats(e,
-                    StatsByTrigger: new()
+                    statsByTrigger: new()
                         {
-                            [(Trigger.OnUse, ModificationType.Add)] = new()
-                            {
-                                ["Peer"]  = 5.0f
-                            }
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["Peer"]  = 5.0f}
                         }
                     )
                 ]
@@ -357,18 +320,12 @@ namespace CBA
                     (e, holder) => new Usable(e, 15),
                     (e, holder) => new Consumable(e),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnUse, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnUse)] = new()
                             {
-                                ["MaximumHealth"]  = 1.25f
-                            }
-                        },
-                        ResourcesByTrigger: new()
-                        {
-                            [(Trigger.OnUse, ModificationType.Multiply)] = new()
-                            {
-                                ["Health"] = 1.25f
+                                ["MaximumHealth"]  = 1.25f,
+                                ["Healing"] = 1.25f
                             }
                         }
                     )
@@ -386,18 +343,12 @@ namespace CBA
                     (e, holder) => new Usable(e, 15),
                     (e, holder) => new Consumable(e),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnUse, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnUse)] = new()
                             {
-                                ["MaximumStamina"]  = 1.25f
-                            }
-                        },
-                        ResourcesByTrigger: new()
-                        {
-                            [(Trigger.OnUse, ModificationType.Multiply)] = new()
-                            {
-                                ["Stamina"] = 1.25f
+                                ["MaximumStamina"]  = 1.25f,
+                                ["Stimming"] = 1.25f
                             }
                         }
                     )
@@ -415,13 +366,60 @@ namespace CBA
                     (e, holder) => new Usable(e, 15),
                     (e, holder) => new Consumable(e),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnUse, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnUse)] = new()
                             {
                                 ["Armor"]  = 1.25f,
                                 ["Shield"] = 1.25f
                             }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "null_nib",
+                "Null Nib",
+                ItemType.Consumable,
+                ItemRarity.Uncommon,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Uncommon, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 15),
+                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ModifiesEffects(e,
+                        effectsByTrigger: new()
+                        {
+                            [(EffectAction.Remove, TargetType.Self, Trigger.OnUse)] =
+                            [
+                                "inferno",
+                                "crushed",
+                                "blinded",
+                                "frozen",
+                            ]
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "void_vial",
+                "Void Vial",
+                ItemType.Consumable,
+                ItemRarity.Uncommon,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Uncommon, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 15),
+                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ModifiesEffects(e,
+                        effectsByTrigger: new()
+                        {
+                            [(EffectAction.Apply, TargetType.Self, Trigger.OnUse)] =
+                            [
+                                "noons_visibility", // TODO: add more positive finite-duration effects
+                            ]
                         }
                     )
                 ]
@@ -443,29 +441,55 @@ namespace CBA
                     (e, holder) => new Usable(e, 15),
                     (e, holder) => new Consumable(e),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnUse, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnUse)] = new()
                             {
                                 ["MaximumHealth"]   = 1.25f,
                                 ["MaximumStamina"]  = 1.25f,
+                                ["Healing"]         = 1.25f,
+                                ["Stimming"]        = 1.25f,
                                 ["Armor"]           = 1.25f,
                                 ["Shield"]          = 1.25f
-                            }
-                        },
-
-                        ResourcesByTrigger: new()
-                        {
-                            [(Trigger.OnUse, ModificationType.Multiply)] = new()
-                            {
-                                ["Health"]  = 1.25f,
-                                ["Stamina"] = 1.25f
                             }
                         }
                     )
                 ]
             ),
-
+            new(
+                EntityCategory.Item,
+                "monochrome_mixture",
+                "Monochrome Mixture",
+                ItemType.Consumable,
+                ItemRarity.Rare,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Rare, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 15),
+                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ModifiesEffects(e,
+                        effectsByTrigger: new()
+                        {
+                            [(EffectAction.Remove, TargetType.Self, Trigger.OnUse)] =
+                            [
+                                "inferno",
+                                "crushed",
+                                "blinded",
+                                "frozen",
+                            ]
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        effectsByTrigger: new()
+                        {
+                            [(EffectAction.Apply, TargetType.Self, Trigger.OnUse)] =
+                            [
+                                "noons_visibility", // TODO: add more positive finite-duration effects
+                            ]
+                        }
+                    )
+                ]
+            ),
             new(
                 EntityCategory.Item,
                 "homogenous_paste",
@@ -478,12 +502,117 @@ namespace CBA
                     (e, holder) => new Usable(e, 15),
                     (e, holder) => new Consumable(e),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnUse, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnUse)] = new()
                             {
                                 ["Critical"]   = 1.25f,
                                 ["Dodge"]      = 1.25f
+                            }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "zoological_delight",
+                "Zoological Delight",
+                ItemType.Consumable,
+                ItemRarity.Rare,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Rare, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 15),
+                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ModifiesStats(e,
+                    statsByTrigger: new()
+                        {
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new()
+                            {
+                                ["Steal"]  = 5.0f
+                            }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "electric_enhancement",
+                "Electric Enhancement",
+                ItemType.Consumable,
+                ItemRarity.Rare,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Rare, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 15),
+                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ModifiesStats(e,
+                    statsByTrigger: new()
+                        {
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnUse)] = new()
+                            {
+                                ["ConsumableCost"]  = 0.9f
+                            }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "magnetic_modification",
+                "Magnetic Modification",
+                ItemType.Consumable,
+                ItemRarity.Rare,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Rare, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 15),
+                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ModifiesStats(e,
+                    statsByTrigger: new()
+                        {
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnUse)] = new()
+                            {
+                                ["WeaponCost"]  = 0.9f
+                            }
+                        }
+                    )
+                ]
+            ),
+            #endregion
+            //     ======================================================
+            //     Mythical
+            //     ======================================================
+            #region
+            new(
+                EntityCategory.Item,
+                "spectral_solution",
+                "Spectral Solution",
+                ItemType.Consumable,
+                ItemRarity.Mythical,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Mythical, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 15),
+                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ModifiesEffects(e,
+                        effectsByTrigger: new()
+                        {
+                            [(EffectAction.Remove, TargetType.Self, Trigger.OnUse)] =
+                            [..World.Instance.GetNegativeEffectsForPlayer(holder).Select(e => e.Id.TypeId)]
+                        }
+                    ),
+                    (e, holder) => new ModifiesStats(e,
+                        statsByTrigger: new()
+                        {
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnUse)] = new()
+                            {
+                                ["MaximumHealth"]   = 1.25f,
+                                ["MaximumStamina"]  = 1.25f,
+                                ["Healing"]         = 1.25f,
+                                ["Stimming"]        = 1.25f,
+                                ["Armor"]           = 1.25f,
+                                ["Shield"]          = 1.25f
                             }
                         }
                     )
@@ -511,7 +640,7 @@ namespace CBA
                     (e, holder) => new Hits(e, true),
                     (e, holder) => new DealsDamage(e, 10, DamageType.Physical, true),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Target, Trigger.OnUse), ["inferno"]}
                         }
@@ -532,7 +661,7 @@ namespace CBA
                     (e, holder) => new Hits(e, true),
                     (e, holder) => new DealsDamage(e, 10, DamageType.Physical, true),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnHit), ["moonlight"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnUnequip), ["moonlight"] },
@@ -556,7 +685,7 @@ namespace CBA
                     (e, holder) => new Hits(e, true),
                     (e, holder) => new DealsDamage(e, 10, DamageType.Physical, true),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Target, Trigger.OnHit), ["crushed"] }
                         }
@@ -577,7 +706,7 @@ namespace CBA
                     (e, holder) => new Hits(e, true),
                     (e, holder) => new DealsDamage(e, 10, DamageType.Physical, true),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Target, Trigger.OnHit), ["blinded"] }
                         }
@@ -598,7 +727,7 @@ namespace CBA
                     (e, holder) => new Hits(e, true),
                     (e, holder) => new DealsDamage(e, 10, DamageType.Physical, true),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnTurnStartWhileEquipped), ["noons_visibility"] }
                         }
@@ -619,7 +748,7 @@ namespace CBA
                     (e, holder) => new Hits(e, true),
                     (e, holder) => new DealsDamage(e, 10, DamageType.Physical, true),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Target, Trigger.OnHit), ["frozen"] }
                         }
@@ -648,20 +777,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Helmet),
                     (e, holder) => new CompletesItemSet(e, "oculus"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["third_eye"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["third_eye"] }
@@ -681,20 +810,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Chestplate),
                     (e, holder) => new CompletesItemSet(e, "oculus"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["third_eye"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["third_eye"] }
@@ -714,20 +843,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Leggings),
                     (e, holder) => new CompletesItemSet(e, "oculus"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["third_eye"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["third_eye"] }
@@ -750,20 +879,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Helmet),
                     (e, holder) => new CompletesItemSet(e, "sonic"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["vibrata"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["vibrata"] }
@@ -783,20 +912,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Chestplate),
                     (e, holder) => new CompletesItemSet(e, "sonic"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["vibrata"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["vibrata"] }
@@ -816,20 +945,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Leggings),
                     (e, holder) => new CompletesItemSet(e, "sonic"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["vibrata"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["vibrata"] }
@@ -852,20 +981,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Helmet),
                     (e, holder) => new CompletesItemSet(e, "olfactory"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["pungence"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["pungence"] }
@@ -885,20 +1014,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Chestplate),
                     (e, holder) => new CompletesItemSet(e, "olfactory"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["pungence"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["pungence"] }
@@ -918,20 +1047,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Leggings),
                     (e, holder) => new CompletesItemSet(e, "olfactory"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["pungence"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["pungence"] }
@@ -954,20 +1083,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Helmet),
                     (e, holder) => new CompletesItemSet(e, "tact"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["substance"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["substance"] }
@@ -988,20 +1117,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Chestplate),
                     (e, holder) => new CompletesItemSet(e, "tact"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["substance"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["substance"] }
@@ -1022,20 +1151,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Leggings),
                     (e, holder) => new CompletesItemSet(e, "tact"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["substance"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["substance"] }
@@ -1058,20 +1187,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Helmet),
                     (e, holder) => new CompletesItemSet(e, "relish"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["delight"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["delight"] }
@@ -1091,20 +1220,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Chestplate),
                     (e, holder) => new CompletesItemSet(e, "relish"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["delight"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["delight"] }
@@ -1124,20 +1253,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Leggings),
                     (e, holder) => new CompletesItemSet(e, "relish"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["delight"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["delight"] }
@@ -1160,20 +1289,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Helmet),
                     (e, holder) => new CompletesItemSet(e, "vanity"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["reflection"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["relection"] }
@@ -1193,20 +1322,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Chestplate),
                     (e, holder) => new CompletesItemSet(e, "vanity"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["reflection"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["relection"] }
@@ -1226,20 +1355,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Leggings),
                     (e, holder) => new CompletesItemSet(e, "vanity"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["reflection"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["relection"] }
@@ -1262,20 +1391,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Helmet),
                     (e, holder) => new CompletesItemSet(e, "avarice"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["pleonexia"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["pleonexia"] }
@@ -1295,20 +1424,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Chestplate),
                     (e, holder) => new CompletesItemSet(e, "avarice"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["pleonexia"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["pleonexia"] }
@@ -1328,20 +1457,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Leggings),
                     (e, holder) => new CompletesItemSet(e, "avarice"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["pleonexia"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["pleonexia"] }
@@ -1364,20 +1493,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Helmet),
                     (e, holder) => new CompletesItemSet(e, "temper"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["rage"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["rage"] }
@@ -1397,20 +1526,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Chestplate),
                     (e, holder) => new CompletesItemSet(e, "temper"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["rage"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["rage"] }
@@ -1430,20 +1559,20 @@ namespace CBA
                     (e, holder) => new Wearable(e, EquipType.Leggings),
                     (e, holder) => new CompletesItemSet(e, "temper"),
                     (e, holder) => new ModifiesStats(e,
-                        StatsByTrigger: new()
+                        statsByTrigger: new()
                         {
-                            [(Trigger.OnEquip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
                                 ["Defense"]   = 25f
                             },
-                            [(Trigger.OnUnequip, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
                                 ["Defense"]   = -25f
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
-                        triggeredEffects: new()
+                        effectsByTrigger: new()
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["rage"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["rage"] }
