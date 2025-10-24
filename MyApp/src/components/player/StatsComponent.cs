@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace CBA
 {
     public class StatsComponent(Entity owner) : Component(owner)
@@ -9,51 +11,38 @@ namespace CBA
             // Resource Stats
             {"MaximumHealth",  (100, 1.0f)},
             {"MaximumStamina", (100, 1.0f)},
-            {"Healing",        (100, 1.0f)},
-            {"Stimming",       (100, 1.0f)},
+            {"Healing",        (100, 1.0f)}, // Represents the percentage of each heal that the player actually receives. Min = .25
+            {"Stimming",       (100, 1.0f)}, // Represents the percentage of each stim that the player actually receives. Min = .25
 
             // Receiving Items
-            {"Peer",  (0, 1.0f)},
-            {"Luck",  (0, 1.0f)},
-            {"Steal", (0, 1.0f)},
+            {"Luck",  (0, 1.0f)}, // Represents the chance of getting a second item, scales hyperbolically
+            {"Steal", (0, 1.0f)}, // Represents the chance of sealing an item, scales hyperbolically
 
             // Using Items
-            { "ConsumableCost", (0, 1.0f) },
-            { "WeaponCost", (0, 1.0f) },
+            { "ConsumableCost", (100, 1.0f) }, // Represents the percentage of each consumable cost that the player expends, Min = .25
+            { "WeaponCost", (100, 1.0f) },     // Represents the percentage of each weapon cost that the player expends, Min = .25
 
             // Dealing Damage
-            { "Attack", (0, 1.0f) },
-            { "Critical", (0, 1.0f) },
-            { "Accuracy", (100, 1.0f) },
-            { "Precision", (0, 1.0f) },
+            { "Attack", (100, 1.0f) },    // Represents the percentage of each damage instance that the player deals, Min = .25
+            { "Critical", (0, 1.0f) },    // Chance-Based stat
+            { "Accuracy", (100, 1.0f) },  // Represents the percentage chance to hit, Min = .25
+            { "Precision", (100, 1.0f) }, // Represents the percentage of the attack damage that critical strikes deal on top, Min = 0
 
             // Receiving Damage
-            { "Armor", (50, 1.0f) },
-            { "Shield", (50, 1.0f) },
-            { "Dodge", (0, 1.0f) },
-            { "Defense", (50, 1.0f) },
-
+            { "Armor", (50, 1.0f) }, // Percentage Stat, scales hyperbolically
+            { "Shield", (50, 1.0f) }, // Percentage Stat, scales hyperbolically
+            { "Dodge", (0, 1.0f) }, // Chance-Based stat, scales hyperbolically
         };
 
         public bool HasStat(string name) => _values.ContainsKey(name);
-        private void ValidateStat(string name)
-        {
-            if (!HasStat(name)) throw new ArgumentException($"Stat '{name}' does not exist.");
-        }
-
         public int Get(string name)
         {
             ValidateStat(name);
             (int Base, float Modifier) = _values[name];
             return (int)(Base * Modifier);
         }
-        public float GetHyperbolic(string name)
-        {
-            ValidateStat(name);
-            float hyperbolic = Get(name);
-            hyperbolic /= hyperbolic + 100;
-            return hyperbolic;
-        }
+        public float GetHyperbolic(string name) => Get(name) / (Get(name) + 100f);
+        public float GetLinearClamped(string name, float minimum) => Math.Max(minimum, Get($"{name}") / 100f);
 
         public void IncreaseBase(string name, int delta)
         {
@@ -62,7 +51,6 @@ namespace CBA
             _values[name] = (Base + delta, Modifier);
             OnStatChanged?.Invoke(name);
         }
-
         public void IncreaseModifier(string name, float factor)
         {
             ValidateStat(name);
@@ -70,7 +58,6 @@ namespace CBA
             _values[name] = (Base, Modifier * factor);
             OnStatChanged?.Invoke(name);
         }
-
         protected override void RegisterSubscriptions()
         {
             RegisterSubscription<Action<string>>(
@@ -79,5 +66,11 @@ namespace CBA
                 name => Printer.PrintStatChanged(this, name)
             );
         }
+        private void ValidateStat(string name)
+        {
+            if (!HasStat(name)) throw new ArgumentException($"Stat '{name}' does not exist.");
+        }
+
+
     }
 }

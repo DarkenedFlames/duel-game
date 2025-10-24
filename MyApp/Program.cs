@@ -14,20 +14,17 @@ public class Program
 
         foreach (Entity p in players)
         {
-            List<Component> Components =
-            [
-                new PlayerData(p),
-                new StatsComponent(p),
-                new ResourcesComponent(p),
-                new GetsRandomItems(p),
-                new PeersComponent(p),
-                new RefillsStamina(p),
-                new TurnMemory(p)
-            ];
-
-            foreach (Component component in Components)
-                p.AddComponent(component);
-
+            p.AddComponents<Component>
+            (
+                [
+                    new PlayerData(p),
+                    new StatsComponent(p),
+                    new ResourcesComponent(p),
+                    new GetsRandomItems(p),
+                    new RefillsStamina(p),
+                    new TurnMemory(p)
+                ]
+            );
 
             World.Instance.AddEntity(p);
         }

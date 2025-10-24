@@ -92,7 +92,7 @@ namespace CBA
                 "inferno",
                 "Inferno",
                 MaxStacks: 5,
-                Chance: .15f,
+                Chance: .33f,
                 Components:
                 [
                     (e, target) => new EffectData(e, target, true, false, maxStacks: 5),
@@ -101,7 +101,20 @@ namespace CBA
                 ]
 
             ),
+            new(
+                EntityCategory.Effect,
+                "sunburn",
+                "Sunburn",
+                MaxStacks: 5,
+                Chance: .15f,
+                Components:
+                [
+                    (e, target) => new EffectData(e, target, true, false, maxStacks: 5),
+                    (e, target) => new EffectDuration(e, 3),
+                    (e, target) => new DealsDamage(e, 10, DamageType.True, false)
+                ]
 
+            ),
             new(
                 EntityCategory.Effect,
                 "moonlight",
@@ -114,11 +127,11 @@ namespace CBA
                     (e, target) => new ModifiesStats(e,
                     statsByTrigger: new()
                         {
-                            [(Trigger.OnAdded, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnAdded)] = new()
                             {
                                 ["Critical"] = 100f
                             },
-                            [(Trigger.OnRemoved, ModificationType.Add)] = new()
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnRemoved)] = new()
                             {
                                 ["Critical"] = -100f
                             }
@@ -137,13 +150,13 @@ namespace CBA
                     (e, target) => new ModifiesStats(e,
                     statsByTrigger: new()
                         {
-                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnAdded)] = new()
                             {
-                                ["Critical"] = 1.2f
+                                ["Critical"] = 2.0f
                             },
-                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnRemoved)] = new()
                             {
-                                ["Critical"] = 1.0f/1.2f
+                                ["Critical"] = 0.5f
                             }
                         }
                     )
@@ -160,13 +173,13 @@ namespace CBA
                     (e, target) => new ModifiesStats(e,
                     statsByTrigger: new()
                         {
-                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnAdded)] = new()
                             {
-                                ["Dodge"] = 1.2f
+                                ["Dodge"] = 2.0f
                             },
-                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnRemoved)] = new()
                             {
-                                ["Dodge"] = 1.0f/1.2f
+                                ["Dodge"] = 0.5f
                             }
                         }
                     )
@@ -183,13 +196,13 @@ namespace CBA
                     (e, target) => new ModifiesStats(e,
                     statsByTrigger: new()
                         {
-                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnAdded)] = new()
                             {
-                                ["Peer"] = 1.2f
+                                ["ConsumableCost"] = .75f
                             },
-                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnRemoved)] = new()
                             {
-                                ["Peer"] = 1.0f/1.2f
+                                ["ConsumableCost"] = 1f/.75f
                             }
                         }
                     )
@@ -197,8 +210,8 @@ namespace CBA
             ),
             new(
                 EntityCategory.Effect,
-                "substance",
-                "Substance",
+                "dexterity",
+                "Dexterity",
                 StackingType: StackingType.Ignore,
                 Components:
                 [
@@ -206,13 +219,13 @@ namespace CBA
                     (e, target) => new ModifiesStats(e,
                     statsByTrigger: new()
                         {
-                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnAdded)] = new()
                             {
-                                ["Armor"] = 1.2f
+                                ["Stimming"] = 2.0f
                             },
-                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnRemoved)] = new()
                             {
-                                ["Armor"] = 1.0f/1.2f
+                                ["Stimming"] = 0.5f
                             }
                         }
                     )
@@ -229,13 +242,13 @@ namespace CBA
                     (e, target) => new ModifiesStats(e,
                     statsByTrigger: new()
                         {
-                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnAdded)] = new()
                             {
-                                ["MaximumHealth"] = 1.2f
+                                ["Healing"] = 2.0f
                             },
-                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnRemoved)] = new()
                             {
-                                ["MaximumHealth"] = 1.0f/1.2f
+                                ["Healing"] = 0.5f
                             }
                         }
                     )
@@ -252,13 +265,13 @@ namespace CBA
                     (e, target) => new ModifiesStats(e,
                     statsByTrigger: new()
                         {
-                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnAdded)] = new()
                             {
-                                ["Shield"] = 1.2f
+                                ["Precision"] = 2.0f
                             },
-                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnRemoved)] = new()
                             {
-                                ["Shield"] = 1.0f/1.2f
+                                ["Precision"] = 0.5f
                             }
                         }
                     )
@@ -275,13 +288,13 @@ namespace CBA
                     (e, target) => new ModifiesStats(e,
                     statsByTrigger: new()
                         {
-                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnAdded)] = new()
                             {
-                                ["Luck"] = 1.2f
+                                ["Luck"] = 2.0f
                             },
-                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnRemoved)] = new()
                             {
-                                ["Luck"] = 1.0f/1.2f
+                                ["Luck"] = 0.5f
                             }
                         }
                     )
@@ -298,19 +311,110 @@ namespace CBA
                     (e, target) => new ModifiesStats(e,
                     statsByTrigger: new()
                         {
-                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnAdded)] = new()
                             {
-                                ["Attack"] = 1.2f
+                                ["Attack"] = 2.0f
                             },
-                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnRemoved)] = new()
                             {
-                                ["Attack"] = 1.0f/1.2f
+                                ["Attack"] = 0.5f
                             }
                         }
                     )
                 ]
             ),
-
+            new(
+                EntityCategory.Effect,
+                "wanting",
+                "Wanting",
+                StackingType: StackingType.Ignore,
+                Components:
+                [
+                    (e, target) => new EffectData(e, target, false, false, StackingType.Ignore),
+                    (e, target) => new ModifiesStats(e,
+                    statsByTrigger: new()
+                        {
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnAdded)] = new()
+                            {
+                                ["Steal"] = 2.0f
+                            },
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnRemoved)] = new()
+                            {
+                                ["Steal"] = 0.5f
+                            }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Effect,
+                "awakening",
+                "Awakening",
+                StackingType: StackingType.Ignore,
+                Components:
+                [
+                    (e, target) => new EffectData(e, target, false, false, StackingType.Ignore),
+                    (e, target) => new ModifiesStats(e,
+                    statsByTrigger: new()
+                        {
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnAdded)] = new()
+                            {
+                                ["MaximumStamina"] = 2.0f
+                            },
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnRemoved)] = new()
+                            {
+                                ["MaximumStamina"] = 0.5f
+                            }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Effect,
+                "devouring",
+                "Devouring",
+                StackingType: StackingType.Ignore,
+                Components:
+                [
+                    (e, target) => new EffectData(e, target, false, false, StackingType.Ignore),
+                    (e, target) => new ModifiesStats(e,
+                    statsByTrigger: new()
+                        {
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnAdded)] = new()
+                            {
+                                ["MaximumHealth"] = 2.0f
+                            },
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnRemoved)] = new()
+                            {
+                                ["MaximumHealth"] = 0.5f
+                            }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Effect,
+                "cheating",
+                "Cheating",
+                StackingType: StackingType.Ignore,
+                Components:
+                [
+                    (e, target) => new EffectData(e, target, false, false, StackingType.Ignore),
+                    (e, target) => new ModifiesStats(e,
+                    statsByTrigger: new()
+                        {
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnAdded)] = new()
+                            {
+                                ["WeaponCost"] = .75f
+                            },
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnRemoved)] = new()
+                            {
+                                ["WeaponCost"] = 1f/.75f
+                            }
+                        }
+                    )
+                ]
+            ),
             new(
                 EntityCategory.Effect,
                 "crushed",
@@ -324,13 +428,13 @@ namespace CBA
                     (e, target) => new ModifiesStats(e,
                     statsByTrigger: new()
                         {
-                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnAdded)] = new()
                             {
-                                ["Attack"] = .8f
+                                ["Critical"] = .8f
                             },
-                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnRemoved)] = new()
                             {
-                                ["Attack"] = 1.0f/.8f
+                                ["Critical"] = 1f/.8f
                             }
                         }
                     )
@@ -349,13 +453,13 @@ namespace CBA
                     (e, target) => new ModifiesStats(e,
                     statsByTrigger: new()
                         {
-                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnAdded)] = new()
                             {
-                                ["Accuracy"] = .8f
+                                ["Critical"] = .8f
                             },
-                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnRemoved)] = new()
                             {
-                                ["Accuracy"] = 1.0f/.8f
+                                ["Critical"] = 1f/.8f
                             }
                         }
                     )
@@ -374,13 +478,13 @@ namespace CBA
                     (e, target) => new ModifiesStats(e,
                     statsByTrigger: new()
                         {
-                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnAdded)] = new()
                             {
                                 ["MaximumStamina"] = .8f
                             },
-                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnRemoved)] = new()
                             {
-                                ["MaximumStamina"] = 1.0f/.8f
+                                ["MaximumStamina"] = 1f/.8f
                             }
                         }
                     )
@@ -399,13 +503,13 @@ namespace CBA
                     (e, target) => new ModifiesStats(e,
                     statsByTrigger: new()
                         {
-                            [(Trigger.OnAdded, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnAdded)] = new()
                             {
-                                ["Precision"] = 1.2f
+                                ["Critical"] = 1.2f
                             },
-                            [(Trigger.OnRemoved, ModificationType.Multiply)] = new()
+                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnRemoved)] = new()
                             {
-                                ["Precision"] = 1.0f/1.2f
+                                ["Critical"] = 1f/1.2f
                             }
                         }
                     )

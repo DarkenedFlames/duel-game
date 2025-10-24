@@ -32,29 +32,27 @@ namespace CBA
             Console.WriteLine("\n==== Resources ====");
             Console.WriteLine($"Health: {resources.Get("Health")} / {stats.Get("MaximumHealth")}");
             Console.WriteLine($"Stamina: {resources.Get("Stamina")} / {stats.Get("MaximumStamina")}");
-            Console.WriteLine($"Healing Multiplier: {resources.Get("Healing") / 100}");
-            Console.WriteLine($"Stimming Multiplier: {resources.Get("Stimming") / 100}");
+            Console.WriteLine($"Healing Multiplier: {stats.Get("Healing")} " + $"(Heal {stats.GetLinearClamped("Healing", .25f):P} as much.)");
+            Console.WriteLine($"Stimming Multiplier: {stats.Get("Stimming")} " + $"(Stim {stats.GetLinearClamped("Stimming", .25f):P} as much.)");
 
             Console.WriteLine("\n==== Item Use ====");
-            Console.WriteLine($"Consumable Cost Score: {stats.Get("ConsumableCost")}");
-            Console.WriteLine($"Weapon Cost Score: {stats.Get("WeaponCost")}");
+            Console.WriteLine($"Consumable Cost: {stats.Get("ConsumableCost")} " + $"(Consumables cost {stats.GetLinearClamped("ConsumableCost", .25f):P} as much.)");
+            Console.WriteLine($"Weapon Cost: {stats.Get("WeaponCost")} " + $"(Weapons cost {stats.GetLinearClamped("WeaponCost", .25f):P} as much.)");
 
             Console.WriteLine("\n==== Obtaining Items ====");
-            Console.WriteLine($"Peer: {stats.Get("Peer")}");
-            Console.WriteLine($"Luck: {stats.Get("Luck")}");
-            Console.WriteLine($"Steal: {stats.Get("Steal")}");
+            Console.WriteLine($"Luck: {stats.Get("Luck")} " + $"(Chance for a second item: {stats.GetHyperbolic("Luck"):P})");
+            Console.WriteLine($"Steal: {stats.Get("Steal")} " + $"(Chance to steal an item: {stats.GetHyperbolic("Steal"):P})");
 
             Console.WriteLine("\n==== Offensive ====");
-            Console.WriteLine($"Attack: {stats.Get("Attack")}");
-            Console.WriteLine($"Critical: {stats.Get("Critical")}");
-            Console.WriteLine($"Precision: {stats.Get("Precision")}");
-            Console.WriteLine($"Accuracy: {stats.Get("Accuracy")}");
+            Console.WriteLine($"Attack: {stats.Get("Attack")} " + $"(Attacks deal {stats.GetLinearClamped("Attack", .25f):P} as much damage.)");
+            Console.WriteLine($"Critical: {stats.Get("Critical")} " + $"(Chance to critically hit: {stats.GetHyperbolic("Critical"):P})");
+            Console.WriteLine($"Precision: {stats.Get("Precision")} " + $"(Critical hits deal: {1 + stats.GetLinearClamped("Precision", 0f):P})");
+            Console.WriteLine($"Accuracy: {stats.Get("Accuracy")} " + $"(Chance to hit: {stats.GetLinearClamped("Accuracy", .25f):P})");
 
             Console.WriteLine("\n==== Defensive ====");
-            Console.WriteLine($"Defense: {stats.Get("Defense")}");
-            Console.WriteLine($"Armor: {stats.Get("Armor")}");
-            Console.WriteLine($"Shield: {stats.Get("Shield")}");
-            Console.WriteLine($"Dodge: {stats.Get("Dodge")}");
+            Console.WriteLine($"Armor: {stats.Get("Armor")} " + $"(Recieve {1f - stats.GetHyperbolic("Armor"):P} as much physical damage.)");
+            Console.WriteLine($"Shield: {stats.Get("Shield")} " + $"(Recieve {1f - stats.GetHyperbolic("Shield"):P} as much magical damage.)");
+            Console.WriteLine($"Dodge: {stats.Get("Dodge")} " + $"(Chance to dodge: {stats.GetHyperbolic("Dodge"):P})");
         }
         public static void PrintEffects(Entity player)
         {

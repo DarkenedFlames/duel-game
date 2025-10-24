@@ -37,13 +37,15 @@ namespace CBA
             if (Owner.Id.Category == EntityCategory.Effect && target != World.GetPlayerOf(Owner))
                 return;
 
-            int healing = Healing;
+            float floatHealing = Healing;
 
-            healing *= target.GetComponent<StatsComponent>().Get("Healing") / 100;
+            floatHealing *= target.GetComponent<StatsComponent>().GetLinearClamped("Healing", .25f);
 
-            target.GetComponent<ResourcesComponent>().Change("Health", healing);
+            int finalHealing = (int)floatHealing;
 
-            OnHealingDone?.Invoke(Owner, target, healing);
+            target.GetComponent<ResourcesComponent>().Change("Health", finalHealing);
+
+            OnHealingDone?.Invoke(Owner, target, finalHealing);
         }
     }
 }

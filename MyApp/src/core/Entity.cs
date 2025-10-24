@@ -19,6 +19,10 @@ namespace CBA
         {
             _components.Add(component);
         }
+        public void AddComponents<T>(IEnumerable<T> components) where T: Component
+        {
+            foreach (Component component in components) AddComponent(component);
+        }
         public void RemoveComponent<T>() where T : Component
         {
             T? c = _components.OfType<T>().FirstOrDefault();

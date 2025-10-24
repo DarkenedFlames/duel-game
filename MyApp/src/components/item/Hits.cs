@@ -28,7 +28,7 @@ namespace CBA
                 return;
             }
 
-            if(Random.Shared.NextDouble() > hitterStats.Get("Accuracy") / 100)
+            if(Random.Shared.NextDouble() > hitterStats.GetLinearClamped("Accuracy", .25f))
             {
                 Printer.PrintMissed(Owner, target);
                 OnMiss?.Invoke(Owner, target);

@@ -8,16 +8,16 @@ namespace CBA
         protected override void RegisterSubscriptions()
         {
             RegisterSubscription<Action<Entity>>(
-                h => World.Instance.TurnManager.OnTurnStart += h,
-                h => World.Instance.TurnManager.OnTurnStart -= h,
-                OnTurnStart
+                h => World.Instance.TurnManager.OnTurnEnd += h,
+                h => World.Instance.TurnManager.OnTurnEnd -= h,
+                OnTurnEnd
             );
         }
-        private void OnTurnStart(Entity turnTaker)
+        private void OnTurnEnd(Entity turnTaker)
         {
             if (turnTaker == World.GetPlayerOf(Owner))
             {
-                if (Remaining <= 0)
+                if (Remaining <= 1)
                     World.Instance.RemoveEntity(Owner);
                 else
                     Remaining--;

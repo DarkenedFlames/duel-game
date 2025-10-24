@@ -7,30 +7,43 @@ namespace CBA
         public event Action<Entity, Entity>? OnUseSuccess;
         public event Action<Entity, Entity>? OnUseFailed;
 
-        protected override void RegisterSubscriptions(){}
+        protected override void RegisterSubscriptions() { }
+
         public void TryUse(Entity target)
         {
             Entity user = World.GetPlayerOf(Owner);
             ResourcesComponent resources = user.GetComponent<ResourcesComponent>();
             StatsComponent stats = user.GetComponent<StatsComponent>();
-            ItemType type = Owner.GetComponent<ItemData>().Type;
+            ItemData itemData = Owner.GetComponent<ItemData>();
 
-            float multiplier;
-            if (type == ItemType.Consumable)
-                multiplier = 1 - stats.GetHyperbolic("ConsumableCost");
-            else
-                multiplier = 1 - stats.GetHyperbolic("WeaponCost");
+            float floatCost = StaminaCost;
+            float multiplier = itemData.Type switch
+            {
+                ItemType.Consumable => stats.GetLinearClamped("ConsumableCost", .25f),
+                ItemType.Weapon     => stats.GetLinearClamped("WeaponCost", .25f),
+                _                   => 1f
+            };
 
-            if (resources.Get("Stamina") < StaminaCost * multiplier)
+            floatCost *= multiplier;
+
+            if (resources.Get("Stamina") < floatCost)
             {
                 Printer.PrintInsufficientStamina(Owner);
                 OnUseFailed?.Invoke(Owner, target);
                 return;
             }
 
-            resources.Change("Stamina", -StaminaCost);
+            int finalCost = (int)floatCost;
+
+            resources.Change("Stamina", -finalCost);
             Printer.PrintItemUsed(Owner, target);
             OnUseSuccess?.Invoke(Owner, target);
+
+            if (itemData.Type == ItemType.Consumable)
+            {
+                Printer.PrintItemConsumed(Owner);
+                World.Instance.RemoveEntity(Owner);
+            }
         }
     }
 }

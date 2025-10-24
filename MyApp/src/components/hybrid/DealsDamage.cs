@@ -41,7 +41,7 @@ namespace CBA
                 if (target != World.GetPlayerOf(Owner))
                     return;
 
-            int finalDamage = Damage;
+            float floatDamage = Damage;
 
             StatsComponent targetStats = target.GetComponent<StatsComponent>();
             ResourcesComponent targetResources = target.GetComponent<ResourcesComponent>();
@@ -51,15 +51,12 @@ namespace CBA
                 StatsComponent userStats = World.GetPlayerOf(Owner).GetComponent<StatsComponent>();
 
                 // --- Attack ---
-                float attackMultiplier = 1 + userStats.GetHyperbolic("Attack");
-                finalDamage = (int)(finalDamage * attackMultiplier);
+                floatDamage *= userStats.GetLinearClamped("Attack", .25f);
 
                 // --- Crit ---
-                float critChance = userStats.GetHyperbolic("Critical");
-                float critMultiplier = 2 + userStats.GetHyperbolic("Precision");
-                if (Random.Shared.NextDouble() < critChance)
+                if (Random.Shared.NextDouble() < userStats.GetHyperbolic("Critical"))
                 {
-                    finalDamage = (int)(finalDamage * critMultiplier);
+                    floatDamage *= 1 + userStats.GetLinearClamped("Precision", 0f);
                     Printer.PrintCritical(Owner, target);
                     OnCritical?.Invoke(Owner, target);
                 }
@@ -73,15 +70,9 @@ namespace CBA
                 _                   => 1f
             };
 
-            finalDamage = (int)(finalDamage * resistanceMultiplier);
+            floatDamage *= resistanceMultiplier;
 
-            // --- Defense ---
-            if (DamageType == DamageType.Physical || DamageType == DamageType.Magical)
-            {
-                float defenseDivisor = 1 + targetStats.GetHyperbolic("Defense");
-                finalDamage = (int)(finalDamage / defenseDivisor);
-            }
-
+            int finalDamage = (int)floatDamage;
 
             // --- Apply Damage ---
             targetResources.Change("Health", -finalDamage);

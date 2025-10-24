@@ -116,9 +116,6 @@ namespace CBA
             // ==========================================================
             // Consumables
             // ==========================================================
-            //     ======================================================
-            //     Common
-            //     ======================================================
             #region
             new(
                 EntityCategory.Item,
@@ -129,9 +126,39 @@ namespace CBA
                 Components:
                 [
                     (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
-                    (e, holder) => new Usable(e, 15),
-                    (e, holder) => new Consumable(e),
+                    (e, holder) => new Usable(e, 25),
                     (e, holder) => new DealsHealing(e, 25)
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "celestial_cyan_cider",
+                "Celestial Cyan Cider",
+                ItemType.Consumable,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 0),
+                    (e, holder) => new DealsStimming(e, 25)
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "yummy_yellow_yarb",
+                "Yummy Yellow Yarb",
+                ItemType.Consumable,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 25),
+                    (e, holder) => new ModifiesStats(e,
+                    statsByTrigger: new()
+                        {
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new() {["MaximumHealth"]  = 25.0f}
+                        }
+                    )
                 ]
             ),
             new(
@@ -143,67 +170,11 @@ namespace CBA
                 Components:
                 [
                     (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
-                    (e, holder) => new Usable(e, 0),
-                    (e, holder) => new Consumable(e),
-                    (e, holder) => new DealsStimming(e, 25)
-                ]
-            ),
-            new(
-                EntityCategory.Item,
-                "oozing_orange_oil",
-                "Oozing Orange Oil",
-                ItemType.Consumable,
-                ItemRarity.Common,
-                Components:
-                [
-                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
-                    (e, holder) => new Usable(e, 15),
-                    (e, holder) => new Consumable(e),
+                    (e, holder) => new Usable(e, 25),
                     (e, holder) => new ModifiesStats(e,
                     statsByTrigger: new()
                         {
-                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new()
-                            {
-                                ["MaximumHealth"]  = 5.0f
-                            }
-                        }
-                    )
-                ]
-            ),
-            new(
-                EntityCategory.Item,
-                "glowing_green_grog",
-                "Glowing Green Grog",
-                ItemType.Consumable,
-                ItemRarity.Common,
-                Components:
-                [
-                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
-                    (e, holder) => new Usable(e, 15),
-                    (e, holder) => new Consumable(e),
-                    (e, holder) => new ModifiesStats(e,
-                    statsByTrigger: new()
-                        {
-                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["MaximumStamina"]  = 5.0f}
-                        }
-                    )
-                ]
-            ),
-            new(
-                EntityCategory.Item,
-                "yielding_yellow_yarb",
-                "Yielding Yellow Yarb",
-                ItemType.Consumable,
-                ItemRarity.Common,
-                Components:
-                [
-                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
-                    (e, holder) => new Usable(e, 15),
-                    (e, holder) => new Consumable(e),
-                    (e, holder) => new ModifiesStats(e,
-                    statsByTrigger: new()
-                        {
-                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["Armor"]  = 5.0f}
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["MaximumStamina"]  = 25.0f}
                         }
                     )
                 ]
@@ -217,162 +188,137 @@ namespace CBA
                 Components:
                 [
                     (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
-                    (e, holder) => new Usable(e, 15),
-                    (e, holder) => new Consumable(e),
+                    (e, holder) => new Usable(e, 25),
                     (e, holder) => new ModifiesStats(e,
                     statsByTrigger: new()
                         {
-                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["Shield"]  = 5.0f}
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["Healing"]  = 25.0f}
                         }
                     )
                 ]
             ),
             new(
                 EntityCategory.Item,
-                "pupil_porridge",
-                "Pupil Porridge",
+                "glowing_green_grog",
+                "Glowing Green Grog",
                 ItemType.Consumable,
                 ItemRarity.Common,
                 Components:
                 [
                     (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
-                    (e, holder) => new Usable(e, 15),
-                    (e, holder) => new Consumable(e),
+                    (e, holder) => new Usable(e, 25),
                     (e, holder) => new ModifiesStats(e,
                     statsByTrigger: new()
                         {
-                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["Critical"]  = 5.0f}
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["Stimming"]  = 25.0f}
                         }
                     )
                 ]
             ),
             new(
                 EntityCategory.Item,
-                "cartilage_chowder",
-                "Cartilage Chowder",
+                "oozing_orange_oil",
+                "Oozing Orange Oil",
                 ItemType.Consumable,
                 ItemRarity.Common,
                 Components:
                 [
                     (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
-                    (e, holder) => new Usable(e, 15),
-                    (e, holder) => new Consumable(e),
+                    (e, holder) => new Usable(e, 25),
                     (e, holder) => new ModifiesStats(e,
                     statsByTrigger: new()
                         {
-                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["Dodge"]  = 5.0f}
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["Armor"]  = 25.0f}
                         }
                     )
                 ]
             ),
             new(
                 EntityCategory.Item,
-                "magpie_morsel",
-                "Magpie Morsel",
+                "alluring_azure_amalgam",
+                "Alluring Azure Amalgam",
                 ItemType.Consumable,
                 ItemRarity.Common,
                 Components:
                 [
                     (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
-                    (e, holder) => new Usable(e, 15),
-                    (e, holder) => new Consumable(e),
+                    (e, holder) => new Usable(e, 25),
                     (e, holder) => new ModifiesStats(e,
                     statsByTrigger: new()
                         {
-                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["Luck"]  = 5.0f}
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["Attack"]  = 25.0f}
                         }
                     )
                 ]
             ),
             new(
                 EntityCategory.Item,
-                "vulture_vittles",
-                "Vulture Vittles",
+                "tall_teal_tincture",
+                "Tall Teal Tincture",
                 ItemType.Consumable,
                 ItemRarity.Common,
                 Components:
                 [
                     (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
-                    (e, holder) => new Usable(e, 15),
-                    (e, holder) => new Consumable(e),
+                    (e, holder) => new Usable(e, 25),
                     (e, holder) => new ModifiesStats(e,
                     statsByTrigger: new()
                         {
-                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["Peer"]  = 5.0f}
-                        }
-                    )
-                ]
-            ),
-            #endregion
-            //     ======================================================
-            //     Uncommon
-            //     ======================================================
-            #region
-            new(
-                EntityCategory.Item,
-                "auburn_amalgam",
-                "Auburn Amalgam",
-                ItemType.Consumable,
-                ItemRarity.Uncommon,
-                Components:
-                [
-                    (e, holder) => new ItemData(e, holder, ItemRarity.Uncommon, ItemType.Consumable),
-                    (e, holder) => new Usable(e, 15),
-                    (e, holder) => new Consumable(e),
-                    (e, holder) => new ModifiesStats(e,
-                        statsByTrigger: new()
-                        {
-                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnUse)] = new()
-                            {
-                                ["MaximumHealth"]  = 1.25f,
-                                ["Healing"] = 1.25f
-                            }
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["Shield"]  = 25.0f}
                         }
                     )
                 ]
             ),
             new(
                 EntityCategory.Item,
-                "teal_tincture",
-                "Teal Tincture",
+                "refreshing_rose_rum",
+                "Refreshing Rose Rum",
                 ItemType.Consumable,
-                ItemRarity.Uncommon,
+                ItemRarity.Common,
                 Components:
                 [
-                    (e, holder) => new ItemData(e, holder, ItemRarity.Uncommon, ItemType.Consumable),
-                    (e, holder) => new Usable(e, 15),
-                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 25),
                     (e, holder) => new ModifiesStats(e,
-                        statsByTrigger: new()
+                    statsByTrigger: new()
                         {
-                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnUse)] = new()
-                            {
-                                ["MaximumStamina"]  = 1.25f,
-                                ["Stimming"] = 1.25f
-                            }
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["Precision"]  = 25.0f}
                         }
                     )
                 ]
             ),
             new(
                 EntityCategory.Item,
-                "earthy_elixir",
-                "Earthy Elixir",
+                "vivid_violet_vase",
+                "Vivid Violet Vase",
                 ItemType.Consumable,
-                ItemRarity.Uncommon,
+                ItemRarity.Common,
                 Components:
                 [
-                    (e, holder) => new ItemData(e, holder, ItemRarity.Uncommon, ItemType.Consumable),
-                    (e, holder) => new Usable(e, 15),
-                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 25),
                     (e, holder) => new ModifiesStats(e,
-                        statsByTrigger: new()
+                    statsByTrigger: new()
                         {
-                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnUse)] = new()
-                            {
-                                ["Armor"]  = 1.25f,
-                                ["Shield"] = 1.25f
-                            }
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["Dodge"]  = 25.0f}
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "lovely_lime_liquid",
+                "Lovely Lime Liquid",
+                ItemType.Consumable,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 25),
+                    (e, holder) => new ModifiesStats(e,
+                    statsByTrigger: new()
+                        {
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["Critical"]  = 25.0f}
                         }
                     )
                 ]
@@ -382,22 +328,15 @@ namespace CBA
                 "null_nib",
                 "Null Nib",
                 ItemType.Consumable,
-                ItemRarity.Uncommon,
+                ItemRarity.Common,
                 Components:
                 [
-                    (e, holder) => new ItemData(e, holder, ItemRarity.Uncommon, ItemType.Consumable),
-                    (e, holder) => new Usable(e, 15),
-                    (e, holder) => new Consumable(e),
-                    (e, holder) => new ModifiesEffects(e,
-                        effectsByTrigger: new()
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 25),
+                    (e, holder) => new ModifiesStats(e,
+                    statsByTrigger: new()
                         {
-                            [(EffectAction.Remove, TargetType.Self, Trigger.OnUse)] =
-                            [
-                                "inferno",
-                                "crushed",
-                                "blinded",
-                                "frozen",
-                            ]
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["Luck"]  = 25.0f}
                         }
                     )
                 ]
@@ -407,129 +346,46 @@ namespace CBA
                 "void_vial",
                 "Void Vial",
                 ItemType.Consumable,
-                ItemRarity.Uncommon,
+                ItemRarity.Common,
                 Components:
                 [
-                    (e, holder) => new ItemData(e, holder, ItemRarity.Uncommon, ItemType.Consumable),
-                    (e, holder) => new Usable(e, 15),
-                    (e, holder) => new Consumable(e),
-                    (e, holder) => new ModifiesEffects(e,
-                        effectsByTrigger: new()
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 25),
+                    (e, holder) => new ModifiesStats(e,
+                    statsByTrigger: new()
                         {
-                            [(EffectAction.Apply, TargetType.Self, Trigger.OnUse)] =
-                            [
-                                "noons_visibility", // TODO: add more positive finite-duration effects
-                            ]
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new(){["Attack"]  = 25.0f}
                         }
                     )
                 ]
             ),
-            #endregion
-            //     ======================================================
-            //     Rare
-            //     ======================================================
-            #region
             new(
                 EntityCategory.Item,
                 "chromatic_concoction",
                 "Chromatic Concoction",
                 ItemType.Consumable,
-                ItemRarity.Rare,
+                ItemRarity.Common,
                 Components:
                 [
-                    (e, holder) => new ItemData(e, holder, ItemRarity.Rare, ItemType.Consumable),
-                    (e, holder) => new Usable(e, 15),
-                    (e, holder) => new Consumable(e),
-                    (e, holder) => new ModifiesStats(e,
-                        statsByTrigger: new()
-                        {
-                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnUse)] = new()
-                            {
-                                ["MaximumHealth"]   = 1.25f,
-                                ["MaximumStamina"]  = 1.25f,
-                                ["Healing"]         = 1.25f,
-                                ["Stimming"]        = 1.25f,
-                                ["Armor"]           = 1.25f,
-                                ["Shield"]          = 1.25f
-                            }
-                        }
-                    )
-                ]
-            ),
-            new(
-                EntityCategory.Item,
-                "monochrome_mixture",
-                "Monochrome Mixture",
-                ItemType.Consumable,
-                ItemRarity.Rare,
-                Components:
-                [
-                    (e, holder) => new ItemData(e, holder, ItemRarity.Rare, ItemType.Consumable),
-                    (e, holder) => new Usable(e, 15),
-                    (e, holder) => new Consumable(e),
-                    (e, holder) => new ModifiesEffects(e,
-                        effectsByTrigger: new()
-                        {
-                            [(EffectAction.Remove, TargetType.Self, Trigger.OnUse)] =
-                            [
-                                "inferno",
-                                "crushed",
-                                "blinded",
-                                "frozen",
-                            ]
-                        }
-                    ),
-                    (e, holder) => new ModifiesEffects(e,
-                        effectsByTrigger: new()
-                        {
-                            [(EffectAction.Apply, TargetType.Self, Trigger.OnUse)] =
-                            [
-                                "noons_visibility", // TODO: add more positive finite-duration effects
-                            ]
-                        }
-                    )
-                ]
-            ),
-            new(
-                EntityCategory.Item,
-                "homogenous_paste",
-                "Homogenous Paste",
-                ItemType.Consumable,
-                ItemRarity.Rare,
-                Components:
-                [
-                    (e, holder) => new ItemData(e, holder, ItemRarity.Rare, ItemType.Consumable),
-                    (e, holder) => new Usable(e, 15),
-                    (e, holder) => new Consumable(e),
-                    (e, holder) => new ModifiesStats(e,
-                        statsByTrigger: new()
-                        {
-                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnUse)] = new()
-                            {
-                                ["Critical"]   = 1.25f,
-                                ["Dodge"]      = 1.25f
-                            }
-                        }
-                    )
-                ]
-            ),
-            new(
-                EntityCategory.Item,
-                "zoological_delight",
-                "Zoological Delight",
-                ItemType.Consumable,
-                ItemRarity.Rare,
-                Components:
-                [
-                    (e, holder) => new ItemData(e, holder, ItemRarity.Rare, ItemType.Consumable),
-                    (e, holder) => new Usable(e, 15),
-                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 25),
                     (e, holder) => new ModifiesStats(e,
                     statsByTrigger: new()
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUse)] = new()
                             {
-                                ["Steal"]  = 5.0f
+                                ["MaximumHealth"]  = 5.0f,
+                                ["MaximumStamina"] = 5.0f,
+                                ["Healing"]        = 5.0f,
+                                ["Stimming"]       = 5.0f,
+                                ["Armor"]          = 5.0f,
+                                ["Shield"]         = 5.0f,
+                                ["Attack"]         = 5.0f,
+                                ["Precision"]      = 5.0f,
+                                ["Dodge"]          = 5.0f,
+                                ["Critical"]       = 5.0f,
+                                ["Luck"]           = 5.0f,
+                                ["Steal"]          = 5.0f,
                             }
                         }
                     )
@@ -540,19 +396,18 @@ namespace CBA
                 "electric_enhancement",
                 "Electric Enhancement",
                 ItemType.Consumable,
-                ItemRarity.Rare,
+                ItemRarity.Common,
                 Components:
                 [
-                    (e, holder) => new ItemData(e, holder, ItemRarity.Rare, ItemType.Consumable),
-                    (e, holder) => new Usable(e, 15),
-                    (e, holder) => new Consumable(e),
-                    (e, holder) => new ModifiesStats(e,
-                    statsByTrigger: new()
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 25),
+                    (e, holder) => new ModifiesEffects(e,
+                    effectsByTrigger: new()
                         {
-                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnUse)] = new()
-                            {
-                                ["ConsumableCost"]  = 0.9f
-                            }
+                            [(EffectAction.Remove, TargetType.Self, Trigger.OnUse)] =
+                            [
+                                "inferno", "crushed", "frozen", "blinded"
+                            ]
                         }
                     )
                 ]
@@ -562,58 +417,43 @@ namespace CBA
                 "magnetic_modification",
                 "Magnetic Modification",
                 ItemType.Consumable,
-                ItemRarity.Rare,
+                ItemRarity.Common,
                 Components:
                 [
-                    (e, holder) => new ItemData(e, holder, ItemRarity.Rare, ItemType.Consumable),
-                    (e, holder) => new Usable(e, 15),
-                    (e, holder) => new Consumable(e),
-                    (e, holder) => new ModifiesStats(e,
-                    statsByTrigger: new()
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 25),
+                    (e, holder) => new ModifiesEffects(e,
+                    effectsByTrigger: new()
                         {
-                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnUse)] = new()
-                            {
-                                ["WeaponCost"]  = 0.9f
-                            }
+                            [(EffectAction.Apply, TargetType.Self, Trigger.OnUse)] =
+                            [
+                                "noons_visibility"
+                            ]
                         }
                     )
                 ]
             ),
-            #endregion
-            //     ======================================================
-            //     Mythical
-            //     ======================================================
-            #region
             new(
                 EntityCategory.Item,
-                "spectral_solution",
-                "Spectral Solution",
+                "metamedicine",
+                "Metamedicine",
                 ItemType.Consumable,
-                ItemRarity.Mythical,
+                ItemRarity.Common,
                 Components:
                 [
-                    (e, holder) => new ItemData(e, holder, ItemRarity.Mythical, ItemType.Consumable),
-                    (e, holder) => new Usable(e, 15),
-                    (e, holder) => new Consumable(e),
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Consumable),
+                    (e, holder) => new Usable(e, 25),
                     (e, holder) => new ModifiesEffects(e,
-                        effectsByTrigger: new()
+                    effectsByTrigger: new()
                         {
                             [(EffectAction.Remove, TargetType.Self, Trigger.OnUse)] =
-                            [..World.Instance.GetNegativeEffectsForPlayer(holder).Select(e => e.Id.TypeId)]
-                        }
-                    ),
-                    (e, holder) => new ModifiesStats(e,
-                        statsByTrigger: new()
-                        {
-                            [(ModificationType.Multiply, TargetType.Self, Trigger.OnUse)] = new()
-                            {
-                                ["MaximumHealth"]   = 1.25f,
-                                ["MaximumStamina"]  = 1.25f,
-                                ["Healing"]         = 1.25f,
-                                ["Stimming"]        = 1.25f,
-                                ["Armor"]           = 1.25f,
-                                ["Shield"]          = 1.25f
-                            }
+                            [
+                                "inferno", "crushed", "frozen", "blinded"
+                            ],
+                            [(EffectAction.Apply, TargetType.Self, Trigger.OnUse)] =
+                            [
+                                "noons_visibility"
+                            ]
                         }
                     )
                 ]
@@ -622,9 +462,6 @@ namespace CBA
             // ==========================================================
             // Weapons
             // ==========================================================
-            //     ======================================================
-            //     Common
-            //     ======================================================
             #region
             new(
                 EntityCategory.Item,
@@ -755,13 +592,62 @@ namespace CBA
                     )
                 ]
             ),
+            new(
+                EntityCategory.Item,
+                "corona",
+                "Corona",
+                ItemType.Weapon,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Weapon),
+                    (e, holder) => new Wearable(e, EquipType.Weapon),
+                    (e, holder) => new Usable(e, 25),
+                    (e, holder) => new Hits(e, true),
+                    (e, holder) => new DealsDamage(e, 10, DamageType.Physical, true),
+                    (e, holder) => new ModifiesEffects(e,
+                        effectsByTrigger: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Target, Trigger.OnHit), ["sunburn"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "aurora",
+                "Aurora",
+                ItemType.Weapon,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Weapon),
+                    (e, holder) => new Wearable(e, EquipType.Weapon),
+                    (e, holder) => new Usable(e, 25),
+                    (e, holder) => new Hits(e, true),
+                    (e, holder) => new DealsDamage(e, 5, DamageType.True, true)
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "harvest",
+                "Harvest",
+                ItemType.Weapon,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Weapon),
+                    (e, holder) => new Wearable(e, EquipType.Weapon),
+                    (e, holder) => new Usable(e, 25),
+                    (e, holder) => new Hits(e, true),
+                    (e, holder) => new DealsDamage(e, 10, DamageType.True, true),
+                    (e, holder) => new DealsHealing(e, 5)
+                ]
+            ),
             #endregion
             // ==========================================================
             // Armor
             // ==========================================================
-            //     ======================================================
-            //     Common
-            //     ======================================================
             #region
             // Oculus Set
             #region
@@ -781,11 +667,13 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
@@ -814,11 +702,13 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
@@ -847,11 +737,13 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
@@ -883,11 +775,13 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
@@ -916,11 +810,13 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
@@ -949,11 +845,13 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
@@ -985,11 +883,13 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
@@ -1018,11 +918,13 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
@@ -1051,11 +953,13 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
@@ -1087,19 +991,21 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
                         effectsByTrigger: new()
                         {
-                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["substance"] },
-                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["substance"] }
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["dexterity"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["dexterity"] }
                         }
                     )
                 ]
@@ -1121,19 +1027,21 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
                         effectsByTrigger: new()
                         {
-                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["substance"] },
-                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["substance"] }
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["dexterity"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["dexterity"] }
                         }
                     )
                 ]
@@ -1155,19 +1063,21 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
                     (e, holder) => new ModifiesEffects(e,
                         effectsByTrigger: new()
                         {
-                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["substance"] },
-                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["substance"] }
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["dexterity"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["dexterity"] }
                         }
                     )
                 ]
@@ -1191,11 +1101,13 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
@@ -1224,11 +1136,13 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
@@ -1257,11 +1171,13 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
@@ -1293,11 +1209,13 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
@@ -1326,11 +1244,13 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
@@ -1359,11 +1279,13 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
@@ -1395,11 +1317,13 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
@@ -1428,11 +1352,13 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
@@ -1461,11 +1387,13 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
@@ -1497,11 +1425,13 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
@@ -1530,11 +1460,13 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
@@ -1563,11 +1495,13 @@ namespace CBA
                         {
                             [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
                             {
-                                ["Defense"]   = 25f
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
                             },
                             [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
                             {
-                                ["Defense"]   = -25f
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
                             }
                         }
                     ),
@@ -1576,6 +1510,438 @@ namespace CBA
                         {
                             {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["rage"] },
                             {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["rage"] }
+                        }
+                    )
+                ]
+            ),
+            #endregion
+            // Covet Set
+            #region
+            new(
+                EntityCategory.Item,
+                "covet_helmet",
+                "Covet Helmet",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Helmet),
+                    (e, holder) => new CompletesItemSet(e, "covet"),
+                    (e, holder) => new ModifiesStats(e,
+                        statsByTrigger: new()
+                        {
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
+                            {
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
+                            },
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
+                            {
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        effectsByTrigger: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["wanting"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["wanting"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "covet_chestplate",
+                "Covet Chestplate",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Chestplate),
+                    (e, holder) => new CompletesItemSet(e, "covet"),
+                    (e, holder) => new ModifiesStats(e,
+                        statsByTrigger: new()
+                        {
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
+                            {
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
+                            },
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
+                            {
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        effectsByTrigger: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["wanting"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["wanting"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "covet_leggings",
+                "Covet Leggings",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Leggings),
+                    (e, holder) => new CompletesItemSet(e, "covet"),
+                    (e, holder) => new ModifiesStats(e,
+                        statsByTrigger: new()
+                        {
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
+                            {
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
+                            },
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
+                            {
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        effectsByTrigger: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["wanting"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["wanting"] }
+                        }
+                    )
+                ]
+            ),
+            #endregion
+            // Lax Set
+            #region
+            new(
+                EntityCategory.Item,
+                "lax_helmet",
+                "Lax Helmet",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Helmet),
+                    (e, holder) => new CompletesItemSet(e, "lax"),
+                    (e, holder) => new ModifiesStats(e,
+                        statsByTrigger: new()
+                        {
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
+                            {
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
+                            },
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
+                            {
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        effectsByTrigger: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["awakening"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["awakening"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "lax_chestplate",
+                "Lax Chestplate",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Chestplate),
+                    (e, holder) => new CompletesItemSet(e, "lax"),
+                    (e, holder) => new ModifiesStats(e,
+                        statsByTrigger: new()
+                        {
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
+                            {
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
+                            },
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
+                            {
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        effectsByTrigger: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["awakening"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["awakening"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "lax_leggings",
+                "Lax Leggings",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Leggings),
+                    (e, holder) => new CompletesItemSet(e, "lax"),
+                    (e, holder) => new ModifiesStats(e,
+                        statsByTrigger: new()
+                        {
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
+                            {
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
+                            },
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
+                            {
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        effectsByTrigger: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["awakening"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["awakening"] }
+                        }
+                    )
+                ]
+            ),
+            #endregion
+            // Voracity Set
+            #region
+            new(
+                EntityCategory.Item,
+                "voracity_helmet",
+                "Voracity Helmet",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Helmet),
+                    (e, holder) => new CompletesItemSet(e, "voracity"),
+                    (e, holder) => new ModifiesStats(e,
+                        statsByTrigger: new()
+                        {
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
+                            {
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
+                            },
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
+                            {
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        effectsByTrigger: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["devouring"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["devouring"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "voracity_chestplate",
+                "Voracity Chestplate",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Chestplate),
+                    (e, holder) => new CompletesItemSet(e, "voracity"),
+                    (e, holder) => new ModifiesStats(e,
+                        statsByTrigger: new()
+                        {
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
+                            {
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
+                            },
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
+                            {
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        effectsByTrigger: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["devouring"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["devouring"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "voracity_leggings",
+                "Voracity Leggings",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Leggings),
+                    (e, holder) => new CompletesItemSet(e, "voracity"),
+                    (e, holder) => new ModifiesStats(e,
+                        statsByTrigger: new()
+                        {
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
+                            {
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
+                            },
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
+                            {
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        effectsByTrigger: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["devouring"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["devouring"] }
+                        }
+                    )
+                ]
+            ),
+            #endregion
+            // Lecher Set
+            #region
+            new(
+                EntityCategory.Item,
+                "lecher_helmet",
+                "Lecher Helmet",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Helmet),
+                    (e, holder) => new CompletesItemSet(e, "lecher"),
+                    (e, holder) => new ModifiesStats(e,
+                        statsByTrigger: new()
+                        {
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
+                            {
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
+                            },
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
+                            {
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        effectsByTrigger: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["cheating"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["cheating"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "lecher_chestplate",
+                "Lecher Chestplate",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Chestplate),
+                    (e, holder) => new CompletesItemSet(e, "lecher"),
+                    (e, holder) => new ModifiesStats(e,
+                        statsByTrigger: new()
+                        {
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
+                            {
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
+                            },
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
+                            {
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        effectsByTrigger: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["cheating"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["cheating"] }
+                        }
+                    )
+                ]
+            ),
+            new(
+                EntityCategory.Item,
+                "lecher_leggings",
+                "Lecher Leggings",
+                ItemType.Armor,
+                ItemRarity.Common,
+                Components:
+                [
+                    (e, holder) => new ItemData(e, holder, ItemRarity.Common, ItemType.Armor),
+                    (e, holder) => new Wearable(e, EquipType.Leggings),
+                    (e, holder) => new CompletesItemSet(e, "lecher"),
+                    (e, holder) => new ModifiesStats(e,
+                        statsByTrigger: new()
+                        {
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnEquip)] = new()
+                            {
+                                ["Armor"]  = 50f,
+                                ["Shield"] = 50f,
+                            },
+                            [(ModificationType.Add, TargetType.Self, Trigger.OnUnequip)] = new()
+                            {
+                                ["Armor"]  = -50f,
+                                ["Shield"] = -50f,
+                            }
+                        }
+                    ),
+                    (e, holder) => new ModifiesEffects(e,
+                        effectsByTrigger: new()
+                        {
+                            {(EffectAction.Apply, TargetType.Self, Trigger.OnArmorSetCompleted), ["cheating"] },
+                            {(EffectAction.Remove, TargetType.Self, Trigger.OnArmorSetBroken), ["cheating"] }
                         }
                     )
                 ]

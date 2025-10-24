@@ -5,27 +5,8 @@ namespace CBA
         public bool DebugModeEnabled = true; // Toggle this on for testing
         public Queue<string> DebugItemQueue = new(
         [
-            "sonic_helmet",
-            "sonic_chestplate",
-            "sonic_leggings",
-            "olfactory_helmet",
-            "olfactory_chestplate",
-            "olfactory_leggings",
-            "tact_helmet",
-            "tact_chestplate",
-            "tact_leggings",
-            "relish_helmet",
-            "relish_chestplate",
-            "relish_leggings",
-            "vanity_helmet",
-            "vanity_chestplate",
-            "vanity_leggings",
-            "avarice_helmet",
-            "avarice_chestplate",
-            "avarice_leggings",
-            "temper_helmet",
-            "temper_chestplate",
-            "temper_leggings"
+            "brandish",
+            "corona"
         ]);
         protected override void RegisterSubscriptions()
         {

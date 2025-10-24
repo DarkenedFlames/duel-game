@@ -37,13 +37,15 @@ namespace CBA
             if (Owner.Id.Category == EntityCategory.Effect && target != World.GetPlayerOf(Owner))
                 return;
 
-            int stimming = Stimming;
+            float floatStimming = Stimming;
 
-            stimming *= target.GetComponent<StatsComponent>().Get("Stimming") / 100;
+            floatStimming *= target.GetComponent<StatsComponent>().GetLinearClamped("Stimming", .25f);
 
-            target.GetComponent<ResourcesComponent>().Change("Stamina", stimming);
+            int finalStimming = (int)floatStimming;
 
-            OnStimmingDone?.Invoke(Owner, target, stimming);
+            target.GetComponent<ResourcesComponent>().Change("Stamina", finalStimming);
+
+            OnStimmingDone?.Invoke(Owner, target, finalStimming);
         }
     }
 }
