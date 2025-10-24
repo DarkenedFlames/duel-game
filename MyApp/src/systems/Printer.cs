@@ -86,7 +86,7 @@ namespace CBA
                     (EquipType.Accessory, "Accessory")
                 };
 
-                List<Entity> orderedEquipment = new();
+                List<Entity> orderedEquipment = [];
 
                 for (int i = 0; i < equipmentSlots.Count; i++)
                 {
@@ -343,12 +343,6 @@ namespace CBA
             }
         }
 
-        public static void PrintPeered(List<string> targetItems, Entity target)
-        {
-            Console.WriteLine($"\nPeer activated! {target.DisplayName}'s inventory:");
-            Console.WriteLine(string.Join(", ", targetItems));
-            InputHandler.WaitForKey();
-        }
         /*
         public static void PrintEffectStacked(Entity player, Effect effect)
         {
